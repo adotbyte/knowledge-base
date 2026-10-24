@@ -18,7 +18,6 @@ export default function MobileMenu() {
 
   return (
     <div className="md:hidden">
-      {/* Mygtukas atidaryti meniu */}
       <button 
         onClick={() => setIsOpen(!isOpen)}
         className="p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
@@ -33,9 +32,8 @@ export default function MobileMenu() {
         </svg>
       </button>
 
-      {/* Išskleidžiamas meniu */}
       {isOpen && (
-        <div className="absolute top-16 left-0 right-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 shadow-lg p-4 flex flex-col gap-4">
+        <div className="absolute top-16 left-0 right-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 shadow-lg p-4 flex flex-col gap-4 z-50">
           <div className="flex flex-col gap-2">
             {links.map((link) => (
               <Link 
@@ -54,15 +52,17 @@ export default function MobileMenu() {
               <ThemeToggle />
               <ExportButton />
             </div>
-            <form action={async () => {
-              'use server';
-              // Čia turėtų būti tavo signOut logika, bet kadangi dabar naudojame Cloudflare Access,
-              // galime tiesiog palikti nuorodą atgal į Cloudflare logout, arba tiesiog mygtuką.
-            }}>
-              <button className="text-sm font-semibold text-red-500 hover:text-red-600 transition-colors">
-                Sign Out
-              </button>
-            </form>
+            
+            {/* Paprastas Sign Out mygtukas be Server Action */}
+            <button 
+              onClick={() => {
+                // Kadangi naudojame Cloudflare Access, galime tiesiog perkrauti puslapį arba ištrinti sesiją
+                window.location.href = '/cdn-cgi/access/logout'; // Cloudflare Access atsijungimo nuoroda
+              }}
+              className="text-sm font-semibold text-red-500 hover:text-red-600 transition-colors"
+            >
+              Sign Out
+            </button>
           </div>
         </div>
       )}
