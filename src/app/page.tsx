@@ -12,6 +12,7 @@ import ExportButton from './components/ExportButton';
 import ThemeToggle from './components/ThemeToggle';
 import GenerateNoteButton from './components/GenerateNoteButton';
 import DeleteConfirmButton from './components/DeleteConfirmButton';
+import AISearch from './components/AISearch';
 import SearchBar from './SearchBar';
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
@@ -225,6 +226,8 @@ export default function Home({ searchParams }: { searchParams: Promise<{ q?: str
       </nav>
 
       <main className="max-w-6xl mx-auto px-6 py-10">
+        {/* RAG PAIEŠKA GRĮŽTA! */}
+        <AISearch />
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-black text-gray-900 dark:text-white hidden md:block">Your Notes</h2>
           <div className="w-full md:max-w-md md:ml-4">
