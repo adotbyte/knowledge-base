@@ -4,13 +4,14 @@ import { notFound } from 'next/navigation';
 import { readFile } from 'fs/promises';
 import { join } from 'path';
 import { NextResponse } from 'next/server';
+import { connection } from 'next/server';
 
-export const dynamic = 'force-dynamic';
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
 
 export default async function SharedFilePage({ params }: { params: Promise<{ id: string }> }) {
+  await connection();  
   const { id } = await params;
 
   const file = await prisma.attachment.findUnique({

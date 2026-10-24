@@ -2,10 +2,10 @@ import { NextResponse } from 'next/server';
 import fs from 'node:fs';
 import os from 'node:os';
 import { execSync } from 'node:child_process';
-
-export const dynamic = 'force-dynamic';
+import { unstable_noStore as noStore } from 'next/cache';
 
 export async function GET() {
+  noStore();
   try {
     // 1. Nuskaitome CPU apkrovimą
     const loadAvg = os.loadavg();
