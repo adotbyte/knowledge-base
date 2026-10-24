@@ -1,4 +1,3 @@
-export const runtime = 'nodejs';
 import { NextResponse } from 'next/server';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -7,8 +6,7 @@ import { unstable_noStore as noStore } from 'next/cache';
 
 export async function GET() {
     // Šis maršrutas visada turi būti dinaminis
-  const { unstable_noStore } = await import('next/cache');
-  unstable_noStore();
+  noStore();
   try {
     // 1. Nuskaitome CPU apkrovimą
     const loadAvg = os.loadavg();
