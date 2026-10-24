@@ -15,6 +15,9 @@ RUN npm ci --legacy-peer-deps
 # Nukopijuojame visą kodą
 COPY . .
 
+# Nustatome netikrą DATABASE_URL, kad Prisma generate nesugriūtų per build'ą
+ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy"
+
 # Sugeneruojame Prisma klientą
 RUN npx prisma generate --schema=prisma/schema.prisma
 
