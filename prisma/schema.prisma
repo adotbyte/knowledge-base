@@ -80,4 +80,6 @@ model Attachment {
   createdAt DateTime @default(now())
   noteId    String
   note      Note     @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  isPublic  Boolean  @default(false)
+  shareId   String?  @unique @default(cuid())
 }

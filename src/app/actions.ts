@@ -44,6 +44,9 @@ export async function createNote(formData: FormData) {
     const uploadDir = join(process.cwd(), 'uploads'); // <-- PAKEISTA
     await mkdir(uploadDir, { recursive: true });
 
+    const apiKey = process.env.GEMINI_API_KEY;
+    const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
+
     for (const file of files) {
       if (file.size === 0) continue;
       const bytes = await file.arrayBuffer();
@@ -51,6 +54,30 @@ export async function createNote(formData: FormData) {
       const uniqueName = `${Date.now()}-${file.name.replace(/\s+/g, '-')}`;
       const filePath = join(uploadDir, uniqueName);
       await writeFile(filePath, buffer);
+
+      let aiDescription = '';
+
+         // Jei tai paveikslėlis ir turime AI raktą, analizuojame
+      if (ai && file.type.startsWith('image/')) {
+        try {
+          // Konvertuojame į base64 Gemini formatui
+          const base64Image = buffer.toString('base64');
+          
+          const response = await ai.interactions.create({
+            model: 'gemini-3.8-flash',
+            input: [
+              { type: 'text', text: 'Describe this image briefly. If it contains text or code, extract it. If it is an error message, suggest a fix. Respond in Lithuanian.' },
+              { type: 'image', data: base64Image, mime_type: file.type }
+            ],
+          });
+          
+          if (response.output_text) {
+            aiDescription = `\n\n---\n### 🖼️ AI Image Analysis (${file.name})\n${response.output_text}`;
+          }
+        } catch (e) {
+          console.error('AI Image Analysis failed:', e);
+        }
+      }
 
       await prisma.attachment.create({
         data: {
@@ -61,6 +88,12 @@ export async function createNote(formData: FormData) {
           noteId: note.id,
         },
       });
+            if (aiDescription) {
+        await prisma.note.update({
+          where: { id: note.id },
+          data: { content: note.content + aiDescription },
+        });
+      }
     }
   }
 
@@ -368,4 +401,18 @@ ${code}
   });
 
   return response.output_text || "No response generated.";
+}
+
+// File share
+export async function toggleFileShare(formData: FormData) {
+  const id = formData.get('id') as string;
+  const isPublic = formData.get('isPublic') === 'true';
+  if (!id) return;
+
+  await prisma.attachment.update({
+    where: { id },
+    data: { isPublic: !isPublic },
+  });
+
+  revalidatePath('/');
 }

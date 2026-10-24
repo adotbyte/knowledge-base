@@ -3,7 +3,7 @@ import { auth, signOut } from '.././auth';
 import { redirect } from 'next/navigation';
 import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
-import { createNote, deleteNote, toggleShare, summarizeNote, improveNote } from './actions';
+import { createNote, deleteNote, toggleShare, summarizeNote, improveNote, toggleFileShare  } from './actions';
 import { Suspense } from 'react';
 import MarkdownRenderer from './components/MarkdownRenderer';
 import CopyButton from './components/CopyButton';
@@ -162,9 +162,30 @@ async function ProtectedContent({ searchParams }: { searchParams: Promise<{ q?: 
                 {note.attachments && note.attachments.length > 0 && (
                   <div className="mt-4 flex flex-wrap gap-2">
                     {note.attachments.map((file: any) => (
-                      <a key={file.id} href={file.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 dark:bg-gray-800 rounded-lg text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-                        📎 {file.name}
-                      </a>
+                      <div key={file.id} className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 dark:bg-gray-800 rounded-lg text-xs font-semibold text-gray-700 dark:text-gray-300 group/file">
+                        <a href={file.url} target="_blank" rel="noopener noreferrer" className="hover:underline flex items-center gap-1">
+                          📎 {file.name}
+                        </a>
+                        
+                        {/* SHARE FILE BUTTON */}
+                        <form action={toggleFileShare}>
+                          <input type="hidden" name="id" value={file.id} />
+                          <input type="hidden" name="isPublic" value={String(file.isPublic)} />
+                          <button 
+                            type="submit" 
+                            className={`transition-colors p-0.5 ${file.isPublic ? 'text-green-500' : 'text-gray-400 hover:text-green-500'}`}
+                            title={file.isPublic ? "Stop sharing" : "Share this file"}
+                          >
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>
+                          </button>
+                        </form>
+
+                        {file.isPublic && (
+                          <span className="text-[10px] text-green-600 dark:text-green-400 font-mono">
+                            /share-file/{file.shareId}
+                          </span>
+                        )}
+                      </div>
                     ))}
                   </div>
                 )}
