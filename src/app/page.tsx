@@ -206,30 +206,6 @@ export default function Home({ searchParams }: { searchParams: Promise<{ q?: str
   return (
     <div className="min-h-screen bg-gray-50/50 dark:bg-gray-950 font-sans">
       <Navbar />
-      <nav className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 sticky top-0 z-10">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white font-black">K</div>
-            <h1 className="text-xl font-black text-gray-900 dark:text-white tracking-tight">Knowledge Base</h1>
-          </div>
-          {/* DESKTOP MENIU (paslėptas telefone) */}
-          <div className="hidden md:flex items-center gap-2 md:gap-4">
-            <Link href="/config-generator" className="...">Config Gen</Link>
-            <Link href="/explainer" className="...">Explainer</Link>
-            <Link href="/code-review" className="...">Code Reviewer</Link>
-            <Link href="/dashboard" className="...">Dashboard</Link>
-            <Link href="/status" className="...">Live Status</Link>
-            <ThemeToggle />
-            <ExportButton />
-            <form action={async () => {
-              'use server';
-              await signOut();
-            }}>
-              <button className="text-sm font-semibold text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 transition-colors">Sign Out</button>
-            </form>
-          </div>
-        </div>
-      </nav>
 
       <main className="max-w-6xl mx-auto px-6 py-10">
         {/* RAG PAIEŠKA GRĮŽTA! */}
