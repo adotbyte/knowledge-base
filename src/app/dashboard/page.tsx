@@ -1,7 +1,5 @@
 import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
-import { auth } from '../../auth';
-import { redirect } from 'next/navigation';
 import { Suspense } from 'react';
 import Link from 'next/link';
 
@@ -9,15 +7,15 @@ const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
 
 async function DashboardContent() {
-  const session = await auth();
-  if (!session?.user?.id) redirect('/login');
+  // Cloudflare Access jau mus apsaugojo, todėl naudojame fiksuotą vartotoją
+  const userId = "admin";
 
   const [totalNotes, totalTags, totalAttachments, recentNotes] = await Promise.all([
-    prisma.note.count({ where: { userId: session.user.id } }),
+    prisma.note.count({ where: { userId: userId } }),
     prisma.tag.count(),
-    prisma.attachment.count({ where: { note: { userId: session.user.id } } }),
+    prisma.attachment.count({ where: { note: { userId: userId } } }),
     prisma.note.findMany({
-      where: { userId: session.user.id },
+      where: { userId: userId },
       orderBy: { createdAt: 'desc' },
       take: 5,
       select: { id: true, title: true, createdAt: true },
