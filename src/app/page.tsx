@@ -12,6 +12,7 @@ import ThemeToggle from './components/ThemeToggle';
 import GenerateNoteButton from './components/GenerateNoteButton';
 import DeleteConfirmButton from './components/DeleteConfirmButton';
 import AISearch from './components/AISearch';
+import ActionButton from './components/ActionButton';
 import SearchBar from './SearchBar';
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
@@ -110,20 +111,26 @@ async function ProtectedContent({ searchParams }: { searchParams: Promise<{ q?: 
                     </Link>
 
                     {/* AI SUMMARIZE */}
-                    <form action={summarizeNote}>
+                    <ActionButton 
+                      action={summarizeNote} 
+                      className="text-gray-400 hover:text-purple-500 transition-colors p-1"
+                    >
                       <input type="hidden" name="id" value={note.id} />
-                      <button type="submit" className="text-gray-400 hover:text-purple-500 transition-colors p-1" title="Summarize with AI">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-                      </button>
-                    </form>
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                      </svg>
+                    </ActionButton>
 
                     {/* AI IMPROVE */}
-                    <form action={improveNote}>
+                    <ActionButton 
+                      action={improveNote} 
+                      className="text-gray-400 hover:text-amber-500 transition-colors p-1"
+                    >
                       <input type="hidden" name="id" value={note.id} />
-                      <button type="submit" className="text-gray-400 hover:text-amber-500 transition-colors p-1" title="Improve with AI">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 4l5 5M6 13l5-5m-5 5l2 2m-2-2l-2-2m7 7l5 5m-5-5l-2-2m2 2l2 2M9 9l6 6M12 3v2m0 14v2M3 12h2m14 0h2" /></svg>
-                      </button>
-                    </form>
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 4l5 5M6 13l5-5m-5 5l2 2m-2-2l-2-2m7 7l5 5m-5-5l-2-2m2 2l2 2M9 9l6 6M12 3v2m0 14v2M3 12h2m14 0h2" />
+                      </svg>
+                    </ActionButton>
 
                     {/* SHARE */}
                     <form action={toggleShare}>

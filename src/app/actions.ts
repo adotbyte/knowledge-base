@@ -21,6 +21,8 @@ export async function createNote(formData: FormData) {
     ? tagsString.split(',').map(tag => tag.trim()).filter(Boolean) 
     : [];
 
+  revalidatePath('/', 'page');
+
   // Sukuriame užrašą DB su fiksuotu "admin" vartotoju
   const note = await prisma.note.create({
     data: {
