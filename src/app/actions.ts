@@ -40,7 +40,8 @@ export async function createNote(formData: FormData) {
 
   // Tvarkome failus
   if (files && files.length > 0 && files[0].size > 0) {
-    const uploadDir = join(process.cwd(), 'public', 'uploads');
+    // Išsaugome NE public, o šakniniame uploads kataloge
+    const uploadDir = join(process.cwd(), 'uploads'); // <-- PAKEISTA
     await mkdir(uploadDir, { recursive: true });
 
     for (const file of files) {
@@ -54,7 +55,7 @@ export async function createNote(formData: FormData) {
       await prisma.attachment.create({
         data: {
           name: file.name,
-          url: `/uploads/${uniqueName}`,
+          url: `/api/uploads/${uniqueName}`, // <-- PAKEISTA: naudosime API maršrutą
           type: file.type,
           size: file.size,
           noteId: note.id,
