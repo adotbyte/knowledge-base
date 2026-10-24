@@ -23,10 +23,11 @@ jobs:
         AUTH_SECRET=${{ secrets.AUTH_SECRET }}
         AUTH_GITHUB_ID=${{ secrets.AUTH_GITHUB_ID }}
         AUTH_GITHUB_SECRET=${{ secrets.AUTH_GITHUB_SECRET }}
-        AUTH_URL=https://knowledge.morkunas.info
-        NEXTAUTH_URL=https://knowledge.morkunas.info
-        AUTH_TRUST_HOST=true
-        AUTH_COOKIE_SECURE=true
+        AUTH_URL=${{ secrets.AUTH_URL }}
+        NEXTAUTH_URL=${{ secrets.NEXTAUTH_URL }}
+        AUTH_TRUST_HOST=${{ secrets.AUTH_TRUST_HOST }}
+        AUTH_COOKIE_SECURE=${{ secrets.AUTH_COOKIE_SECURE }}
+        AUTH_COOKIE_SAME_SITE=${{ secrets.AUTH_COOKIE_SAME_SITE }}
         EOF
 
     - name: Stop old containers and Clean up
