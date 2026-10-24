@@ -204,6 +204,8 @@ export default function Home({ searchParams }: { searchParams: Promise<{ q?: str
             <h1 className="text-xl font-black text-gray-900 dark:text-white tracking-tight">Knowledge Base</h1>
           </div>
           <div className="flex items-center gap-2 md:gap-4">
+            <Link href="/config-generator" className="text-sm font-semibold text-gray-500 hover:text-emerald-600 transition-colors">Config Gen</Link>
+            <Link href="/explainer" className="text-sm font-semibold text-gray-500 hover:text-orange-600 transition-colors">Explainer</Link>
             <Link href="/code-review" className="text-sm font-semibold text-gray-500 hover:text-purple-600 dark:text-gray-400 dark:hover:text-purple-400 transition-colors">
               Code Reviewer
             </Link>

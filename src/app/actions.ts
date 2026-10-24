@@ -312,3 +312,60 @@ Respond in the same language as the code comments (if any). Be concise but thoro
     throw new Error('Failed to review code');
   }
 }
+
+// „AI Konfigūracijų Generatorius“ (DevOps Asistentas)
+export async function generateConfig(formData: FormData) {
+  const serviceName = formData.get('serviceName') as string;
+  const requirements = formData.get('requirements') as string || '';
+
+  if (!serviceName) throw new Error('Service name is required');
+
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) throw new Error('GEMINI_API_KEY is missing');
+
+  const ai = new GoogleGenAI({ apiKey });
+
+  const prompt = `You are a DevOps expert. Generate a production-ready configuration for the following service: "${serviceName}".
+Requirements: ${requirements || 'Standard secure setup'}.
+
+Please provide:
+1. A complete \`docker-compose.yml\` file (with proper environment variables, volumes, and networks).
+2. Any required \`.env\` variables.
+3. A brief explanation of the key security or performance settings.
+
+Return the response in Markdown format with code blocks.`;
+
+  const response = await ai.interactions.create({
+    model: 'gemini-3.8-flash',
+    input: prompt,
+  });
+
+  return response.output_text || "No response generated.";
+}
+
+// „AI Kodo Vertėjas“ (Code Explainer)
+export async function explainCode(formData: FormData) {
+  const code = formData.get('code') as string;
+  if (!code) throw new Error('Code is required');
+
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) throw new Error('GEMINI_API_KEY is missing');
+
+  const ai = new GoogleGenAI({ apiKey });
+
+  const prompt = `Explain the following code to a junior developer. 
+Break it down line by line or block by block. Explain WHY it's written this way.
+Use simple language (Lithuanian).
+
+CODE:
+\`\`\`
+${code}
+\`\`\``;
+
+  const response = await ai.interactions.create({
+    model: 'gemini-3.8-flash',
+    input: prompt,
+  });
+
+  return response.output_text || "No response generated.";
+}
