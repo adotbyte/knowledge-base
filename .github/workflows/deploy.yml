@@ -37,17 +37,16 @@ jobs:
       run: |
         docker compose up -d --build
 
-    # --- NAUJI ŽINGSNIAI ---
-    - name: Wait for DB and push schema
+    # --- VIENINTELIS DB INICIALIZAVIMO ŽINGSNIS ---
+    - name: Wait for DB and initialize schema
       run: |
-        sleep 10 # Palaukiame, kol PostgreSQL pilnai pasileis
-        docker compose exec -T web npx prisma db push --schema=prisma/schema.prisma || true
-
-    - name: Create Admin User
-      run: |
-        # Įterpiame admin vartotoją tiesiai per SQL, apeinant Prisma
-        docker compose exec -T db psql -U knowledge -d knowledge_db -c "INSERT INTO \"User\" (id, name, email) VALUES ('admin', 'Admin', 'admin@example.com') ON CONFLICT (id) DO NOTHING;" || true
-    # -----------------------
+        echo "Waiting for PostgreSQL to be ready..."
+        sleep 5
+        echo "Applying safe database schema updates..."
+        # Nukopijuojame SQL failą į DB konteinerį ir jį įvykdome
+        docker cp scripts/init-db.sql knowledge_db:/tmp/init-db.sql
+        docker exec -i knowledge_db psql -U knowledge -d knowledge_db -f /tmp/init-db.sql || true
+    # ---------------------------------------------
 
     - name: Clean up dangling images
       run: |
