@@ -3,60 +3,140 @@ import { PrismaPg } from '@prisma/adapter-pg';
 import { Suspense } from 'react';
 import Link from 'next/link';
 
+// Importuojame Recharts komponentus
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
+
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
 
 async function DashboardContent() {
-  // Cloudflare Access jau mus apsaugojo, todėl naudojame fiksuotą vartotoją
   const userId = "admin";
 
-  const [totalNotes, totalTags, totalAttachments, recentNotes] = await Promise.all([
-    prisma.note.count({ where: { userId: userId } }),
+  // 1. Pagrindinė statistika
+  const [totalNotes, totalTags, totalAttachments, totalStorage] = await Promise.all([
+    prisma.note.count({ where: { userId } }),
     prisma.tag.count(),
-    prisma.attachment.count({ where: { note: { userId: userId } } }),
-    prisma.note.findMany({
-      where: { userId: userId },
-      orderBy: { createdAt: 'desc' },
-      take: 5,
-      select: { id: true, title: true, createdAt: true },
+    prisma.attachment.count({ where: { note: { userId } } }),
+    prisma.attachment.aggregate({
+      where: { note: { userId } },
+      _sum: { size: true },
     }),
   ]);
 
+  // 2. Aktyvumo grafiko duomenys (paskutinės 7 dienos)
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+  const recentNotes = await prisma.note.findMany({
+    where: { 
+      userId,
+      createdAt: { gte: sevenDaysAgo }
+    },
+    select: { createdAt: true },
+  });
+
+  // Grupuojame pagal dienas
+  const activityMap = new Map();
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const dateStr = d.toLocaleDateString('lt-LT', { month: 'short', day: 'numeric' });
+    activityMap.set(dateStr, 0);
+  }
+
+  recentNotes.forEach(note => {
+    const dateStr = new Date(note.createdAt).toLocaleDateString('lt-LT', { month: 'short', day: 'numeric' });
+    if (activityMap.has(dateStr)) {
+      activityMap.set(dateStr, activityMap.get(dateStr) + 1);
+    }
+  });
+
+  const chartData = Array.from(activityMap.entries()).map(([date, count]) => ({
+    date,
+    notes: count,
+  }));
+
+  // 3. Populiariausios žymės
+  const topTags = await prisma.tag.findMany({
+    take: 5,
+    include: {
+      _count: {
+        select: { notes: true }
+      }
+    },
+    orderBy: {
+      notes: { _count: 'desc' }
+    }
+  });
+
+  const storageMB = (totalStorage._sum.size || 0) / (1024 * 1024);
+
   return (
     <div className="space-y-8">
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* 1. Kortelės */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
           <div className="text-3xl mb-2">📝</div>
-          <h3 className="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Notes</h3>
-          <p className="text-4xl font-black text-gray-900 dark:text-white mt-1">{totalNotes}</p>
+          <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Iš viso užrašų</h3>
+          <p className="text-3xl font-black text-gray-900 dark:text-white mt-1">{totalNotes}</p>
         </div>
         <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
           <div className="text-3xl mb-2">🏷️</div>
-          <h3 className="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Unique Tags</h3>
-          <p className="text-4xl font-black text-gray-900 dark:text-white mt-1">{totalTags}</p>
+          <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Unikalios žymės</h3>
+          <p className="text-3xl font-black text-gray-900 dark:text-white mt-1">{totalTags}</p>
         </div>
         <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
           <div className="text-3xl mb-2">📎</div>
-          <h3 className="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Attachments</h3>
-          <p className="text-4xl font-black text-gray-900 dark:text-white mt-1">{totalAttachments}</p>
+          <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Failai</h3>
+          <p className="text-3xl font-black text-gray-900 dark:text-white mt-1">{totalAttachments}</p>
+        </div>
+        <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
+          <div className="text-3xl mb-2">💾</div>
+          <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Užimta vieta</h3>
+          <p className="text-3xl font-black text-gray-900 dark:text-white mt-1">{storageMB.toFixed(2)} MB</p>
         </div>
       </div>
 
-      {/* Recent Notes */}
-      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-6">
-        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Recent Notes</h3>
-        <div className="space-y-3">
-          {recentNotes.length === 0 ? (
-            <p className="text-gray-500 dark:text-gray-400 text-sm">No notes yet.</p>
-          ) : (
-            recentNotes.map(note => (
-              <div key={note.id} className="flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-xl transition-colors">
-                <span className="font-semibold text-gray-800 dark:text-gray-200">{note.title}</span>
-                <span className="text-xs text-gray-400">{new Date(note.createdAt).toLocaleDateString()}</span>
-              </div>
-            ))
-          )}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* 2. Aktyvumo grafikas */}
+        <div className="lg:col-span-2 bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6">Aktyvumas (paskutinės 7 dienos)</h3>
+          <div className="h-[300px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#374151" vertical={false} />
+                <XAxis dataKey="date" stroke="#9ca3af" fontSize={12} tickLine={false} axisLine={false} />
+                <YAxis stroke="#9ca3af" fontSize={12} tickLine={false} axisLine={false} allowDecimals={false} />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: '#1f2937', borderColor: '#374151', color: '#fff', borderRadius: '8px' }}
+                  itemStyle={{ color: '#60a5fa' }}
+                />
+                <Bar dataKey="notes" fill="#3b82f6" radius={[4, 4, 0, 0]} maxBarSize={50} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* 3. Top žymės */}
+        <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6">Populiariausios žymės</h3>
+          <div className="space-y-3">
+            {topTags.length === 0 ? (
+              <p className="text-gray-500 text-sm">Nėra žymių.</p>
+            ) : (
+              topTags.map((tag, index) => (
+                <div key={tag.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-xl">
+                  <div className="flex items-center gap-3">
+                    <span className="text-gray-400 font-mono text-sm">#{index + 1}</span>
+                    <Link href={`/?tag=${tag.name}`} className="font-bold text-blue-600 hover:underline">
+                      #{tag.name}
+                    </Link>
+                  </div>
+                  <span className="text-sm font-bold text-gray-900 dark:text-white">{tag._count.notes} užrašai</span>
+                </div>
+              ))
+            )}
+          </div>
         </div>
       </div>
     </div>
