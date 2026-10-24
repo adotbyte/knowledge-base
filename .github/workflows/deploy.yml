@@ -3,11 +3,13 @@ name: Deploy Knowledge Base
 on:
   push:
     branches: [ "main" ]
-  workflow_dispatch: # Leidžia paleisti rankiniu būdu
+  workflow_dispatch:
 
 jobs:
   deploy:
-    runs-on: self-hosted # Naudoja tavo avietę
+    runs-on: self-hosted
+    # Jei nori, kad niekada neužstrigtų amžinai, nustatome limitą
+    timeout-minutes: 15
 
     steps:
     - name: Checkout repository
@@ -21,10 +23,18 @@ jobs:
         AUTH_SECRET=${{ secrets.AUTH_SECRET }}
         AUTH_GITHUB_ID=${{ secrets.AUTH_GITHUB_ID }}
         AUTH_GITHUB_SECRET=${{ secrets.AUTH_GITHUB_SECRET }}
+        AUTH_URL=https://knowledge.morkunas.info
         AUTH_TRUST_HOST=true
         EOF
 
-    - name: Build and Deploy with Docker
+    - name: Stop old containers and Clean up
       run: |
-        docker compose down
+        docker compose down --remove-orphans || true
+
+    - name: Build and Deploy
+      run: |
         docker compose up -d --build
+
+    - name: Clean up dangling images (optional, saves disk space)
+      run: |
+        docker image prune -f
