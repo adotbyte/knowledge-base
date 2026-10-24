@@ -13,7 +13,7 @@ import GenerateNoteButton from './components/GenerateNoteButton';
 import DeleteConfirmButton from './components/DeleteConfirmButton';
 import AISearch from './components/AISearch';
 import ActionButton from './components/ActionButton';
-import MobileMenu from './components/MobileMenu';
+import Navbar from './components/Navbar';
 import SearchBar from './SearchBar';
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
@@ -205,6 +205,7 @@ async function ProtectedContent({ searchParams }: { searchParams: Promise<{ q?: 
 export default function Home({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   return (
     <div className="min-h-screen bg-gray-50/50 dark:bg-gray-950 font-sans">
+      <Navbar />
       <nav className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -228,8 +229,6 @@ export default function Home({ searchParams }: { searchParams: Promise<{ q?: str
             </form>
           </div>
         </div>
-        {/* MOBILE MENIU (matomas tik telefone) */}
-        <MobileMenu />
       </nav>
 
       <main className="max-w-6xl mx-auto px-6 py-10">
