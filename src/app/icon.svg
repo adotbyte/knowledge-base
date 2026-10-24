@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Mėlynas fonas su apvalintais kampais -->
+  <rect width="512" height="512" rx="96" fill="#2563eb" />
+  
+  <!-- Baltas "K" logotipas -->
+  <path d="M 180 120 L 240 120 L 240 230 L 330 120 L 400 120 L 290 250 L 410 392 L 340 392 L 240 270 L 240 392 L 180 392 Z" fill="#ffffff" />
+</svg>
