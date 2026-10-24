@@ -33,7 +33,7 @@ services:
       - "3080:3000"
     volumes:
       - /proc:/host/proc:ro  # <-- SVARBU DASHBOARD'UI (RAM, UPTIME)
-      - uploads_data:/app/public/uploads
+      - /home/audrius/knowledge-uploads:/app/uploads
     environment:
       - DATABASE_URL=postgresql://knowledge:${DB_PASSWORD}@db:5432/knowledge_db?schema=public
       - GEMINI_API_KEY=${GEMINI_API_KEY}
