@@ -3,7 +3,8 @@
 import prisma from './prisma';
 import { revalidatePath } from 'next/cache';
 import { GoogleGenAI } from '@google/genai';
-import { writeFile, mkdir } from 'fs/promises';
+import { writeFile, mkdir, access } from 'fs/promises';
+import { constants } from 'fs';
 import { join } from 'path';
 
 // 1. CREATE NOTE
@@ -74,6 +75,13 @@ export async function createNote(formData: FormData) {
         } catch (e) {
           console.error('AI Image Analysis failed:', e);
         }
+      }
+            // Papildomas patikrinimas, ar failas tikrai yra
+      try {
+        await access(filePath, constants.F_OK);
+      } catch (e) {
+        console.error('Failas nebuvo įrašytas:', e);
+        continue;
       }
 
       await prisma.attachment.create({
