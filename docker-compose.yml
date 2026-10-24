@@ -27,6 +27,7 @@ services:
       - AUTH_TRUST_HOST=true
       - AUTH_COOKIE_SECURE=true
       - AUTH_COOKIE_SAME_SITE=lax
+      - NEXTAUTH_URL_INTERNAL=http://knowledge_web:3000
     depends_on:
       db:
         condition: service_started
