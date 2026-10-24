@@ -1,0 +1,30 @@
+name: Deploy Knowledge Base
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch: # Leidžia paleisti rankiniu būdu
+
+jobs:
+  deploy:
+    runs-on: self-hosted # Naudoja tavo avietę
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Create .env file
+      run: |
+        cat << 'EOF' > .env
+        DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+        GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
+        AUTH_SECRET=${{ secrets.AUTH_SECRET }}
+        AUTH_GITHUB_ID=${{ secrets.AUTH_GITHUB_ID }}
+        AUTH_GITHUB_SECRET=${{ secrets.AUTH_GITHUB_SECRET }}
+        AUTH_TRUST_HOST=true
+        EOF
+
+    - name: Build and Deploy with Docker
+      run: |
+        docker compose down
+        docker compose up -d --build
