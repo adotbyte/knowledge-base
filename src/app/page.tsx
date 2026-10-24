@@ -18,18 +18,15 @@ const prisma = new PrismaClient({ adapter });
 
 // --- 1. APSAUGOTAS TURINYS (Server Component) ---
 async function ProtectedContent({ searchParams }: { searchParams: Promise<{ q?: string; tag?: string }> }) {
-  const session = await auth();
-
-  if (!session || !session.user) {
-    redirect('/login');
-  }
+  // 1. Cloudflare Access jau mus apsaugojo, todėl naudojame fiksuotą vartotoją
+  const userId = "admin"; 
 
   const { q, tag } = await searchParams;
   const searchQuery = q?.replace('#', '').trim();
 
   const notes = await prisma.note.findMany({
     where: { 
-      userId: session.user.id,
+      userId: userId, // <-- Pakeista iš session.user.id į userId
       ...(searchQuery && {
         OR: [
           { title: { contains: searchQuery, mode: 'insensitive' } },
