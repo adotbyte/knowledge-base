@@ -114,6 +114,7 @@ async function ProtectedContent({ searchParams }: { searchParams: Promise<{ q?: 
                     <ActionButton 
                       action={summarizeNote} 
                       className="text-gray-400 hover:text-purple-500 transition-colors p-1"
+                      title="Summarize with AI"
                     >
                       <input type="hidden" name="id" value={note.id} />
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -125,6 +126,7 @@ async function ProtectedContent({ searchParams }: { searchParams: Promise<{ q?: 
                     <ActionButton 
                       action={improveNote} 
                       className="text-gray-400 hover:text-amber-500 transition-colors p-1"
+                      title="Improve with AI"
                     >
                       <input type="hidden" name="id" value={note.id} />
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
