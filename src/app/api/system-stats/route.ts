@@ -3,6 +3,8 @@ import fs from 'node:fs';
 import os from 'node:os';
 import { execSync } from 'node:child_process';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     // 1. Nuskaitome CPU apkrovimą
