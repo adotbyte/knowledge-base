@@ -24,10 +24,10 @@ jobs:
         AUTH_GITHUB_ID=${{ secrets.AUTH_GITHUB_ID }}
         AUTH_GITHUB_SECRET=${{ secrets.AUTH_GITHUB_SECRET }}
         AUTH_URL=${{ secrets.AUTH_URL }}
-        NEXTAUTH_URL=${{ secrets.NEXTAUTH_URL }}
         AUTH_TRUST_HOST=${{ secrets.AUTH_TRUST_HOST }}
         AUTH_COOKIE_SECURE=${{ secrets.AUTH_COOKIE_SECURE }}
         AUTH_COOKIE_SAME_SITE=${{ secrets.AUTH_COOKIE_SAME_SITE }}
+        AUTH_COOKIE_DOMAIN=${{ secrets.AUTH_COOKIE_DOMAIN }}
         EOF
 
     - name: Stop old containers and Clean up

@@ -23,11 +23,11 @@ services:
       - AUTH_GITHUB_ID=${AUTH_GITHUB_ID}
       - AUTH_GITHUB_SECRET=${AUTH_GITHUB_SECRET}
       - AUTH_URL=https://knowledge.morkunas.info
-      - NEXTAUTH_URL=https://knowledge.morkunas.info
       - AUTH_TRUST_HOST=true
       - AUTH_COOKIE_SECURE=true
       - AUTH_COOKIE_SAME_SITE=lax
       - NEXTAUTH_URL_INTERNAL=http://knowledge_web:3000
+      - AUTH_COOKIE_DOMAIN=knowledge.morkunas.info
     depends_on:
       db:
         condition: service_started
