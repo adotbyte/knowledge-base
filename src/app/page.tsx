@@ -5,7 +5,6 @@ import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { createNote, deleteNote, toggleShare, summarizeNote, improveNote } from './actions';
 import { Suspense } from 'react';
-import { connection } from 'next/server';
 import MarkdownRenderer from './components/MarkdownRenderer';
 import CopyButton from './components/CopyButton';
 import ExportButton from './components/ExportButton';
@@ -21,7 +20,6 @@ const prisma = new PrismaClient({ adapter });
 // --- 1. APSAUGOTAS TURINYS (Server Component) ---
 async function ProtectedContent({ searchParams }: { searchParams: Promise<{ q?: string; tag?: string }> }) {
   // 1. Cloudflare Access jau mus apsaugojo, todėl naudojame fiksuotą vartotoją
-  await connection();
   const userId = "admin"; 
 
   const { q, tag } = await searchParams;
