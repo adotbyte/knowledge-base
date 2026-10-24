@@ -206,6 +206,9 @@ export default function Home({ searchParams }: { searchParams: Promise<{ q?: str
             <Link href="/dashboard" className="text-sm font-semibold text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 transition-colors mr-2">
               Dashboard
             </Link>
+            <Link href="/status" className="text-sm font-semibold text-gray-500 hover:text-green-600 dark:text-gray-400 dark:hover:text-green-400 transition-colors">
+              Live Status
+            </Link>
             <ThemeToggle />
             <ExportButton />
             <form action={async () => {

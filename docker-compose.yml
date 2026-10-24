@@ -9,13 +9,30 @@ services:
       POSTGRES_DB: knowledge_db
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - internal_net
+
+  # --- NAUJAS SAUGUS DOCKER PROXY DASHBOARD'UI ---
+  socket-proxy:
+    image: tecnativa/docker-socket-proxy:v0.5.0
+    container_name: knowledge_socket_proxy
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - CONTAINERS=1
+      - POST=0
+    networks:
+      - internal_net
 
   web:
     build: .
     container_name: knowledge_web
     restart: unless-stopped
     ports:
-      - "3080:3000" # 3001, kad nesikirstų su portfolio (8080)
+      - "3080:3000"
+    volumes:
+      - /proc:/host/proc:ro  # <-- SVARBU DASHBOARD'UI (RAM, UPTIME)
     environment:
       - DATABASE_URL=postgresql://knowledge:${DB_PASSWORD}@db:5432/knowledge_db?schema=public
       - GEMINI_API_KEY=${GEMINI_API_KEY}
@@ -23,6 +40,7 @@ services:
       - AUTH_GITHUB_ID=${AUTH_GITHUB_ID}
       - AUTH_GITHUB_SECRET=${AUTH_GITHUB_SECRET}
       - AUTH_URL=https://knowledge.morkunas.info
+      - NEXTAUTH_URL=https://knowledge.morkunas.info
       - AUTH_TRUST_HOST=true
       - AUTH_COOKIE_SECURE=true
       - AUTH_COOKIE_SAME_SITE=lax
@@ -31,6 +49,13 @@ services:
     depends_on:
       db:
         condition: service_started
+    networks:
+      - internal_net
+
+# --- TINKLAI IR VOLUME'AI VISADA BŪNA APAČIOJE ---
+networks:
+  internal_net:
+    driver: bridge
 
 volumes:
   postgres_data:
