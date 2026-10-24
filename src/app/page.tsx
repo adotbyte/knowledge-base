@@ -4,6 +4,7 @@ import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { createNote, deleteNote, toggleShare, summarizeNote, improveNote } from './actions';
 import { Suspense } from 'react';
+import { redirect } from 'next/navigation';
 import MarkdownRenderer from './components/MarkdownRenderer';
 import CopyButton from './components/CopyButton';
 import ExportButton from './components/ExportButton';
@@ -83,7 +84,6 @@ async function NotesContent({ searchParams }: { searchParams: Promise<{ q?: stri
       </div>
 
       {/* RIGHT COLUMN: Notes List */}
-{/* RIGHT COLUMN: Notes List */}
       <div className="lg:col-span-2">
         <div className="flex items-center gap-4 mb-4">
           <h2 className="text-lg font-bold text-gray-900 dark:text-white">
@@ -224,6 +224,12 @@ async function NotesContent({ searchParams }: { searchParams: Promise<{ q?: stri
 }
 
 export default async function Home({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
+  const session = await auth();
+
+  if (!session) {
+    redirect('/login');
+  }
+
   return (
     <div className="min-h-screen bg-gray-50/50 dark:bg-gray-950 font-sans">
       <nav className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 sticky top-0 z-10">
