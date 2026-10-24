@@ -13,6 +13,7 @@ import GenerateNoteButton from './components/GenerateNoteButton';
 import DeleteConfirmButton from './components/DeleteConfirmButton';
 import AISearch from './components/AISearch';
 import ActionButton from './components/ActionButton';
+import MobileMenu from './components/MobileMenu';
 import SearchBar from './SearchBar';
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
@@ -210,18 +211,13 @@ export default function Home({ searchParams }: { searchParams: Promise<{ q?: str
             <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white font-black">K</div>
             <h1 className="text-xl font-black text-gray-900 dark:text-white tracking-tight">Knowledge Base</h1>
           </div>
-          <div className="flex items-center gap-2 md:gap-4">
-            <Link href="/config-generator" className="text-sm font-semibold text-gray-500 hover:text-emerald-600 transition-colors">Config Gen</Link>
-            <Link href="/explainer" className="text-sm font-semibold text-gray-500 hover:text-orange-600 transition-colors">Explainer</Link>
-            <Link href="/code-review" className="text-sm font-semibold text-gray-500 hover:text-purple-600 dark:text-gray-400 dark:hover:text-purple-400 transition-colors">
-              Code Reviewer
-            </Link>
-            <Link href="/dashboard" className="text-sm font-semibold text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 transition-colors mr-2">
-              Dashboard
-            </Link>
-            <Link href="/status" className="text-sm font-semibold text-gray-500 hover:text-green-600 dark:text-gray-400 dark:hover:text-green-400 transition-colors">
-              Live Status
-            </Link>
+          {/* DESKTOP MENIU (paslėptas telefone) */}
+          <div className="hidden md:flex items-center gap-2 md:gap-4">
+            <Link href="/config-generator" className="...">Config Gen</Link>
+            <Link href="/explainer" className="...">Explainer</Link>
+            <Link href="/code-review" className="...">Code Reviewer</Link>
+            <Link href="/dashboard" className="...">Dashboard</Link>
+            <Link href="/status" className="...">Live Status</Link>
             <ThemeToggle />
             <ExportButton />
             <form action={async () => {
@@ -232,6 +228,8 @@ export default function Home({ searchParams }: { searchParams: Promise<{ q?: str
             </form>
           </div>
         </div>
+        {/* MOBILE MENIU (matomas tik telefone) */}
+        <MobileMenu />
       </nav>
 
       <main className="max-w-6xl mx-auto px-6 py-10">
