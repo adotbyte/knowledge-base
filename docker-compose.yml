@@ -23,7 +23,9 @@ services:
       - AUTH_GITHUB_ID=${AUTH_GITHUB_ID}
       - AUTH_GITHUB_SECRET=${AUTH_GITHUB_SECRET}
       - AUTH_URL=https://knowledge.morkunas.info
+      - NEXTAUTH_URL=https://knowledge.morkunas.info
       - AUTH_TRUST_HOST=true
+      - AUTH_COOKIE_SECURE=true
     depends_on:
       db:
         condition: service_started
