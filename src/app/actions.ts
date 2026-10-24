@@ -21,14 +21,12 @@ export async function createNote(formData: FormData) {
     ? tagsString.split(',').map(tag => tag.trim()).filter(Boolean) 
     : [];
 
-  revalidatePath('/', 'page');
-
-  // Sukuriame užrašą DB su fiksuotu "admin" vartotoju
+  // Sukuriame užrašą DB
   const note = await prisma.note.create({
     data: {
       title,
       content,
-      userId: "admin", // <-- Fiksuotas vartotojas
+      userId: "admin",
       tags: {
         connectOrCreate: tagNames.map((tagName) => ({
           where: { name: tagName },
@@ -40,8 +38,7 @@ export async function createNote(formData: FormData) {
 
   // Tvarkome failus
   if (files && files.length > 0 && files[0].size > 0) {
-    // Išsaugome NE public, o šakniniame uploads kataloge
-    const uploadDir = join(process.cwd(), 'uploads'); // <-- PAKEISTA
+    const uploadDir = join(process.cwd(), 'uploads');
     await mkdir(uploadDir, { recursive: true });
 
     const apiKey = process.env.GEMINI_API_KEY;
@@ -49,6 +46,7 @@ export async function createNote(formData: FormData) {
 
     for (const file of files) {
       if (file.size === 0) continue;
+      
       const bytes = await file.arrayBuffer();
       const buffer = Buffer.from(bytes);
       const uniqueName = `${Date.now()}-${file.name.replace(/\s+/g, '-')}`;
@@ -57,10 +55,9 @@ export async function createNote(formData: FormData) {
 
       let aiDescription = '';
 
-         // Jei tai paveikslėlis ir turime AI raktą, analizuojame
+      // Jei tai paveikslėlis ir turime AI raktą, analizuojame
       if (ai && file.type.startsWith('image/')) {
         try {
-          // Konvertuojame į base64 Gemini formatui
           const base64Image = buffer.toString('base64');
           
           const response = await ai.interactions.create({
@@ -82,13 +79,14 @@ export async function createNote(formData: FormData) {
       await prisma.attachment.create({
         data: {
           name: file.name,
-          url: `/api/uploads/${uniqueName}`, // <-- PAKEISTA: naudosime API maršrutą
+          url: `/api/uploads/${uniqueName}`,
           type: file.type,
           size: file.size,
           noteId: note.id,
         },
       });
-            if (aiDescription) {
+
+      if (aiDescription) {
         await prisma.note.update({
           where: { id: note.id },
           data: { content: note.content + aiDescription },
@@ -186,7 +184,6 @@ export async function summarizeNote(formData: FormData) {
     where: { id: note.id },
     data: { content: `${note.content}\n\n---\n### 🤖 AI Summary\n${summary}` },
   });
-
 }
 
 // 6. AI IMPROVE
@@ -217,7 +214,6 @@ export async function improveNote(formData: FormData) {
     where: { id: note.id },
     data: { content: improvedContent },
   });
-
 }
 
 // 7. AI GENERATE NOTE
@@ -253,6 +249,7 @@ export async function generateNote(formData: FormData) {
     },
   });
 
+  revalidatePath('/', 'page');
 }
 
 // 8. ASK AI (RAG)
@@ -318,7 +315,6 @@ export async function reviewCode(formData: FormData) {
 
   const ai = new GoogleGenAI({ apiKey });
 
-  // Promptas, kuris liepia AI grąžinti struktūrizuotą atsakymą
   const prompt = `You are an expert code reviewer. Analyze the following ${language} code.
 Provide your response in Markdown format with the following sections:
 1. **Summary**: A brief overview of what the code does.
@@ -346,7 +342,7 @@ Respond in the same language as the code comments (if any). Be concise but thoro
   }
 }
 
-// „AI Konfigūracijų Generatorius“ (DevOps Asistentas)
+// AI Config Generator
 export async function generateConfig(formData: FormData) {
   const serviceName = formData.get('serviceName') as string;
   const requirements = formData.get('requirements') as string || '';
@@ -376,7 +372,7 @@ Return the response in Markdown format with code blocks.`;
   return response.output_text || "No response generated.";
 }
 
-// „AI Kodo Vertėjas“ (Code Explainer)
+// AI Code Explainer
 export async function explainCode(formData: FormData) {
   const code = formData.get('code') as string;
   if (!code) throw new Error('Code is required');
