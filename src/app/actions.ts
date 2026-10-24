@@ -151,7 +151,6 @@ export async function summarizeNote(formData: FormData) {
     data: { content: `${note.content}\n\n---\n### 🤖 AI Summary\n${summary}` },
   });
 
-  revalidatePath('/', 'page');
 }
 
 // 6. AI IMPROVE
@@ -183,7 +182,6 @@ export async function improveNote(formData: FormData) {
     data: { content: improvedContent },
   });
 
-  revalidatePath('/', 'page');
 }
 
 // 7. AI GENERATE NOTE
@@ -219,7 +217,6 @@ export async function generateNote(formData: FormData) {
     },
   });
 
-  revalidatePath('/', 'page');
 }
 
 // 8. ASK AI (RAG)
