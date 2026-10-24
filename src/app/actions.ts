@@ -61,7 +61,7 @@ export async function createNote(formData: FormData) {
     }
   }
 
-  revalidatePath('/');
+  revalidatePath('/', 'page');
 }
 
 // 2. DELETE NOTE
@@ -73,7 +73,7 @@ export async function deleteNote(formData: FormData) {
     where: { id: id, userId: "admin" },
   });
 
-  revalidatePath('/');
+  revalidatePath('/', 'page');
 }
 
 // 3. TOGGLE SHARE
@@ -87,7 +87,7 @@ export async function toggleShare(formData: FormData) {
     data: { isPublic: !isPublic },
   });
 
-  revalidatePath('/');
+  revalidatePath('/', 'page');
 }
 
 // 4. UPDATE NOTE
@@ -119,7 +119,7 @@ export async function updateNote(id: string, formData: FormData) {
     },
   });
 
-  revalidatePath('/');
+  revalidatePath('/', 'page');
 }
 
 // 5. AI SUMMARIZE
@@ -151,7 +151,7 @@ export async function summarizeNote(formData: FormData) {
     data: { content: `${note.content}\n\n---\n### 🤖 AI Summary\n${summary}` },
   });
 
-  revalidatePath('/');
+  revalidatePath('/', 'page');
 }
 
 // 6. AI IMPROVE
@@ -183,7 +183,7 @@ export async function improveNote(formData: FormData) {
     data: { content: improvedContent },
   });
 
-  revalidatePath('/');
+  revalidatePath('/', 'page');
 }
 
 // 7. AI GENERATE NOTE
@@ -219,7 +219,7 @@ export async function generateNote(formData: FormData) {
     },
   });
 
-  revalidatePath('/');
+  revalidatePath('/', 'page');
 }
 
 // 8. ASK AI (RAG)

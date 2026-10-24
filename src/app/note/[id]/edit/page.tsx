@@ -1,25 +1,19 @@
-import { auth } from '../../../../auth';
 import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { updateNote } from '../../../actions';
-import { notFound, redirect } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { Suspense } from 'react';
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
 
-// 1. EditForm priima `params` pažadą ir pats jį išsprendžia
 async function EditForm({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params; // <-- Išsprendžiame params ČIA
-  const session = await auth();
-
-  if (!session?.user?.id) {
-    redirect('/login');
-  }
+  const { id } = await params;
+  const userId = "admin"; // <-- Naudojame fiksuotą vartotoją
 
   const note = await prisma.note.findUnique({
-    where: { id: id, userId: session.user.id },
+    where: { id: id, userId: userId },
     include: { tags: true },
   });
 
@@ -78,8 +72,6 @@ async function EditForm({ params }: { params: Promise<{ id: string }> }) {
   );
 }
 
-// 2. Pagrindinis puslapis dabar yra paprastas ir sinchroninis!
-// Jis nebesprendžia params, o tiesiog perduoda juos į EditForm.
 export default function EditNotePage({ params }: { params: Promise<{ id: string }> }) {
   return (
     <div className="max-w-3xl mx-auto p-6 min-h-screen">
@@ -95,7 +87,6 @@ export default function EditNotePage({ params }: { params: Promise<{ id: string 
           Loading note...
         </div>
       }>
-        {/* Perduodame params kaip Promise į EditForm */}
         <EditForm params={params} />
       </Suspense>
     </div>
