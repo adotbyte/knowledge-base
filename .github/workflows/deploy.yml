@@ -8,7 +8,6 @@ on:
 jobs:
   deploy:
     runs-on: self-hosted
-    # Jei nori, kad niekada neužstrigtų amžinai, nustatome limitą
     timeout-minutes: 15
 
     steps:
@@ -24,10 +23,10 @@ jobs:
         AUTH_GITHUB_ID=${{ secrets.AUTH_GITHUB_ID }}
         AUTH_GITHUB_SECRET=${{ secrets.AUTH_GITHUB_SECRET }}
         AUTH_URL=${{ secrets.AUTH_URL }}
+        NEXTAUTH_URL=${{ secrets.NEXTAUTH_URL }}
         AUTH_TRUST_HOST=${{ secrets.AUTH_TRUST_HOST }}
         AUTH_COOKIE_SECURE=${{ secrets.AUTH_COOKIE_SECURE }}
         AUTH_COOKIE_SAME_SITE=${{ secrets.AUTH_COOKIE_SAME_SITE }}
-        AUTH_COOKIE_DOMAIN=${{ secrets.AUTH_COOKIE_DOMAIN }}
         EOF
 
     - name: Stop old containers and Clean up
@@ -38,6 +37,18 @@ jobs:
       run: |
         docker compose up -d --build
 
-    - name: Clean up dangling images (optional, saves disk space)
+    # --- NAUJI ŽINGSNIAI ---
+    - name: Wait for DB and push schema
+      run: |
+        sleep 10 # Palaukiame, kol PostgreSQL pilnai pasileis
+        docker compose exec -T web npx prisma db push --schema=prisma/schema.prisma || true
+
+    - name: Create Admin User
+      run: |
+        # Įterpiame admin vartotoją tiesiai per SQL, apeinant Prisma
+        docker compose exec -T db psql -U knowledge -d knowledge_db -c "INSERT INTO \"User\" (id, name, email) VALUES ('admin', 'Admin', 'admin@example.com') ON CONFLICT (id) DO NOTHING;" || true
+    # -----------------------
+
+    - name: Clean up dangling images
       run: |
         docker image prune -f
