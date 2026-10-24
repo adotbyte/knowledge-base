@@ -1,13 +1,13 @@
 import { NextResponse } from 'next/server';
 import { readFile } from 'fs/promises';
 import { join } from 'path';
-
-export const dynamic = 'force-dynamic';
+import { unstable_noStore as noStore } from 'next/cache';
 
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ filename: string }> }
 ) {
+  noStore();
   const { filename } = await params;
   
   // Saugumo patikrinimas, kad nebandytų išeiti už katalogo ribų
