@@ -15,7 +15,7 @@ services:
     container_name: knowledge_web
     restart: unless-stopped
     ports:
-      - "3001:3000" # 3001, kad nesikirstų su portfolio (8080)
+      - "3080:3000" # 3001, kad nesikirstų su portfolio (8080)
     environment:
       - DATABASE_URL=postgresql://knowledge:${DB_PASSWORD}@db:5432/knowledge_db?schema=public
       - GEMINI_API_KEY=${GEMINI_API_KEY}
