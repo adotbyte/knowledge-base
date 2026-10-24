@@ -4,23 +4,22 @@ import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
 
 export default function ThemeToggle() {
-  const { theme, setTheme, resolvedTheme } = useTheme();
+  const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
-  // Kad išvengtume React hydration mismatch, palaukiame, kol komponentas užsikraus
   useEffect(() => {
     setMounted(true);
   }, []);
 
   if (!mounted) {
-    return <div className="w-9 h-9"></div>; // Tuščia vieta, kol kraunasi
+    // Kol neįsikėlė, rodoma tuščia vieta (be ikonos, kad nebūtų blyksnio)
+    return <div className="w-9 h-9"></div>;
   }
 
   return (
     <button
       onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
       className="p-2 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800 transition-colors"
-      title="Toggle theme"
     >
       {resolvedTheme === 'dark' ? (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
