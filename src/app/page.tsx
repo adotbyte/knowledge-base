@@ -181,9 +181,12 @@ async function ProtectedContent({ searchParams }: { searchParams: Promise<{ q?: 
                         </form>
 
                         {file.isPublic && (
-                          <span className="text-[10px] text-green-600 dark:text-green-400 font-mono">
-                            /share-file/{file.shareId}
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-[10px] text-green-600 dark:text-green-400 font-mono">
+                              /share-file/{file.shareId}
+                            </span>
+                            <CopyButton text={`https://knowledge.morkunas.info/share-file/${file.shareId}`} />
+                          </div>
                         )}
                       </div>
                     ))}
@@ -202,9 +205,12 @@ async function ProtectedContent({ searchParams }: { searchParams: Promise<{ q?: 
                 
                 {note.isPublic && (
                   <div className="mt-3 p-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg flex items-center justify-between">
-                    <span className="text-xs text-green-700 dark:text-green-400 font-mono truncate mr-2">
-                      /share/{note.shareId}
-                    </span>
+                    <div className="flex items-center gap-2 overflow-hidden">
+                      <span className="text-xs text-green-700 dark:text-green-400 font-mono truncate">
+                        /share/{note.shareId}
+                      </span>
+                      <CopyButton text={`https://knowledge.morkunas.info/share/${note.shareId}`} />
+                    </div>
                     <span className="text-[10px] font-bold text-green-600 dark:text-green-500 uppercase tracking-wider">Public</span>
                   </div>
                 )}
