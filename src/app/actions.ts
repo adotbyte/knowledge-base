@@ -272,3 +272,43 @@ export async function exportNotes() {
 
   return markdownContent;
 }
+
+// Review Code
+export async function reviewCode(formData: FormData) {
+  const code = formData.get('code') as string;
+  const language = formData.get('language') as string || 'unknown';
+
+  if (!code) throw new Error('Code is required');
+
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) throw new Error('GEMINI_API_KEY is missing');
+
+  const ai = new GoogleGenAI({ apiKey });
+
+  // Promptas, kuris liepia AI grąžinti struktūrizuotą atsakymą
+  const prompt = `You are an expert code reviewer. Analyze the following ${language} code.
+Provide your response in Markdown format with the following sections:
+1. **Summary**: A brief overview of what the code does.
+2. **Issues**: Any bugs, security vulnerabilities, or bad practices (if none, say "No major issues found").
+3. **Improvements**: Suggestions for optimization, readability, or performance.
+4. **Refactored Code**: (Optional) Provide an improved version of the code.
+
+CODE TO REVIEW:
+\`\`\`${language}
+${code}
+\`\`\`
+
+Respond in the same language as the code comments (if any). Be concise but thorough.`;
+
+  try {
+    const response = await ai.interactions.create({
+      model: 'gemini-3.8-flash',
+      input: prompt,
+    });
+
+    return response.output_text || "No response generated.";
+  } catch (error) {
+    console.error('AI Code Review Error:', error);
+    throw new Error('Failed to review code');
+  }
+}
