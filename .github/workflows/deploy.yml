@@ -44,7 +44,7 @@ jobs:
         sleep 5
         echo "Applying safe database schema updates..."
         # Nukopijuojame SQL failą į DB konteinerį ir jį įvykdome
-        docker cp scripts/init-db.sql knowledge_db:/tmp/init-db.sql
+        docker cp init-db.sql knowledge_db:/tmp/init-db.sql
         docker exec -i knowledge_db psql -U knowledge -d knowledge_db -f /tmp/init-db.sql || true
     # ---------------------------------------------
 

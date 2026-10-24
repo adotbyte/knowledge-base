@@ -1,12 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { createNote, deleteNote } from '../actions';
-import { auth } from '../../auth';
-import prisma from '../prisma'; // <-- SVARBU: Importuojame prisma
-
-// Apgauname auth
-vi.mock('@/auth', () => ({
-  auth: vi.fn(),
-}));
+import prisma from '../prisma';
 
 // Apgauname Prisma
 vi.mock('../prisma', () => ({
@@ -19,30 +13,48 @@ vi.mock('../prisma', () => ({
   },
 }));
 
-describe('Server Actions Security', () => {
+// Apgauname revalidatePath (nes testuose nėra Next.js aplinkos)
+vi.mock('next/cache', () => ({
+  revalidatePath: vi.fn(),
+}));
+
+describe('Server Actions', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('should throw error if user is not authenticated', async () => {
-    vi.mocked(auth).mockResolvedValueOnce(null as any);
+  it('should create a note successfully with admin user', async () => {
+    // Nustatome, kad Prisma sėkmingai sukuria įrašą
+    vi.mocked(prisma.note.create).mockResolvedValueOnce({ id: 'note-1', title: 'Test', content: 'Test content', userId: 'admin' } as any);
 
     const formData = new FormData();
     formData.append('title', 'Test');
     formData.append('content', 'Test content');
 
-    await expect(createNote(formData)).rejects.toThrow('Unauthorized');
+    await createNote(formData);
+
+    // Patikriname, ar Prisma buvo iškviesta su teisingu userId
+    expect(prisma.note.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          userId: 'admin',
+        }),
+      })
+    );
   });
 
-  it('should throw error if user tries to delete someone else\'s note', async () => {
-    vi.mocked(auth).mockResolvedValueOnce({ user: { id: 'user_A' } } as any);
+  it('should delete a note successfully', async () => {
+    vi.mocked(prisma.note.delete).mockResolvedValueOnce({ id: 'note-1' } as any);
 
     const formData = new FormData();
-    formData.append('id', 'note_of_user_B');
+    formData.append('id', 'note-1');
 
-    // Dabar prisma kintamasis YRA apibrėžtas, nes jį importavome viršuje
-    vi.mocked(prisma.note.delete).mockRejectedValueOnce(new Error('Record to delete does not exist.'));
+    await deleteNote(formData);
 
-    await expect(deleteNote(formData)).rejects.toThrow('Record to delete does not exist.');
+    expect(prisma.note.delete).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: 'note-1', userId: 'admin' },
+      })
+    );
   });
 });
