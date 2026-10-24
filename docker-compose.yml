@@ -9,8 +9,6 @@ services:
       POSTGRES_DB: knowledge_db
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5433:5432" # Naudojame 5433, kad nesikirstų su portfolio_db (5432)
 
   web:
     build: .
