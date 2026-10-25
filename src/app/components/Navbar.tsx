@@ -14,6 +14,7 @@ export default function Navbar() {
     { name: 'Code Reviewer', href: '/code-review' },
     { name: 'Config Gen', href: '/config-generator' },
     { name: 'Explainer', href: '/explainer' },
+    { name: 'Public View', href: '/public' },
   ];
 
   return (
