@@ -10,6 +10,7 @@ export default function Navbar() {
 
   const links = [
     { name: 'Dashboard', href: '/dashboard' },
+    { name: 'Docker', href: '/docker' },
     { name: 'Live Status', href: '/status' },
     { name: 'Code Reviewer', href: '/code-review' },
     { name: 'Config Gen', href: '/config-generator' },

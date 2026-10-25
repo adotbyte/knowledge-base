@@ -519,3 +519,45 @@ export async function searchNotes(query: string) {
 
   return notes;
 }
+
+// --- DOCKER MANAGEMENT ACTIONS ---
+
+// 1. Gauti visų konteinerių sąrašą
+export async function getDockerContainers() {
+  try {
+    const res = await fetch('http://socket-proxy:2375/containers/json?all=true', { cache: 'no-store' });
+    if (!res.ok) throw new Error('Failed to fetch containers');
+    
+    const data = await res.json();
+    return data.map((c: any) => ({
+      id: c.Id,
+      name: c.Names[0].replace('/', ''),
+      state: c.State, // running, exited, paused
+      status: c.Status,
+      image: c.Image,
+    }));
+  } catch (error) {
+    console.error('Docker fetch error:', error);
+    return [];
+  }
+}
+
+// 2. Valdyti konteinerį (start, stop, restart)
+export async function controlContainer(containerId: string, action: 'start' | 'stop' | 'restart') {
+  try {
+    // Siunčiame POST užklausą į Docker API
+    const res = await fetch(`http://socket-proxy:2375/containers/${containerId}/${action}`, {
+      method: 'POST',
+    });
+
+    if (!res.ok) {
+      throw new Error(`Failed to ${action} container`);
+    }
+
+    revalidatePath('/docker');
+    return { success: true };
+  } catch (error) {
+    console.error(`Docker ${action} error:`, error);
+    return { success: false, error: 'Action could not be performed' };
+  }
+}
