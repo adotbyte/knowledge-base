@@ -4,6 +4,7 @@ import { updateNote } from '../../../actions';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { Suspense } from 'react';
+import Navbar from '../../../components/Navbar';
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
@@ -62,6 +63,18 @@ async function EditForm({ params }: { params: Promise<{ id: string }> }) {
         />
       </div>
 
+      {/* --- NAUJAS: FAILŲ ĮKĖLIMAS --- */}
+      <div className="relative z-10 pointer-events-none mt-2">
+        <label htmlFor="files" className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1">Add Attachments</label>
+        <input 
+          type="file" 
+          id="files"
+          name="files" 
+          multiple 
+          className="pointer-events-auto w-full p-2 bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-gray-800 dark:file:text-gray-300 dark:hover:file:bg-gray-700 transition-none" 
+        />
+      </div>
+
       <button 
         type="submit" 
         className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-colors shadow-lg shadow-blue-200 dark:shadow-none mt-2"
@@ -74,21 +87,25 @@ async function EditForm({ params }: { params: Promise<{ id: string }> }) {
 
 export default function EditNotePage({ params }: { params: Promise<{ id: string }> }) {
   return (
-    <div className="max-w-3xl mx-auto p-6 min-h-screen">
-      <div className="mb-8">
-        <Link href="/" className="text-blue-600 hover:underline text-sm font-semibold">
-          &larr; Back to Notes
-        </Link>
-        <h1 className="text-3xl font-black mt-4">Edit Note</h1>
-      </div>
-
-      <Suspense fallback={
-        <div className="text-center p-10 text-gray-500 animate-pulse font-medium">
-          Loading note...
+    // PRIDĖTA: bg-gray-50 dark:bg-gray-950 ir min-h-screen
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 font-sans">
+      <Navbar />
+      <div className="max-w-3xl mx-auto p-6 py-10">
+        <div className="mb-8">
+          <Link href="/" className="text-blue-600 hover:underline text-sm font-semibold">
+            &larr; Back to Notes
+          </Link>
+          <h1 className="text-3xl font-black mt-4 text-gray-900 dark:text-white">Edit Note</h1>
         </div>
-      }>
-        <EditForm params={params} />
-      </Suspense>
+
+        <Suspense fallback={
+          <div className="text-center p-10 text-gray-500 animate-pulse font-medium">
+            Loading note...
+          </div>
+        }>
+          <EditForm params={params} />
+        </Suspense>
+      </div>
     </div>
   );
 }

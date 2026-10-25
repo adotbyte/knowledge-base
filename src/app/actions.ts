@@ -137,6 +137,7 @@ export async function updateNote(id: string, formData: FormData) {
   const title = formData.get('title') as string;
   const content = formData.get('content') as string;
   const tagsString = formData.get('tags') as string;
+  const files = formData.getAll('files') as File[];
 
   if (!title || !content) {
     throw new Error('Title and content are required.');
@@ -146,6 +147,7 @@ export async function updateNote(id: string, formData: FormData) {
     ? tagsString.split(',').map(tag => tag.trim()).filter(Boolean) 
     : [];
 
+  // Atnaujiname užrašą
   await prisma.note.update({
     where: { id: id, userId: "admin" },
     data: {
@@ -160,6 +162,31 @@ export async function updateNote(id: string, formData: FormData) {
       },
     },
   });
+
+  // Tvarkome naujus failus (jei jų yra)
+  if (files && files.length > 0 && files[0].size > 0) {
+    const uploadDir = join(process.cwd(), 'uploads');
+    await mkdir(uploadDir, { recursive: true });
+
+    for (const file of files) {
+      if (file.size === 0) continue;
+      const bytes = await file.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+      const uniqueName = `${Date.now()}-${file.name.replace(/\s+/g, '-')}`;
+      const filePath = join(uploadDir, uniqueName);
+      await writeFile(filePath, buffer);
+
+      await prisma.attachment.create({
+        data: {
+          name: file.name,
+          url: `/api/uploads/${uniqueName}`,
+          type: file.type,
+          size: file.size,
+          noteId: id,
+        },
+      });
+    }
+  }
 
   revalidatePath('/', 'page');
 }
