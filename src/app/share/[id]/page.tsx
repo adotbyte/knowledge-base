@@ -52,7 +52,7 @@ export default function SharedNotePage({ params }: { params: Promise<{ id: strin
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 py-12 px-6">
       <div className="max-w-3xl mx-auto">
         <div className="mb-8 flex items-center justify-between">
-          <Link href="/login" className="text-sm font-bold text-blue-600 hover:underline">
+          <Link href="https://knowledge.morkunas.info" className="text-sm font-bold text-blue-600 hover:underline">
             &larr; Go to my Knowledge Base
           </Link>
           <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Shared Note</span>

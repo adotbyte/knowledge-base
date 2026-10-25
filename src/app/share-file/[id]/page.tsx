@@ -42,7 +42,7 @@ export default function SharedFilePage({ params }: { params: Promise<{ id: strin
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex flex-col items-center justify-center p-6">
       <div className="w-full max-w-md">
         <div className="mb-6 text-center">
-          <Link href="/" className="text-sm font-bold text-blue-600 hover:underline">
+          <Link href="https://knowledge.morkunas.info" className="text-sm font-bold text-blue-600 hover:underline">
             &larr; Go to Knowledge Base
           </Link>
         </div>
