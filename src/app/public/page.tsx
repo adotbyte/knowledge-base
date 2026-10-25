@@ -10,7 +10,7 @@ const prisma = new PrismaClient({ adapter });
 async function PublicNotesContent() {
   const notes = await prisma.note.findMany({
     where: { isPublic: true },
-    include: { tags: true },
+    include: { tags: true, attachments: true },
     orderBy: { updatedAt: 'desc' },
   });
 
@@ -47,7 +47,27 @@ async function PublicNotesContent() {
           <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-3">
             {note.content.substring(0, 150)}...
           </p>
-          
+          {/* --- NAUJAS: FAILŲ ATVAIZDAVIMAS --- */}
+          {note.attachments && note.attachments.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-4">
+              {note.attachments.map((file: any) => (
+                <a 
+                  key={file.id} 
+                  href={file.url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded-md text-xs text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                >
+                  📎 {file.name}
+                </a>
+              ))}
+            </div>
+          )}
+          {/* ---------------------------------- */}
+
+          <div className="mt-4 text-xs text-gray-400">
+            Updated: {new Date(note.updatedAt).toLocaleDateString()}
+          </div>
           <div className="mt-4 text-xs text-gray-400">
             Updated: {new Date(note.updatedAt).toLocaleDateString()}
           </div>
