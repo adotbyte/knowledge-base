@@ -14,7 +14,7 @@ async function SharedNoteContent({ params }: { params: Promise<{ id: string }> }
 
   const note = await prisma.note.findUnique({
     where: { shareId: id, isPublic: true },
-    include: { tags: true },
+    include: { tags: true, attachments: true },
   });
 
   if (!note) {
@@ -38,7 +38,27 @@ async function SharedNoteContent({ params }: { params: Promise<{ id: string }> }
       <div className="bg-gray-50 dark:bg-gray-950 p-6 rounded-2xl border border-gray-100 dark:border-gray-800">
         <MarkdownRenderer content={note.content} />
       </div>
-      
+       {/* --- NAUJAS: FAILŲ SĄRAŠAS --- */}
+      {note.attachments && note.attachments.length > 0 && (
+        <div className="mt-6">
+          <h3 className="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Attachments</h3>
+          <div className="flex flex-wrap gap-2">
+            {note.attachments.map((file: any) => (
+              <a 
+                key={file.id} 
+                href={file.url} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              >
+                📎 {file.name}
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+      {/* ------------------------------ */}
+
       <p className="text-xs text-gray-400 mt-8 text-center">
         Shared on {new Date(note.updatedAt).toLocaleDateString()}
       </p>
