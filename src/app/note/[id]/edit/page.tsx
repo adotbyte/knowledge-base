@@ -15,7 +15,7 @@ async function EditForm({ params }: { params: Promise<{ id: string }> }) {
 
   const note = await prisma.note.findUnique({
     where: { id: id, userId: userId },
-    include: { tags: true },
+    include: { tags: true, attachments: true },
   });
 
   if (!note) {
@@ -74,7 +74,21 @@ async function EditForm({ params }: { params: Promise<{ id: string }> }) {
           className="pointer-events-auto w-full p-2 bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-gray-800 dark:file:text-gray-300 dark:hover:file:bg-gray-700 transition-none" 
         />
       </div>
-
+      {/* Jau prisegti failai */}
+      {note.attachments && note.attachments.length > 0 && (
+        <div className="mt-4">
+          <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-2">Current Attachments</label>
+          <div className="flex flex-wrap gap-2">
+            {note.attachments.map((file: any) => (
+              <div key={file.id} className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 dark:bg-gray-800 rounded-lg text-xs font-semibold text-gray-700 dark:text-gray-300">
+                <a href={file.url} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                  📎 {file.name}
+                </a>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
       <button 
         type="submit" 
         className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-colors shadow-lg shadow-blue-200 dark:shadow-none mt-2"
@@ -97,7 +111,7 @@ export default function EditNotePage({ params }: { params: Promise<{ id: string 
           </Link>
           <h1 className="text-3xl font-black mt-4 text-gray-900 dark:text-white">Edit Note</h1>
         </div>
-
+        
         <Suspense fallback={
           <div className="text-center p-10 text-gray-500 animate-pulse font-medium">
             Loading note...
@@ -108,4 +122,5 @@ export default function EditNotePage({ params }: { params: Promise<{ id: string 
       </div>
     </div>
   );
+  
 }

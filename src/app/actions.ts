@@ -6,6 +6,7 @@ import { GoogleGenAI } from '@google/genai';
 import { writeFile, mkdir, access } from 'fs/promises';
 import { constants } from 'fs';
 import { join } from 'path';
+import { redirect } from 'next/navigation';
 
 // 1. CREATE NOTE
 export async function createNote(formData: FormData) {
@@ -189,6 +190,7 @@ export async function updateNote(id: string, formData: FormData) {
   }
 
   revalidatePath('/', 'page');
+  redirect('/');
 }
 
 // 5. AI SUMMARIZE
