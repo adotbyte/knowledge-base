@@ -99,9 +99,10 @@ async function EditForm({ params }: { params: Promise<{ id: string }> }) {
   );
 }
 
-export default function EditNotePage({ params }: { params: Promise<{ id: string }> }) {
+export default async function EditNotePage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params; // <-- Ištraukiame ID ČIA
+
   return (
-    // PRIDĖTA: bg-gray-50 dark:bg-gray-950 ir min-h-screen
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 font-sans">
       <Navbar />
       <div className="max-w-3xl mx-auto p-6 py-10">
@@ -109,7 +110,18 @@ export default function EditNotePage({ params }: { params: Promise<{ id: string 
           <Link href="/" className="text-blue-600 hover:underline text-sm font-semibold">
             &larr; Back to Notes
           </Link>
-          <h1 className="text-3xl font-black mt-4 text-gray-900 dark:text-white">Edit Note</h1>
+          
+          {/* --- NAUJAS BLOKAS SU ISTORIJOS NUORODA --- */}
+          <div className="flex justify-between items-end mt-4">
+            <h1 className="text-3xl font-black text-gray-900 dark:text-white">Edit Note</h1>
+            <Link href={`/note/${id}/history`} className="text-sm font-bold text-purple-600 hover:underline mb-1 flex items-center gap-1">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              View History
+            </Link>
+          </div>
+          {/* ------------------------------------------- */}
         </div>
         
         <Suspense fallback={
@@ -117,10 +129,10 @@ export default function EditNotePage({ params }: { params: Promise<{ id: string 
             Loading note...
           </div>
         }>
+          {/* Perduodame params toliau, kaip ir buvo */}
           <EditForm params={params} />
         </Suspense>
       </div>
     </div>
   );
-  
 }

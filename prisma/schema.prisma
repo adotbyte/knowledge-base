@@ -63,6 +63,7 @@ model Note {
   isPublic  Boolean  @default(false)
   shareId   String?  @unique @default(cuid())
   attachments Attachment[]
+  versions    NoteVersion[]
 }
 
 model Tag {
@@ -82,4 +83,13 @@ model Attachment {
   note      Note     @relation(fields: [noteId], references: [id], onDelete: Cascade)
   isPublic  Boolean  @default(false)
   shareId   String?  @unique @default(cuid())
+}
+
+model NoteVersion {
+  id        String   @id @default(cuid())
+  title     String
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+  noteId    String
+  note      Note     @relation(fields: [noteId], references: [id], onDelete: Cascade)
 }

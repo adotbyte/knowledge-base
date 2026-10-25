@@ -144,11 +144,26 @@ export async function updateNote(id: string, formData: FormData) {
     throw new Error('Title and content are required.');
   }
 
+  // 1. Išsaugome senąją versiją prieš atnaujinimą
+  const oldNote = await prisma.note.findUnique({
+    where: { id, userId: "admin" },
+  });
+
+  if (oldNote) {
+    await prisma.noteVersion.create({
+      data: {
+        title: oldNote.title,
+        content: oldNote.content,
+        noteId: oldNote.id,
+      },
+    });
+  }
+
   const tagNames = tagsString 
     ? tagsString.split(',').map(tag => tag.trim()).filter(Boolean) 
     : [];
 
-  // Atnaujiname užrašą
+  // 2. Atnaujiname užrašą
   await prisma.note.update({
     where: { id: id, userId: "admin" },
     data: {
@@ -164,7 +179,7 @@ export async function updateNote(id: string, formData: FormData) {
     },
   });
 
-  // Tvarkome naujus failus (jei jų yra)
+  // 3. Tvarkome naujus failus
   if (files && files.length > 0 && files[0].size > 0) {
     const uploadDir = join(process.cwd(), 'uploads');
     await mkdir(uploadDir, { recursive: true });
