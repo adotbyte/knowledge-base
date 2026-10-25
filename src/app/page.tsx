@@ -14,6 +14,7 @@ import AISearch from './components/AISearch';
 import ActionButton from './components/ActionButton';
 import Navbar from './components/Navbar';
 import SearchBar from './SearchBar';
+import CommandPalette from './components/CommandPalette';
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
@@ -253,6 +254,7 @@ export default function Home({ searchParams }: { searchParams: Promise<{ q?: str
           <ProtectedContent searchParams={searchParams} />
         </Suspense>
       </main>
+      <CommandPalette />
     </div>
   );
 }

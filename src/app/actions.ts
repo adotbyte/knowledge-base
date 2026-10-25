@@ -449,3 +449,27 @@ export async function toggleFileShare(formData: FormData) {
 
   revalidatePath('/');
 }
+
+// Globali paieška (dažnai vadinama Command Palette arba Cmd + K meniu) 
+export async function searchNotes(query: string) {
+  if (!query || query.trim().length === 0) return [];
+
+  const notes = await prisma.note.findMany({
+    where: {
+      userId: "admin",
+      OR: [
+        { title: { contains: query, mode: 'insensitive' } },
+        { content: { contains: query, mode: 'insensitive' } },
+        { tags: { some: { name: { contains: query, mode: 'insensitive' } } } },
+      ],
+    },
+    select: {
+      id: true,
+      title: true,
+      content: true,
+    },
+    take: 10, // Rodome tik 10 geriausių rezultatų
+  });
+
+  return notes;
+}
