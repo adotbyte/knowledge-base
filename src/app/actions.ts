@@ -77,13 +77,23 @@ export async function createNote(formData: FormData) {
         }
       }
 
-            // --- AI PDF ANALIZĖ (NAUJA) ---
+      // --- AI PDF ANALIZĖ (NAUJA) ---
       if (ai && file.type === 'application/pdf') {
         try {
-          const pdfParse = (await import('pdf-parse')) as any;
-          const pdfData = await pdfParse(buffer);
-          const extractedText = pdfData.text.substring(0, 4000); // Imame tik pirmus 4000 simbolių, kad netaupytume limito
+          // 1. Naudojame pdfjs-dist vietoj pdf-parse
+          const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
+          const uint8Array = new Uint8Array(buffer);
+          const pdf = await pdfjs.getDocument({ data: uint8Array }).promise;
+          
+          // 2. Ištraukiame tekstą iš pirmo puslapio (kad netaupytume limito)
+          const page = await pdf.getPage(1);
+          const textContent = await page.getTextContent();
+          const extractedText = textContent.items
+            .map((item: any) => item.str)
+            .join(' ')
+            .substring(0, 4000); // Imame tik pirmus 4000 simbolių
 
+          // 3. Siunčiame AI
           const response = await ai.interactions.create({
             model: 'gemini-3.8-flash',
             input: `You are a helpful assistant. I will provide you with text extracted from a PDF document. Please summarize its contents in 3-4 bullet points in Lithuanian. If it's an invoice or document with key data, extract the main numbers, dates, and names.\n\nPDF CONTENT:\n${extractedText}`,
