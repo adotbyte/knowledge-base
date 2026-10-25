@@ -91,11 +91,17 @@ export default function CommandPalette() {
                 }}
                 className="w-full text-left px-3 py-2 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors flex flex-col gap-1 group"
               >
-                <span className="font-bold text-gray-900 dark:text-white group-hover:text-blue-600 transition-colors">
-                  {note.title}
-                </span>
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-gray-900 dark:text-white group-hover:text-blue-600 transition-colors">
+                    {note.title}
+                  </span>
+                  {/* Jei yra failų, parodome mažą ikoną */}
+                  {note.attachments && note.attachments.length > 0 && (
+                    <span className="text-xs text-gray-400">📎 {note.attachments.length}</span>
+                  )}
+                </div>
                 <span className="text-xs text-gray-500 dark:text-gray-400 line-clamp-1">
-                  {note.content.replace(/[#*`]/g, '')} {/* Nuimame markdown simbolius ištraukai */}
+                  {note.content.replace(/[#*`]/g, '')}
                 </span>
               </button>
             ))

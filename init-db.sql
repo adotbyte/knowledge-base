@@ -108,4 +108,17 @@ BEGIN
     END IF;
 END $$;
 
+CREATE TABLE IF NOT EXISTS "NoteVersion" (
+    "id" TEXT NOT NULL,
+    "title" TEXT NOT NULL,
+    "content" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "noteId" TEXT NOT NULL,
+    CONSTRAINT "NoteVersion_pkey" PRIMARY KEY ("id")
+);
+
+CREATE INDEX IF NOT EXISTS "NoteVersion_noteId_idx" ON "NoteVersion"("noteId");
+
+ALTER TABLE "NoteVersion" ADD CONSTRAINT "NoteVersion_noteId_fkey" FOREIGN KEY ("noteId") REFERENCES "Note"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
 INSERT INTO "User" (id, name, email) VALUES ('admin', 'Admin', 'admin@example.com') ON CONFLICT (id) DO NOTHING;

@@ -61,7 +61,6 @@ export async function createNote(formData: FormData) {
       if (ai && file.type.startsWith('image/')) {
         try {
           const base64Image = buffer.toString('base64');
-          
           const response = await ai.interactions.create({
             model: 'gemini-3.8-flash',
             input: [
@@ -75,6 +74,26 @@ export async function createNote(formData: FormData) {
           }
         } catch (e) {
           console.error('AI Image Analysis failed:', e);
+        }
+      }
+
+            // --- AI PDF ANALIZĖ (NAUJA) ---
+      if (ai && file.type === 'application/pdf') {
+        try {
+          const pdfParse = (await import('pdf-parse')) as any;
+          const pdfData = await pdfParse(buffer);
+          const extractedText = pdfData.text.substring(0, 4000); // Imame tik pirmus 4000 simbolių, kad netaupytume limito
+
+          const response = await ai.interactions.create({
+            model: 'gemini-3.8-flash',
+            input: `You are a helpful assistant. I will provide you with text extracted from a PDF document. Please summarize its contents in 3-4 bullet points in Lithuanian. If it's an invoice or document with key data, extract the main numbers, dates, and names.\n\nPDF CONTENT:\n${extractedText}`,
+          });
+
+          if (response.output_text) {
+            aiDescription = `\n\n---\n### 📄 AI PDF Analysis (${file.name})\n${response.output_text}`;
+          }
+        } catch (e) {
+          console.error('AI PDF Analysis failed:', e);
         }
       }
             // Papildomas patikrinimas, ar failas tikrai yra
@@ -476,14 +495,16 @@ export async function searchNotes(query: string) {
         { title: { contains: query, mode: 'insensitive' } },
         { content: { contains: query, mode: 'insensitive' } },
         { tags: { some: { name: { contains: query, mode: 'insensitive' } } } },
+        { attachments: { some: { name: { contains: query, mode: 'insensitive' } } } }, // <-- NAUJA: ieškome failų pavadinimuose
       ],
     },
     select: {
       id: true,
       title: true,
       content: true,
+      attachments: { select: { name: true } }, // <-- Pridedame failų pavadinimus, kad galėtume parodyti
     },
-    take: 10, // Rodome tik 10 geriausių rezultatų
+    take: 10,
   });
 
   return notes;
