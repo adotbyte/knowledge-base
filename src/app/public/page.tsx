@@ -1,15 +1,27 @@
 import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import Link from 'next/link';
-import MarkdownRenderer from '../components/MarkdownRenderer';
 import { Suspense } from 'react';
+import PublicSearchBar from '../components/PublicSearchBar';
+import ThemeToggle from '../components/ThemeToggle';
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
 
-async function PublicNotesContent() {
+async function PublicNotesContent({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
+  const { q } = await searchParams;
+  const searchQuery = q?.replace('#', '').trim();
+
   const notes = await prisma.note.findMany({
-    where: { isPublic: true },
+    where: { 
+      isPublic: true,
+      ...(searchQuery && {
+        OR: [
+          { title: { contains: searchQuery, mode: 'insensitive' } },
+          { content: { contains: searchQuery, mode: 'insensitive' } },
+        ],
+      }),
+    },
     include: { tags: true, attachments: true },
     orderBy: { updatedAt: 'desc' },
   });
@@ -17,7 +29,7 @@ async function PublicNotesContent() {
   if (notes.length === 0) {
     return (
       <div className="text-center p-20 text-gray-500">
-        No public notes available yet.
+        No public notes found.
       </div>
     );
   }
@@ -44,30 +56,20 @@ async function PublicNotesContent() {
             </div>
           )}
           
-          <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-3">
+          <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-3 mb-4">
             {note.content.substring(0, 150)}...
           </p>
-          {/* --- NAUJAS: FAILŲ ATVAIZDAVIMAS --- */}
+
           {note.attachments && note.attachments.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-4">
               {note.attachments.map((file: any) => (
-                <a 
-                  key={file.id} 
-                  href={file.url} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1 px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded-md text-xs text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-                >
+                <span key={file.id} className="flex items-center gap-1 px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded-md text-xs text-gray-600 dark:text-gray-300">
                   📎 {file.name}
-                </a>
+                </span>
               ))}
             </div>
           )}
-          {/* ---------------------------------- */}
-
-          <div className="mt-4 text-xs text-gray-400">
-            Updated: {new Date(note.updatedAt).toLocaleDateString()}
-          </div>
+          
           <div className="mt-4 text-xs text-gray-400">
             Updated: {new Date(note.updatedAt).toLocaleDateString()}
           </div>
@@ -77,19 +79,25 @@ async function PublicNotesContent() {
   );
 }
 
-export default function PublicPage() {
+export default function PublicPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 font-sans">
-      {/* Paprastas Navbar be meniu */}
-      <nav className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
+      <nav className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white font-black">K</div>
-            <h1 className="text-xl font-black text-gray-900 dark:text-white tracking-tight">Public Knowledge Base</h1>
+            <h1 className="text-xl font-black text-gray-900 dark:text-white tracking-tight hidden sm:block">Public Knowledge Base</h1>
           </div>
-            <a href="https://knowledge.morkunas.info" className="text-sm font-semibold text-gray-500 hover:text-blue-600">
-            Go to App
+          
+          <div className="flex items-center gap-4">
+            <Suspense fallback={<div className="w-64 h-9 bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse"></div>}>
+              <PublicSearchBar />
+            </Suspense>
+            <ThemeToggle />
+            <a href="https://knowledge.morkunas.info" className="text-sm font-semibold text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 transition-colors hidden sm:block">
+              Go to App
             </a>
+          </div>
         </div>
       </nav>
 
@@ -102,7 +110,7 @@ export default function PublicPage() {
         <Suspense fallback={
           <div className="text-center p-20 text-gray-500 animate-pulse">Loading public notes...</div>
         }>
-          <PublicNotesContent />
+          <PublicNotesContent searchParams={searchParams} />
         </Suspense>
       </main>
     </div>
