@@ -67,9 +67,9 @@ export default function PublicPage() {
             <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white font-black">K</div>
             <h1 className="text-xl font-black text-gray-900 dark:text-white tracking-tight">Public Knowledge Base</h1>
           </div>
-          <Link href="/" className="text-sm font-semibold text-gray-500 hover:text-blue-600">
+            <a href="https://knowledge.morkunas.info" className="text-sm font-semibold text-gray-500 hover:text-blue-600">
             Go to App
-          </Link>
+            </a>
         </div>
       </nav>
 
