@@ -9,15 +9,42 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     GitHub({
       clientId: process.env.AUTH_GITHUB_ID,
       clientSecret: process.env.AUTH_GITHUB_SECRET,
-      issuer: "https://github.com/login/oauth", // <-- BŪTINAS 2026 m.
+      issuer: "https://github.com/login/oauth",
     }),
   ],
   session: { strategy: "database" },
   pages: {
-    signIn: "/login", 
+    signIn: "/login",
+  },
+  cookies: {
+    csrfToken: {
+      name: "__Host-authjs.csrf-token",
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: true,
+      },
+    },
+    sessionToken: {
+      name: "__Host-authjs.session-token",
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: true,
+      },
+    },
+    callbackUrl: {
+      name: "__Host-authjs.callback-url",
+      options: {
+        sameSite: "lax",
+        path: "/",
+        secure: true,
+      },
+    },
   },
   callbacks: {
-    // Užtikriname, kad sesijoje būtų vartotojo ID
     session({ session, user }) {
       if (session.user) {
         session.user.id = user.id;
