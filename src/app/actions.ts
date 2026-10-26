@@ -108,7 +108,7 @@ export async function createNote(formData: FormData) {
           const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
           
           // Nurodome worker failo kelią
-          pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.mjs';
+          pdfjs.GlobalWorkerOptions.workerSrc = `file://${process.cwd()}/public/pdf.worker.mjs`;
           
           const uint8Array = new Uint8Array(buffer);
           const pdf = await pdfjs.getDocument({ data: uint8Array }).promise;
