@@ -1,7 +1,6 @@
 'use server';
 
 import prisma from './prisma';
-import { auth } from './auth';
 import { revalidatePath } from 'next/cache';
 import { GoogleGenAI } from '@google/genai';
 import { writeFile, mkdir, access } from 'fs/promises';
@@ -9,13 +8,10 @@ import { constants } from 'fs';
 import { join } from 'path';
 import { redirect } from 'next/navigation';
 
-// Pagalbinė funkcija sesijai gauti
+// Pagalbinė funkcija vartotojo ID gauti
 async function getUserId() {
-  const session = await auth();
-  if (!session?.user?.id) {
-    throw new Error('Unauthorized');
-  }
-  return session.user.id;
+  // Cloudflare Access jau mus apsaugojo, todėl naudojame fiksuotą vartotoją
+  return "admin";
 }
 
 // 1. CREATE NOTE
