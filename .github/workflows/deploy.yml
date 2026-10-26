@@ -27,6 +27,7 @@ jobs:
         AUTH_TRUST_HOST=${{ secrets.AUTH_TRUST_HOST }}
         AUTH_COOKIE_SECURE=${{ secrets.AUTH_COOKIE_SECURE }}
         AUTH_COOKIE_SAME_SITE=${{ secrets.AUTH_COOKIE_SAME_SITE }}
+        NEXT_SERVER_ACTIONS_ENCRYPTION_KEY=${{ secrets.NEXT_SERVER_ACTIONS_ENCRYPTION_KEY }}
         EOF
 
     - name: Stop old containers and Clean up
