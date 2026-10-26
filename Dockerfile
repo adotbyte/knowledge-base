@@ -14,6 +14,8 @@ RUN npm ci --legacy-peer-deps
 
 # Nukopijuojame visą kodą
 COPY . .
+# Nukopijuojame PDF workerį į public katalogą
+RUN cp node_modules/pdfjs-dist/build/pdf.worker.mjs public/
 
 # Nustatome netikrą DATABASE_URL, kad Prisma generate nesugriūtų per build'ą
 ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy"

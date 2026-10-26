@@ -44,12 +44,10 @@ export async function createNote(formData: FormData) {
     },
   });
 
+    // Tvarkome failus
   if (files && files.length > 0 && files[0].size > 0) {
     const uploadDir = join(process.cwd(), 'uploads');
     await mkdir(uploadDir, { recursive: true });
-
-    const apiKey = process.env.GEMINI_API_KEY;
-    const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
 
     for (const file of files) {
       if (file.size === 0) continue;
@@ -58,9 +56,32 @@ export async function createNote(formData: FormData) {
       const buffer = Buffer.from(bytes);
       const uniqueName = `${Date.now()}-${file.name.replace(/\s+/g, '-')}`;
       const filePath = join(uploadDir, uniqueName);
+      
+      // 1. PIRMA įrašome failą į diską
       await writeFile(filePath, buffer);
 
+      try {
+        await access(filePath, constants.F_OK);
+      } catch (e) {
+        console.error('Failas nebuvo įrašytas:', e);
+        continue;
+      }
+
+      // 2. Įrašome į duomenų bazę (tai turi įvykti prieš AI)
+      const attachment = await prisma.attachment.create({
+        data: {
+          name: file.name,
+          url: `/api/uploads/${uniqueName}`,
+          type: file.type,
+          size: file.size,
+          noteId: note.id,
+        },
+      });
+
+      // 3. TIK DABAR bandome AI analizę (jei ji lūžta, failas jau yra saugus)
       let aiDescription = '';
+      const apiKey = process.env.GEMINI_API_KEY;
+      const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
 
       if (ai && file.type.startsWith('image/')) {
         try {
@@ -81,9 +102,14 @@ export async function createNote(formData: FormData) {
         }
       }
 
+      // PDF analizė (įjungta)
       if (ai && file.type === 'application/pdf') {
         try {
           const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
+          
+          // Nurodome worker failo kelią
+          pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.mjs';
+          
           const uint8Array = new Uint8Array(buffer);
           const pdf = await pdfjs.getDocument({ data: uint8Array }).promise;
           
@@ -107,23 +133,7 @@ export async function createNote(formData: FormData) {
         }
       }
 
-      try {
-        await access(filePath, constants.F_OK);
-      } catch (e) {
-        console.error('Failas nebuvo įrašytas:', e);
-        continue;
-      }
-
-      await prisma.attachment.create({
-        data: {
-          name: file.name,
-          url: `/api/uploads/${uniqueName}`,
-          type: file.type,
-          size: file.size,
-          noteId: note.id,
-        },
-      });
-
+      // 4. Jei AI ką nors aprašė, pridedame prie užrašo turinio
       if (aiDescription) {
         await prisma.note.update({
           where: { id: note.id },
