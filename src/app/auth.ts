@@ -16,9 +16,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   pages: {
     signIn: "/login",
   },
-  cookies: {
+    cookies: {
     csrfToken: {
-      name: "__Host-authjs.csrf-token",
+      name: "authjs.csrf-token",
       options: {
         httpOnly: true,
         sameSite: "lax",
@@ -27,7 +27,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
     },
     sessionToken: {
-      name: "__Host-authjs.session-token",
+      name: "authjs.session-token",
       options: {
         httpOnly: true,
         sameSite: "lax",
@@ -36,7 +36,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
     },
     callbackUrl: {
-      name: "__Host-authjs.callback-url",
+      name: "authjs.callback-url",
       options: {
         sameSite: "lax",
         path: "/",
