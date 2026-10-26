@@ -12,44 +12,25 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       issuer: "https://github.com/login/oauth",
     }),
   ],
-  session: { strategy: "database" },
+  session: { 
+    strategy: "jwt", // <-- PERJUNGIME Į JWT
+  },
   pages: {
     signIn: "/login",
   },
-    cookies: {
-    csrfToken: {
-      name: "authjs.csrf-token",
-      options: {
-        httpOnly: true,
-        sameSite: "lax",
-        path: "/",
-        secure: true,
-      },
-    },
-    sessionToken: {
-      name: "authjs.session-token",
-      options: {
-        httpOnly: true,
-        sameSite: "lax",
-        path: "/",
-        secure: true,
-      },
-    },
-    callbackUrl: {
-      name: "authjs.callback-url",
-      options: {
-        sameSite: "lax",
-        path: "/",
-        secure: true,
-      },
-    },
-  },
+  trustHost: true,
   callbacks: {
-    session({ session, user }) {
+    session({ session, token }) {
       if (session.user) {
-        session.user.id = user.id;
+        session.user.id = token.sub as string; // JWT naudoja token.sub
       }
       return session;
+    },
+    jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
+      }
+      return token;
     },
   },
 });
