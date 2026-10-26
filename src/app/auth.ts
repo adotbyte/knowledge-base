@@ -12,17 +12,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       issuer: "https://github.com/login/oauth",
     }),
   ],
-  session: { strategy: "jwt" }, // JWT strategija
+  session: { strategy: "jwt" },
   pages: { signIn: "/login" },
-  trustHost: true,
-      cookies: {
+  trustHost: true, // <-- BŪTINAS Cloudflare
+  cookies: {
     csrfToken: {
       name: "authjs.csrf-token",
       options: {
         httpOnly: true,
-        sameSite: "none", // <-- GRĄŽINAME NONE
+        sameSite: "none", // <-- BŪTINAS tuneliui
         path: "/",
-        secure: true,
+        secure: true, // <-- BŪTINAS, kai sameSite=none
       },
     },
     sessionToken: {
