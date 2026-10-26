@@ -9,14 +9,7 @@ vi.mock('next/server', () => ({
   },
 }));
 
-// 2. Apgauname auth() funkciją
-vi.mock('../auth', () => ({
-  auth: vi.fn().mockResolvedValue({
-    user: { id: 'test-user-id' },
-  }),
-}));
-
-// 3. Apgauname Prisma
+// 2. Apgauname Prisma
 vi.mock('../prisma', () => ({
   default: {
     note: {
@@ -27,7 +20,7 @@ vi.mock('../prisma', () => ({
   },
 }));
 
-// 4. Apgauname revalidatePath
+// 3. Apgauname revalidatePath
 vi.mock('next/cache', () => ({
   revalidatePath: vi.fn(),
 }));
@@ -37,9 +30,9 @@ describe('Server Actions Security', () => {
     vi.clearAllMocks();
   });
 
-  it('should create a note for the logged-in user', async () => {
+  it('should create a note with admin user (Cloudflare Access mode)', async () => {
     // Nustatome, kad Prisma sėkmingai sukuria įrašą
-    vi.mocked(prisma.note.create).mockResolvedValueOnce({ id: 'note-1', title: 'Test', content: 'Test content', userId: 'test-user-id' } as any);
+    vi.mocked(prisma.note.create).mockResolvedValueOnce({ id: 'note-1', title: 'Test', content: 'Test content', userId: 'admin' } as any);
 
     const formData = new FormData();
     formData.append('title', 'Test');
@@ -47,17 +40,17 @@ describe('Server Actions Security', () => {
 
     await createNote(formData);
 
-    // Patikriname, ar Prisma buvo iškviesta su teisingu userId
+    // Patikriname, ar Prisma buvo iškviesta su "admin"
     expect(prisma.note.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
-          userId: 'test-user-id', // <-- Dabar naudojame sesijos ID
+          userId: 'admin', // <-- Dabar tikimės "admin"
         }),
       })
     );
   });
 
-  it('should delete a note for the logged-in user', async () => {
+  it('should delete a note with admin user', async () => {
     vi.mocked(prisma.note.delete).mockResolvedValueOnce({ id: 'note-1' } as any);
 
     const formData = new FormData();
@@ -67,7 +60,7 @@ describe('Server Actions Security', () => {
 
     expect(prisma.note.delete).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: { id: 'note-1', userId: 'test-user-id' }, // <-- Naudojame sesijos ID
+        where: { id: 'note-1', userId: 'admin' }, // <-- Dabar tikimės "admin"
       })
     );
   });
