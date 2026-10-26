@@ -15,12 +15,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   session: { strategy: "jwt" }, // JWT strategija
   pages: { signIn: "/login" },
   trustHost: true,
-    cookies: {
+      cookies: {
     csrfToken: {
       name: "authjs.csrf-token",
       options: {
         httpOnly: true,
-        sameSite: "lax",
+        sameSite: "none", // <-- GRĄŽINAME NONE
         path: "/",
         secure: true,
       },
@@ -29,7 +29,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       name: "authjs.session-token",
       options: {
         httpOnly: true,
-        sameSite: "lax",
+        sameSite: "none",
         path: "/",
         secure: true,
       },
@@ -37,7 +37,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     callbackUrl: {
       name: "authjs.callback-url",
       options: {
-        sameSite: "lax",
+        sameSite: "none",
         path: "/",
         secure: true,
       },
