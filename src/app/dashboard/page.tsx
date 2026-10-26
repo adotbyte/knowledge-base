@@ -1,13 +1,18 @@
 import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { Suspense } from 'react';
+import { auth } from '../auth';
+import { redirect } from 'next/navigation';
 import Link from 'next/link';
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
 
 async function DashboardContent() {
-  const userId = "admin";
+  const session = await auth();
+  if (!session?.user?.id) redirect('/login');
+  
+  const userId = session.user.id;
 
   // 1. Pagrindinė statistika
   const [totalNotes, totalTags, totalAttachments, totalStorage] = await Promise.all([

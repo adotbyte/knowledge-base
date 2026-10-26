@@ -1,6 +1,7 @@
 'use server';
 
 import prisma from './prisma';
+import { auth } from './auth';
 import { revalidatePath } from 'next/cache';
 import { GoogleGenAI } from '@google/genai';
 import { writeFile, mkdir, access } from 'fs/promises';
@@ -8,8 +9,18 @@ import { constants } from 'fs';
 import { join } from 'path';
 import { redirect } from 'next/navigation';
 
+// Pagalbinė funkcija sesijai gauti
+async function getUserId() {
+  const session = await auth();
+  if (!session?.user?.id) {
+    throw new Error('Unauthorized');
+  }
+  return session.user.id;
+}
+
 // 1. CREATE NOTE
 export async function createNote(formData: FormData) {
+  const userId = await getUserId();
   const title = formData.get('title') as string;
   const content = formData.get('content') as string;
   const tagsString = formData.get('tags') as string; 
@@ -23,12 +34,11 @@ export async function createNote(formData: FormData) {
     ? tagsString.split(',').map(tag => tag.trim()).filter(Boolean) 
     : [];
 
-  // Sukuriame užrašą DB
   const note = await prisma.note.create({
     data: {
       title,
       content,
-      userId: "admin",
+      userId: userId, // <-- Dinaminis ID
       tags: {
         connectOrCreate: tagNames.map((tagName) => ({
           where: { name: tagName },
@@ -38,7 +48,6 @@ export async function createNote(formData: FormData) {
     },
   });
 
-  // Tvarkome failus
   if (files && files.length > 0 && files[0].size > 0) {
     const uploadDir = join(process.cwd(), 'uploads');
     await mkdir(uploadDir, { recursive: true });
@@ -57,7 +66,6 @@ export async function createNote(formData: FormData) {
 
       let aiDescription = '';
 
-      // Jei tai paveikslėlis ir turime AI raktą, analizuojame
       if (ai && file.type.startsWith('image/')) {
         try {
           const base64Image = buffer.toString('base64');
@@ -77,23 +85,19 @@ export async function createNote(formData: FormData) {
         }
       }
 
-      // --- AI PDF ANALIZĖ (NAUJA) ---
       if (ai && file.type === 'application/pdf') {
         try {
-          // 1. Naudojame pdfjs-dist vietoj pdf-parse
           const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
           const uint8Array = new Uint8Array(buffer);
           const pdf = await pdfjs.getDocument({ data: uint8Array }).promise;
           
-          // 2. Ištraukiame tekstą iš pirmo puslapio (kad netaupytume limito)
           const page = await pdf.getPage(1);
           const textContent = await page.getTextContent();
           const extractedText = textContent.items
             .map((item: any) => item.str)
             .join(' ')
-            .substring(0, 4000); // Imame tik pirmus 4000 simbolių
+            .substring(0, 4000);
 
-          // 3. Siunčiame AI
           const response = await ai.interactions.create({
             model: 'gemini-3.8-flash',
             input: `You are a helpful assistant. I will provide you with text extracted from a PDF document. Please summarize its contents in 3-4 bullet points in Lithuanian. If it's an invoice or document with key data, extract the main numbers, dates, and names.\n\nPDF CONTENT:\n${extractedText}`,
@@ -106,7 +110,7 @@ export async function createNote(formData: FormData) {
           console.error('AI PDF Analysis failed:', e);
         }
       }
-            // Papildomas patikrinimas, ar failas tikrai yra
+
       try {
         await access(filePath, constants.F_OK);
       } catch (e) {
@@ -138,11 +142,12 @@ export async function createNote(formData: FormData) {
 
 // 2. DELETE NOTE
 export async function deleteNote(formData: FormData) {
+  const userId = await getUserId();
   const id = formData.get('id') as string;
   if (!id) return;
 
   await prisma.note.delete({
-    where: { id: id, userId: "admin" },
+    where: { id: id, userId: userId },
   });
 
   revalidatePath('/', 'page');
@@ -150,12 +155,13 @@ export async function deleteNote(formData: FormData) {
 
 // 3. TOGGLE SHARE
 export async function toggleShare(formData: FormData) {
+  const userId = await getUserId();
   const id = formData.get('id') as string;
   const isPublic = formData.get('isPublic') === 'true';
   if (!id) return;
 
   await prisma.note.update({
-    where: { id, userId: "admin" },
+    where: { id, userId: userId },
     data: { isPublic: !isPublic },
   });
 
@@ -164,6 +170,7 @@ export async function toggleShare(formData: FormData) {
 
 // 4. UPDATE NOTE
 export async function updateNote(id: string, formData: FormData) {
+  const userId = await getUserId();
   const title = formData.get('title') as string;
   const content = formData.get('content') as string;
   const tagsString = formData.get('tags') as string;
@@ -173,9 +180,8 @@ export async function updateNote(id: string, formData: FormData) {
     throw new Error('Title and content are required.');
   }
 
-  // 1. Išsaugome senąją versiją prieš atnaujinimą
   const oldNote = await prisma.note.findUnique({
-    where: { id, userId: "admin" },
+    where: { id, userId: userId },
   });
 
   if (oldNote) {
@@ -192,9 +198,8 @@ export async function updateNote(id: string, formData: FormData) {
     ? tagsString.split(',').map(tag => tag.trim()).filter(Boolean) 
     : [];
 
-  // 2. Atnaujiname užrašą
   await prisma.note.update({
-    where: { id: id, userId: "admin" },
+    where: { id: id, userId: userId },
     data: {
       title,
       content,
@@ -208,7 +213,6 @@ export async function updateNote(id: string, formData: FormData) {
     },
   });
 
-  // 3. Tvarkome naujus failus
   if (files && files.length > 0 && files[0].size > 0) {
     const uploadDir = join(process.cwd(), 'uploads');
     await mkdir(uploadDir, { recursive: true });
@@ -239,11 +243,12 @@ export async function updateNote(id: string, formData: FormData) {
 
 // 5. AI SUMMARIZE
 export async function summarizeNote(formData: FormData) {
+  const userId = await getUserId();
   const id = formData.get('id') as string;
   if (!id) return;
 
   const note = await prisma.note.findUnique({
-    where: { id, userId: "admin" },
+    where: { id, userId: userId },
   });
 
   if (!note) throw new Error('Note not found');
@@ -269,11 +274,12 @@ export async function summarizeNote(formData: FormData) {
 
 // 6. AI IMPROVE
 export async function improveNote(formData: FormData) {
+  const userId = await getUserId();
   const id = formData.get('id') as string;
   if (!id) return;
 
   const note = await prisma.note.findUnique({
-    where: { id, userId: "admin" },
+    where: { id, userId: userId },
   });
 
   if (!note) throw new Error('Note not found');
@@ -299,6 +305,7 @@ export async function improveNote(formData: FormData) {
 
 // 7. AI GENERATE NOTE
 export async function generateNote(formData: FormData) {
+  const userId = await getUserId();
   const topic = formData.get('topic') as string;
   if (!topic) throw new Error('Topic is required');
 
@@ -320,7 +327,7 @@ export async function generateNote(formData: FormData) {
     data: {
       title: title,
       content: generatedContent,
-      userId: "admin",
+      userId: userId,
       tags: {
         connectOrCreate: {
           where: { name: 'AI Generated' },
@@ -335,8 +342,9 @@ export async function generateNote(formData: FormData) {
 
 // 8. ASK AI (RAG)
 export async function askKnowledgeBase(query: string) {
+  const userId = await getUserId();
   const notes = await prisma.note.findMany({
-    where: { userId: "admin" },
+    where: { userId: userId },
     include: { tags: true },
     orderBy: { createdAt: 'desc' },
     take: 15,
@@ -365,8 +373,9 @@ export async function askKnowledgeBase(query: string) {
 
 // 9. EXPORT NOTES
 export async function exportNotes() {
+  const userId = await getUserId();
   const notes = await prisma.note.findMany({
-    where: { userId: "admin" },
+    where: { userId: userId },
     include: { tags: true },
     orderBy: { createdAt: 'desc' },
   });
@@ -386,6 +395,7 @@ export async function exportNotes() {
 
 // Review Code
 export async function reviewCode(formData: FormData) {
+  await getUserId(); // Patikriname, ar prisijungęs
   const code = formData.get('code') as string;
   const language = formData.get('language') as string || 'unknown';
 
@@ -425,6 +435,7 @@ Respond in the same language as the code comments (if any). Be concise but thoro
 
 // AI Config Generator
 export async function generateConfig(formData: FormData) {
+  await getUserId();
   const serviceName = formData.get('serviceName') as string;
   const requirements = formData.get('requirements') as string || '';
 
@@ -455,6 +466,7 @@ Return the response in Markdown format with code blocks.`;
 
 // AI Code Explainer
 export async function explainCode(formData: FormData) {
+  await getUserId();
   const code = formData.get('code') as string;
   if (!code) throw new Error('Code is required');
 
@@ -482,6 +494,7 @@ ${code}
 
 // File share
 export async function toggleFileShare(formData: FormData) {
+  await getUserId();
   const id = formData.get('id') as string;
   const isPublic = formData.get('isPublic') === 'true';
   if (!id) return;
@@ -494,25 +507,26 @@ export async function toggleFileShare(formData: FormData) {
   revalidatePath('/');
 }
 
-// Globali paieška (dažnai vadinama Command Palette arba Cmd + K meniu) 
+// Globali paieška
 export async function searchNotes(query: string) {
+  await getUserId();
   if (!query || query.trim().length === 0) return [];
 
   const notes = await prisma.note.findMany({
     where: {
-      userId: "admin",
+      userId: (await getUserId()), // <-- Dinaminis ID
       OR: [
         { title: { contains: query, mode: 'insensitive' } },
         { content: { contains: query, mode: 'insensitive' } },
         { tags: { some: { name: { contains: query, mode: 'insensitive' } } } },
-        { attachments: { some: { name: { contains: query, mode: 'insensitive' } } } }, // <-- NAUJA: ieškome failų pavadinimuose
+        { attachments: { some: { name: { contains: query, mode: 'insensitive' } } } },
       ],
     },
     select: {
       id: true,
       title: true,
       content: true,
-      attachments: { select: { name: true } }, // <-- Pridedame failų pavadinimus, kad galėtume parodyti
+      attachments: { select: { name: true } },
     },
     take: 10,
   });
@@ -522,8 +536,8 @@ export async function searchNotes(query: string) {
 
 // --- DOCKER MANAGEMENT ACTIONS ---
 
-// 1. Gauti visų konteinerių sąrašą
 export async function getDockerContainers() {
+  await getUserId();
   try {
     const res = await fetch('http://socket-proxy:2375/containers/json?all=true', { cache: 'no-store' });
     if (!res.ok) throw new Error('Failed to fetch containers');
@@ -532,7 +546,7 @@ export async function getDockerContainers() {
     return data.map((c: any) => ({
       id: c.Id,
       name: c.Names[0].replace('/', ''),
-      state: c.State, // running, exited, paused
+      state: c.State,
       status: c.Status,
       image: c.Image,
     }));
@@ -542,10 +556,9 @@ export async function getDockerContainers() {
   }
 }
 
-// 2. Valdyti konteinerį (start, stop, restart)
 export async function controlContainer(containerId: string, action: 'start' | 'stop' | 'restart') {
+  await getUserId();
   try {
-    // Siunčiame POST užklausą į Docker API
     const res = await fetch(`http://socket-proxy:2375/containers/${containerId}/${action}`, {
       method: 'POST',
     });

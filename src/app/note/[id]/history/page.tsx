@@ -1,3 +1,5 @@
+import { auth } from '../../../auth';
+import { redirect } from 'next/navigation';
 import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { notFound } from 'next/navigation';
@@ -8,12 +10,20 @@ import { Suspense } from 'react';
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
 
-// 1. Atskiras komponentas, kuris priima params ir krauna duomenis
 async function HistoryContent({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params; // <-- params išsprendžiami ČIA (Suspense viduje)
 
+  // 1. Patikriname, ar vartotojas prisijungęs
+  const session = await auth();
+  if (!session?.user?.id) {
+    redirect('/login');
+  }
+
+  const userId = session.user.id;
+
+  // 2. Ieškome užrašo TIK to vartotojo
   const note = await prisma.note.findUnique({
-    where: { id, userId: "admin" },
+    where: { id: id, userId: userId }, // <-- Pakeista iš "admin" į userId
     include: {
       versions: {
         orderBy: { createdAt: 'desc' },

@@ -1,3 +1,5 @@
+import { auth } from '../../../auth';
+import { redirect } from 'next/navigation';
 import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { updateNote } from '../../../actions';
@@ -11,8 +13,11 @@ const prisma = new PrismaClient({ adapter });
 
 async function EditForm({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const session = await auth();
+  if (!session?.user?.id) redirect('/login');
   
-  const userId = "admin";
+  const userId = session.user.id;
+
 
   const note = await prisma.note.findUnique({
     where: { id: id, userId: userId },
