@@ -1,6 +1,4 @@
 import Link from 'next/link';
-import { auth } from './auth';
-import { redirect } from 'next/navigation';
 import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { createNote, deleteNote, toggleShare, summarizeNote, improveNote, toggleFileShare  } from './actions';
@@ -22,21 +20,15 @@ const prisma = new PrismaClient({ adapter });
 
 // --- 1. APSAUGOTAS TURINYS (Server Component) ---
 async function ProtectedContent({ searchParams }: { searchParams: Promise<{ q?: string; tag?: string }> }) {
-  // 1. Patikriname, ar vartotojas prisijungęs
-  const session = await auth();
-  
-  if (!session?.user?.id) {
-    redirect('/login');
-  }
-
-  const userId = session.user.id; // <-- Naudojame TIKRĄ vartotojo ID
+  // 1. Cloudflare Access jau mus apsaugojo, todėl naudojame fiksuotą vartotoją
+  const userId = "admin"; 
 
   const { q, tag } = await searchParams;
   const searchQuery = q?.replace('#', '').trim();
 
   const notes = await prisma.note.findMany({
     where: { 
-      userId: userId, // <-- Pakeista iš "admin" į kintamąjį
+      userId: userId, 
       ...(searchQuery && {
         OR: [
           { title: { contains: searchQuery, mode: 'insensitive' } },

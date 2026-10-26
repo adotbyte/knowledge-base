@@ -1,5 +1,3 @@
-import { auth } from '../../../auth';
-import { redirect } from 'next/navigation';
 import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { notFound } from 'next/navigation';
@@ -14,12 +12,7 @@ async function HistoryContent({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params; // <-- params išsprendžiami ČIA (Suspense viduje)
 
   // 1. Patikriname, ar vartotojas prisijungęs
-  const session = await auth();
-  if (!session?.user?.id) {
-    redirect('/login');
-  }
-
-  const userId = session.user.id;
+  const userId = "admin";
 
   // 2. Ieškome užrašo TIK to vartotojo
   const note = await prisma.note.findUnique({
