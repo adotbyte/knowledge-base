@@ -175,7 +175,7 @@ export async function GET() {
     const grouped: Record<string, any> = {};
     
     pings.reverse().forEach(p => {
-      const timeKey = p.createdAt.toLocaleTimeString('lt-LT', { hour: '2-digit', minute: '2-digit' });
+      const timeKey = p.createdAt.toLocaleTimeString('lt-LT', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Vilnius' });
       
       if (!grouped[timeKey]) {
         grouped[timeKey] = { name: timeKey };
