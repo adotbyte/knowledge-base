@@ -109,6 +109,36 @@ export async function GET() {
     // Jei failo nėra, paliekame 100%
   }
 
+    // 6. Renkame atsako laikus grafikui (paskutiniai 20 patikrinimų)
+  let responseTimes: any[] = [];
+  try {
+    const uptimeFile = readFileSync('/host/tmp/uptime_history.log', 'utf8');
+    const lines = uptimeFile.trim().split('\n').filter(Boolean).slice(-40); // Imame paskutinius 40 (20 portfolio + 20 kb)
+
+    let pfData: any[] = [];
+    let kbData: any[] = [];
+
+    lines.forEach(line => {
+      const parts = line.split(' ');
+      if (parts.length === 3) {
+        // Portfolio: timestamp status time
+        pfData.push({ time: parseInt(parts[0]), responseTime: parseFloat(parts[2]) });
+      } else if (parts.length === 4 && parts[0] === 'kb') {
+        // KB: kb timestamp status time
+        kbData.push({ time: parseInt(parts[1]), responseTime: parseFloat(parts[3]) });
+      }
+    });
+
+    // Sujungiame ir paverčiame į gražų formatą grafikui
+    const allData = [
+      ...pfData.map(d => ({ name: new Date(d.time * 1000).toLocaleTimeString('lt-LT', { hour: '2-digit', minute: '2-digit' }), Portfolio: d.responseTime })),
+      ...kbData.map(d => ({ name: new Date(d.time * 1000).toLocaleTimeString('lt-LT', { hour: '2-digit', minute: '2-digit' }), Knowledge: d.responseTime }))
+    ];
+
+    // Surikiuojame pagal laiką
+    responseTimes = allData.sort((a, b) => a.name.localeCompare(b.name)).slice(-20);
+  } catch (e) { /* ignore */ }
+
         return NextResponse.json({
       success: true,
       data: {
@@ -131,6 +161,7 @@ export async function GET() {
           portfolio: portfolioUptime,
           knowledge: knowledgeUptime,
         },
+        responseTimes: responseTimes,
       },
     });
   } catch (error) {

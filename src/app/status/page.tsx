@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import Navbar from '../components/Navbar';
 
 export default function StatusPage() {
@@ -59,7 +60,8 @@ export default function StatusPage() {
             </div>
           ))}
         </div>
-                {/* UPTIME STATS */}
+
+        {/* UPTIME STATS */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
           <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm flex items-center justify-between">
             <div>
@@ -83,6 +85,27 @@ export default function StatusPage() {
             }`}>
               {stats.uptime.knowledge}%
             </span>
+          </div>
+        </div>
+
+        {/* RESPONSE TIME CHART */}
+        <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm mb-8">
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6">Response Time (seconds)</h3>
+          <div className="h-[300px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={stats.responseTimes}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#374151" vertical={false} />
+                <XAxis dataKey="name" stroke="#9ca3af" fontSize={12} tickLine={false} axisLine={false} />
+                <YAxis stroke="#9ca3af" fontSize={12} tickLine={false} axisLine={false} unit="s" />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: '#1f2937', borderColor: '#374151', color: '#fff', borderRadius: '8px' }}
+                  itemStyle={{ color: '#60a5fa' }}
+                />
+                <Legend />
+                <Line type="monotone" dataKey="Portfolio" stroke="#3b82f6" strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="Knowledge" stroke="#10b981" strokeWidth={2} dot={false} />
+              </LineChart>
+            </ResponsiveContainer>
           </div>
         </div>
 
