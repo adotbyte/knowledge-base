@@ -132,6 +132,7 @@ export default function StatusPage() {
             </ResponsiveContainer>
           </div>
         </div>
+        
 
                 {/* MONTHLY UPTIME CHART */}
         <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm mb-8">
@@ -153,6 +154,63 @@ export default function StatusPage() {
             </ResponsiveContainer>
           </div>
         </div>
+
+        {/* Statistika po grafiku */}
+{stats?.serverStats && (
+  <div className="mt-6 overflow-x-auto">
+    <table className="min-w-full text-sm text-left">
+      <thead>
+        <tr className="border-b border-gray-200 dark:border-gray-800 text-gray-500 dark:text-gray-400">
+          <th className="pb-3 font-medium">Serveris</th>
+          <th className="pb-3 font-medium text-right">Vidurkis (ms)</th>
+          <th className="pb-3 font-medium text-right">Min (ms)</th>
+          <th className="pb-3 font-medium text-right">Max (ms)</th>
+        </tr>
+      </thead>
+      <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+        {/* Cloudflare */}
+        <tr>
+          <td className="py-3 flex items-center gap-2 text-gray-700 dark:text-gray-300 font-medium">
+            <span className="w-3 h-3 rounded-full bg-[#f59e0b]"></span> Cloudflare
+          </td>
+          <td className="py-3 text-right text-gray-600 dark:text-gray-400">{stats.serverStats['Cloudflare']?.avg || '-'}</td>
+          <td className="py-3 text-right text-gray-600 dark:text-gray-400">{stats.serverStats['Cloudflare']?.min || '-'}</td>
+          <td className="py-3 text-right text-gray-600 dark:text-gray-400">{stats.serverStats['Cloudflare']?.max || '-'}</td>
+        </tr>
+        
+        {/* Google */}
+        <tr>
+          <td className="py-3 flex items-center gap-2 text-gray-700 dark:text-gray-300 font-medium">
+            <span className="w-3 h-3 rounded-full bg-[#10b981]"></span> Google
+          </td>
+          <td className="py-3 text-right text-gray-600 dark:text-gray-400">{stats.serverStats['Google']?.avg || '-'}</td>
+          <td className="py-3 text-right text-gray-600 dark:text-gray-400">{stats.serverStats['Google']?.min || '-'}</td>
+          <td className="py-3 text-right text-gray-600 dark:text-gray-400">{stats.serverStats['Google']?.max || '-'}</td>
+        </tr>
+
+        {/* Skynet_Warsaw */}
+        <tr>
+          <td className="py-3 flex items-center gap-2 text-gray-700 dark:text-gray-300 font-medium">
+            <span className="w-3 h-3 rounded-full bg-[#3b82f6]"></span> Skynet_Warsaw
+          </td>
+          <td className="py-3 text-right text-gray-600 dark:text-gray-400">{stats.serverStats['Skynet_Warsaw']?.avg || '-'}</td>
+          <td className="py-3 text-right text-gray-600 dark:text-gray-400">{stats.serverStats['Skynet_Warsaw']?.min || '-'}</td>
+          <td className="py-3 text-right text-gray-600 dark:text-gray-400">{stats.serverStats['Skynet_Warsaw']?.max || '-'}</td>
+        </tr>
+
+        {/* Frankfurt_Serveris */}
+        <tr>
+          <td className="py-3 flex items-center gap-2 text-gray-700 dark:text-gray-300 font-medium">
+            <span className="w-3 h-3 rounded-full bg-[#ef4444]"></span> Frankfurt_Serveris
+          </td>
+          <td className="py-3 text-right text-gray-600 dark:text-gray-400">{stats.serverStats['Frankfurt_Serveris']?.avg || '-'}</td>
+          <td className="py-3 text-right text-gray-600 dark:text-gray-400">{stats.serverStats['Frankfurt_Serveris']?.min || '-'}</td>
+          <td className="py-3 text-right text-gray-600 dark:text-gray-400">{stats.serverStats['Frankfurt_Serveris']?.max || '-'}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+)}
 
                 {/* ALERT HEATMAP */}
         <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm mb-8 overflow-x-auto">
