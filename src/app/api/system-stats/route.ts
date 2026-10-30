@@ -113,7 +113,7 @@ export async function GET() {
   let responseTimes: any[] = [];
   try {
     const uptimeFile = readFileSync('/host/tmp/uptime_history.log', 'utf8');
-    const lines = uptimeFile.trim().split('\n').filter(Boolean).slice(-40); // Imame paskutinius 40 (20 portfolio + 20 kb)
+    const lines = uptimeFile.trim().split('\n').filter(Boolean).slice(-40);
 
     let pfData: any[] = [];
     let kbData: any[] = [];
@@ -121,22 +121,21 @@ export async function GET() {
     lines.forEach(line => {
       const parts = line.split(' ');
       if (parts.length === 3) {
-        // Portfolio: timestamp status time
-        pfData.push({ time: parseInt(parts[0]), responseTime: parseFloat(parts[2]) });
+        // Portfolio: YYYY-MM-DD status time
+        pfData.push({ date: parts[0], responseTime: parseFloat(parts[2]) });
       } else if (parts.length === 4 && parts[0] === 'kb') {
-        // KB: kb timestamp status time
-        kbData.push({ time: parseInt(parts[1]), responseTime: parseFloat(parts[3]) });
+        // KB: kb YYYY-MM-DD status time
+        kbData.push({ date: parts[1], responseTime: parseFloat(parts[3]) });
       }
     });
 
-    // Sujungiame ir paverčiame į gražų formatą grafikui
     const allData = [
-      ...pfData.map(d => ({ name: isNaN(d.time) ? '--:--' : new Date(d.time * 1000).toLocaleTimeString('lt-LT', { hour: '2-digit', minute: '2-digit' }), Portfolio: d.responseTime })),
-      ...kbData.map(d => ({ name: isNaN(d.time) ? '--:--' : new Date(d.time * 1000).toLocaleTimeString('lt-LT', { hour: '2-digit', minute: '2-digit' }), Knowledge: d.responseTime }))
+      ...pfData.map(d => ({ name: d.date.substring(5), Portfolio: d.responseTime })),
+      ...kbData.map(d => ({ name: d.date.substring(5), Knowledge: d.responseTime }))
     ];
 
-    // Surikiuojame pagal laiką
-    responseTimes = allData.sort((a, b) => a.name.localeCompare(b.name)).slice(-20);
+    // Surikiuojame pagal laiką (šiuo atveju pagal datą, bet kadangi ji vienoda, paliekame eilės tvarką)
+    responseTimes = allData.slice(-20);
   } catch (e) { /* ignore */ }
 
     // 7. Grupuojame aliarmus pagal savaitės dieną ir valandą
