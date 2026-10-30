@@ -126,6 +126,7 @@ export default function StatusPage() {
                 <Legend />
                 <Line type="monotone" dataKey="Cloudflare" stroke="#f59e0b" strokeWidth={2} dot={false} />
                 <Line type="monotone" dataKey="Skynet_Warsaw" stroke="#3b82f6" strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="Frankfurt_Serveris" stroke="#ef4444" strokeWidth={2} dot={false} />
                 <Line type="monotone" dataKey="Google" stroke="#10b981" strokeWidth={2} dot={false} />
               </LineChart>
             </ResponsiveContainer>
