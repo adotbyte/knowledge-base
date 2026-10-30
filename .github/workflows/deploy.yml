@@ -15,7 +15,7 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Apply migrations
-      run: npx prisma migrate deploy
+      run: npx prisma@7 migrate deploy
 
     - name: Create .env file
       run: |
