@@ -84,6 +84,11 @@ export default function StatusPage() {
               {stats.containers.filter((c: any) => c.state === 'running').length} / {stats.containers.length}
             </p>
           </div>
+          <div className="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
+            <div className="text-xl mb-1">🛠️</div>
+            <h3 className="text-xs font-bold text-gray-500 uppercase">Self-Healing</h3>
+            <p className="text-2xl font-black text-gray-900 dark:text-white">{stats.selfHealingCount} saves</p>
+          </div>
         </div>
 
         {/* Konteineriai */}

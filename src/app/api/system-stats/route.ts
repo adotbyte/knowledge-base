@@ -65,14 +65,18 @@ export async function GET() {
       }
     } catch (e) { /* ignore */ }
 
-    // 4. Nuskaitome aliarmų istoriją
+  // 4. Nuskaitome aliarmų istoriją
   let alerts: any[] = [];
+  let selfHealingCount = 0;
   try {
     const alertsFile = readFileSync('/host/tmp/alerts_history.log', 'utf8');
-    alerts = alertsFile.trim().split('\n').map(line => JSON.parse(line)).reverse(); // Naujausi viršuje
-  } catch (e) {
-    // Jei failo nėra, tiesiog paliekame tuščią masyvą
-  }
+    alerts = alertsFile.trim().split('\n').map(line => JSON.parse(line)).reverse();
+    
+    // Skaičiuojame, kiek kartų buvo sėkmingai restartuota
+    selfHealingCount = alerts.filter((a: any) => 
+      a.message.includes('sėkmingai restartuotas') || a.message.includes('sėkmingai paleistas')
+    ).length;
+  } catch (e) { /* ignore */ }
 
     return NextResponse.json({
       success: true,
@@ -83,6 +87,7 @@ export async function GET() {
           uptimeDays,
           diskUsage,
           alerts: alerts,
+          selfHealingCount: selfHealingCount,
         },
         websites: [
           { name: 'Portfolio (morkunas.info)', status: portfolioStatus },
