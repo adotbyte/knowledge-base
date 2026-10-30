@@ -114,31 +114,44 @@ export async function GET() {
     let responseTimes: any[] = [];
     try {
       const uptimeFile = readFileSync('/host/tmp/uptime_history.log', 'utf8');
-      const lines = uptimeFile.trim().split('\n').filter(Boolean).slice(-20); // Imame paskutinius 20
+      const lines = uptimeFile.trim().split('\n').filter(Boolean).slice(-20); // Paskutiniai 20 įrašų
 
-      const timeMap: Record<string, any> = {};
       let index = 1;
+      const groupedData: Record<number, { name: string, Knowledge?: number, Portfolio?: number }> = {};
+      let currentGroup = 1;
 
-      lines.forEach(line => {
+      // Einame per visas eilutes ir bandome jas suporuoti
+      lines.forEach((line) => {
         const parts = line.split(' ');
         
         // Knowledge Base formatas
         if (parts.length === 4 && parts[0] === 'kb') {
-          const key = `#${index}`;
-          if (!timeMap[key]) timeMap[key] = { name: key };
-          timeMap[key].Knowledge = parseFloat(parts[3]);
-          index++;
+          groupedData[currentGroup] = { 
+            name: `#${currentGroup}`, 
+            Knowledge: parseFloat(parts[3]) 
+          };
+          currentGroup++; // Pereiname prie kito taško
         } 
         // Portfolio formatas
         else if (parts.length === 3) {
-          const key = `#${index}`;
-          if (!timeMap[key]) timeMap[key] = { name: key };
-          timeMap[key].Portfolio = parseFloat(parts[2]);
-          index++;
+          // Jei prieš tai buvęs taškas neturi Portfolio, pridedame jį ten pat
+          const prevGroup = currentGroup - 1;
+          if (groupedData[prevGroup] && !groupedData[prevGroup].Portfolio) {
+            groupedData[prevGroup].Portfolio = parseFloat(parts[2]);
+          } else {
+            // Kitu atveju kuriame naują tašką
+            groupedData[currentGroup] = { 
+              name: `#${currentGroup}`, 
+              Portfolio: parseFloat(parts[2]) 
+            };
+            currentGroup++;
+          }
         }
       });
 
-      responseTimes = Object.values(timeMap);
+      // Paverčiame objektą į masyvą ir paimame paskutinius 15 taškų, kad grafikas būtų švaresnis
+      responseTimes = Object.values(groupedData).slice(-15);
+      
     } catch (e) { 
       console.error("Klaida skaitant uptime:", e);
     }
