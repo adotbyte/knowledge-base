@@ -163,18 +163,34 @@ export async function GET() {
     } catch (e) { /* ignore */ }
   });
 
-        // 8. Nuskaitome ping istoriją (sugrupuotą pagal serverį) IR statistiką
+            // 8. Nuskaitome ping istoriją IR statistiką
   let pingHistory: any[] = [];
   const serverStats: Record<string, { avg: number, min: number, max: number }> = {};
   
   try {
-    const pings = await prisma.pingLog.findMany({
-      orderBy: { createdAt: 'desc' },
-      take: 60, // Imame paskutinius 60 įrašų (visiems serveriams)
+    // Ištraukiame unikalius serverių pavadinimus
+    const uniqueTargets = await prisma.pingLog.findMany({
+      select: { target: true },
+      distinct: ['target'],
     });
 
-    // --- STATISTIKOS SKAIČIAVIMAS ---
-    pings.forEach(p => {
+    let allRecentPings: any[] = [];
+
+    // Kiekvienam serveriui imame po paskutinius 15 įrašų
+    for (const t of uniqueTargets) {
+      const recent = await prisma.pingLog.findMany({
+        where: { target: t.target },
+        orderBy: { createdAt: 'desc' },
+        take: 15, // Imame 15 naujausių kiekvienam
+      });
+      allRecentPings = [...allRecentPings, ...recent];
+    }
+
+    // Surikiuojame visus pagal laiką (nuo seniausio iki naujausio) grafikui
+    allRecentPings.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+
+    // --- STATISTIKOS SKAIČIAVIMAS (Dabar tikslesnis) ---
+    allRecentPings.forEach(p => {
       if (!serverStats[p.target]) {
         serverStats[p.target] = { avg: 0, min: p.latency, max: p.latency };
       }
@@ -184,19 +200,19 @@ export async function GET() {
       s.max = Math.max(s.max, p.latency);
     });
 
-    // Suskaičiuojame vidurkį
     Object.keys(serverStats).forEach(target => {
-      const count = pings.filter(p => p.target === target).length;
+      // Suskaičiuojame kiek įrašų turime šiam serveriui
+      const count = allRecentPings.filter(p => p.target === target).length;
       serverStats[target].avg = parseFloat((serverStats[target].avg / count).toFixed(1));
       serverStats[target].min = parseFloat(serverStats[target].min.toFixed(1));
       serverStats[target].max = parseFloat(serverStats[target].max.toFixed(1));
     });
-    // --------------------------------
+    // ---------------------------------------------------
 
-    // Grupuojame pagal laiką (apvaliname iki minutės)
+    // Grupuojame laiko grafikui
     const grouped: Record<string, any> = {};
     
-    pings.reverse().forEach(p => {
+    allRecentPings.forEach(p => {
       const timeKey = p.createdAt.toLocaleTimeString('lt-LT', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Vilnius' });
       
       if (!grouped[timeKey]) {
@@ -206,7 +222,9 @@ export async function GET() {
     });
 
     pingHistory = Object.values(grouped);
-  } catch (e) { /* ignore */ }
+  } catch (e) { 
+    console.error('Ping stats error:', e); 
+  }
 
       // 8.1. Nuskaitome ping istoriją SAVAITĖS grafikui (sugrupuota pagal dieną)
     let weeklyPingHistory: any[] = [];
