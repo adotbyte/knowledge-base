@@ -101,7 +101,8 @@ export default function StatusPage() {
                 <YAxis stroke="#9ca3af" fontSize={12} tickLine={false} axisLine={false} unit="s" />
                 <Tooltip 
                   contentStyle={{ backgroundColor: '#1f2937', borderColor: '#374151', color: '#fff', borderRadius: '8px' }}
-                  itemStyle={{ color: '#60a5fa' }}
+                  itemStyle={{ fontWeight: 'bold' }}
+                  formatter={(value: any, name: any) => [`${value}s`, name]}
                 />
                 <Legend />
                 <Line type="monotone" dataKey="Portfolio" stroke="#3b82f6" strokeWidth={2} dot={false} />

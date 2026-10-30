@@ -110,41 +110,35 @@ export async function GET() {
     // Jei failo nėra, paliekame 100%
   }
 
-      // 6. Renkame atsako laikus grafikui
+    // 6. Renkame atsako laikus grafikui
     let responseTimes: any[] = [];
     try {
       const uptimeFile = readFileSync('/host/tmp/uptime_history.log', 'utf8');
       const lines = uptimeFile.trim().split('\n').filter(Boolean).slice(-20); // Imame paskutinius 20
 
+      const timeMap: Record<string, any> = {};
       let index = 1;
+
       lines.forEach(line => {
         const parts = line.split(' ');
         
-        // Jei tai Knowledge Base formatas (kb 2026-10-30 1 0.327456)
+        // Knowledge Base formatas
         if (parts.length === 4 && parts[0] === 'kb') {
-          responseTimes.push({
-            name: `#${index}`, // X ašyje rodysime eilutės numerį
-            Knowledge: parseFloat(parts[3]),
-            dateInfo: parts[1] // Paslėpta data, jei norėtume rodyti tooltip'e
-          });
+          const key = `#${index}`;
+          if (!timeMap[key]) timeMap[key] = { name: key };
+          timeMap[key].Knowledge = parseFloat(parts[3]);
           index++;
         } 
-        // Jei tai Portfolio formatas (2026-10-30 1 0.248527)
+        // Portfolio formatas
         else if (parts.length === 3) {
-          // Jei jau turime tokį patį indeksą, pridedame Portfolio reikšmę
-          const existing = responseTimes.find(r => r.name === `#${index}`);
-          if (existing) {
-            existing.Portfolio = parseFloat(parts[2]);
-          } else {
-            responseTimes.push({
-              name: `#${index}`,
-              Portfolio: parseFloat(parts[2]),
-              dateInfo: parts[0]
-            });
-          }
+          const key = `#${index}`;
+          if (!timeMap[key]) timeMap[key] = { name: key };
+          timeMap[key].Portfolio = parseFloat(parts[2]);
           index++;
         }
       });
+
+      responseTimes = Object.values(timeMap);
     } catch (e) { 
       console.error("Klaida skaitant uptime:", e);
     }
