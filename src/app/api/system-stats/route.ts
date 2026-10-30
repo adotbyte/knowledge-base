@@ -110,49 +110,41 @@ export async function GET() {
     // Jei failo nėra, paliekame 100%
   }
 
-            // 6. Renkame atsako laikus grafikui (paskutiniai 20 patikrinimų)
+      // 6. Renkame atsako laikus grafikui
     let responseTimes: any[] = [];
     try {
       const uptimeFile = readFileSync('/host/tmp/uptime_history.log', 'utf8');
-      const lines = uptimeFile.trim().split('\n').filter(Boolean).slice(-40);
+      const lines = uptimeFile.trim().split('\n').filter(Boolean).slice(-20); // Imame paskutinius 20
 
-      let pfData: any[] = [];
-      let kbData: any[] = [];
-
+      let index = 1;
       lines.forEach(line => {
         const parts = line.split(' ');
         
-        // Jei tai Knowledge Base formatas
+        // Jei tai Knowledge Base formatas (kb 2026-10-30 1 0.327456)
         if (parts.length === 4 && parts[0] === 'kb') {
-          // Paimame laiką. Tikėtina, kad parts[1] yra data, o parts[2] yra statusas.
-          // Jei norime laiko, reikia pažiūrėti, kaip atrodo failas.
-          // Štai saugiausias variantas: imame visą datą, bet iškerpame laiką, jei jis yra.
-          const timeStr = parts[1].includes('T') ? parts[1].split('T')[1].substring(0,5) : parts[1].substring(11, 16);
-          kbData.push({ name: timeStr || 'N/A', Knowledge: parseFloat(parts[3]) });
+          responseTimes.push({
+            name: `#${index}`, // X ašyje rodysime eilutės numerį
+            Knowledge: parseFloat(parts[3]),
+            dateInfo: parts[1] // Paslėpta data, jei norėtume rodyti tooltip'e
+          });
+          index++;
         } 
-        // Jei tai Portfolio formatas
-        else if (parts.length >= 3) {
-          const timeStr = parts[0].includes('T') ? parts[0].split('T')[1].substring(0,5) : parts[0].substring(11, 16);
-          pfData.push({ name: timeStr || 'N/A', Portfolio: parseFloat(parts[2]) });
+        // Jei tai Portfolio formatas (2026-10-30 1 0.248527)
+        else if (parts.length === 3) {
+          // Jei jau turime tokį patį indeksą, pridedame Portfolio reikšmę
+          const existing = responseTimes.find(r => r.name === `#${index}`);
+          if (existing) {
+            existing.Portfolio = parseFloat(parts[2]);
+          } else {
+            responseTimes.push({
+              name: `#${index}`,
+              Portfolio: parseFloat(parts[2]),
+              dateInfo: parts[0]
+            });
+          }
+          index++;
         }
       });
-
-      // Sujungiame pagal laiką
-      const timeMap: Record<string, any> = {};
-      
-      kbData.forEach(d => {
-        if (!timeMap[d.name]) timeMap[d.name] = { name: d.name };
-        timeMap[d.name].Knowledge = d.Knowledge;
-      });
-
-      pfData.forEach(d => {
-        if (!timeMap[d.name]) timeMap[d.name] = { name: d.name };
-        timeMap[d.name].Portfolio = d.Portfolio;
-      });
-
-      // Paimame paskutinius 20 įrašų
-      responseTimes = Object.values(timeMap).filter(d => d.name !== 'N/A').slice(-20);
-      
     } catch (e) { 
       console.error("Klaida skaitant uptime:", e);
     }
