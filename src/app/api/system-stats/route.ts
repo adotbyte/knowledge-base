@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import { execSync } from 'node:child_process';
 import { unstable_noStore as noStore } from 'next/cache';
+import { readFileSync } from 'fs';
 
 export async function GET() {
   noStore();
@@ -64,6 +65,15 @@ export async function GET() {
       }
     } catch (e) { /* ignore */ }
 
+    // 4. Nuskaitome aliarmų istoriją
+  let alerts: any[] = [];
+  try {
+    const alertsFile = readFileSync('/host/tmp/alerts_history.log', 'utf8');
+    alerts = alertsFile.trim().split('\n').map(line => JSON.parse(line)).reverse(); // Naujausi viršuje
+  } catch (e) {
+    // Jei failo nėra, tiesiog paliekame tuščią masyvą
+  }
+
     return NextResponse.json({
       success: true,
       data: {
@@ -72,6 +82,7 @@ export async function GET() {
           memory: { total: memTotal, used: memUsed, free: memFree },
           uptimeDays,
           diskUsage,
+          alerts: alerts,
         },
         websites: [
           { name: 'Portfolio (morkunas.info)', status: portfolioStatus },
