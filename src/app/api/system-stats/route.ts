@@ -4,6 +4,7 @@ import os from 'node:os';
 import { execSync } from 'node:child_process';
 import { unstable_noStore as noStore } from 'next/cache';
 import { readFileSync } from 'fs';
+import prisma from '../../prisma';
 
 export async function GET() {
   noStore();
@@ -162,6 +163,29 @@ export async function GET() {
     } catch (e) { /* ignore */ }
   });
 
+    // 8. Nuskaitome ping istoriją (sugrupuotą pagal serverį)
+  let pingHistory: any[] = [];
+  try {
+    const pings = await prisma.pingLog.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: 60, // Imame paskutinius 60 įrašų (visiems serveriams)
+    });
+
+    // Grupuojame pagal laiką (apvaliname iki minutės)
+    const grouped: Record<string, any> = {};
+    
+    pings.reverse().forEach(p => {
+      const timeKey = p.createdAt.toLocaleTimeString('lt-LT', { hour: '2-digit', minute: '2-digit' });
+      
+      if (!grouped[timeKey]) {
+        grouped[timeKey] = { name: timeKey };
+      }
+      grouped[timeKey][p.target] = p.latency;
+    });
+
+    pingHistory = Object.values(grouped);
+  } catch (e) { /* ignore */ }
+
         return NextResponse.json({
       success: true,
       data: {
@@ -186,6 +210,7 @@ export async function GET() {
         },
         responseTimes: responseTimes,
         heatmapData: heatmapData,
+        pingHistory: pingHistory
       },
     });
   } catch (error) {

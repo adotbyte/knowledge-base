@@ -93,3 +93,10 @@ model NoteVersion {
   noteId    String
   note      Note     @relation(fields: [noteId], references: [id], onDelete: Cascade)
 }
+
+model PingLog {
+  id        Int      @id @default(autoincrement())
+  target    String   // Serverio pavadinimas (pvz., "Cloudflare", "Skynet")
+  latency   Float    // Vidutinis ping laikas ms
+  createdAt DateTime @default(now())
+}

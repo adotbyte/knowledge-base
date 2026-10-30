@@ -111,6 +111,26 @@ export default function StatusPage() {
           </div>
         </div>
 
+                    {/* PING LATENCY CHART */}
+        <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm mb-8">
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6">Ping Latency (ms)</h3>
+          <div className="h-[300px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={stats.pingHistory}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#374151" vertical={false} />
+                <XAxis dataKey="name" stroke="#9ca3af" fontSize={12} tickLine={false} axisLine={false} />
+                <YAxis stroke="#9ca3af" fontSize={12} tickLine={false} axisLine={false} unit="ms" />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: '#1f2937', borderColor: '#374151', color: '#fff', borderRadius: '8px' }}
+                />
+                <Legend />
+                <Line type="monotone" dataKey="Cloudflare" stroke="#f59e0b" strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="Skynet_Warsaw" stroke="#3b82f6" strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="Google" stroke="#10b981" strokeWidth={2} dot={false} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
 
                 {/* MONTHLY UPTIME CHART */}
         <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm mb-8">
