@@ -110,7 +110,7 @@ export async function GET() {
     // Jei failo nėra, paliekame 100%
   }
 
-        // 6. Renkame atsako laikus grafikui (paskutiniai 20 patikrinimų)
+            // 6. Renkame atsako laikus grafikui (paskutiniai 20 patikrinimų)
     let responseTimes: any[] = [];
     try {
       const uptimeFile = readFileSync('/host/tmp/uptime_history.log', 'utf8');
@@ -121,28 +121,41 @@ export async function GET() {
 
       lines.forEach(line => {
         const parts = line.split(' ');
-        // KB formatas: kb YYYY-MM-DD status time
-        if (parts.length >= 4 && parts[0] === 'kb') {
-          const timeOnly = parts[1].split(' ')[1]?.substring(0, 5) || parts[1].substring(11, 16);
-          kbData.push({ time: timeOnly, responseTime: parseFloat(parts[3]) });
+        
+        // Jei tai Knowledge Base formatas
+        if (parts.length === 4 && parts[0] === 'kb') {
+          // Paimame laiką. Tikėtina, kad parts[1] yra data, o parts[2] yra statusas.
+          // Jei norime laiko, reikia pažiūrėti, kaip atrodo failas.
+          // Štai saugiausias variantas: imame visą datą, bet iškerpame laiką, jei jis yra.
+          const timeStr = parts[1].includes('T') ? parts[1].split('T')[1].substring(0,5) : parts[1].substring(11, 16);
+          kbData.push({ name: timeStr || 'N/A', Knowledge: parseFloat(parts[3]) });
         } 
-        // Portfolio formatas: YYYY-MM-DD status time (arba YYYY-MM-DD HH:MM:SS status time)
-        else if (parts.length >= 2) {
-          const timeOnly = parts[0].split(' ')[1]?.substring(0, 5) || parts[0].substring(11, 16);
-          pfData.push({ time: timeOnly, responseTime: parseFloat(parts[2] || parts[1]) });
+        // Jei tai Portfolio formatas
+        else if (parts.length >= 3) {
+          const timeStr = parts[0].includes('T') ? parts[0].split('T')[1].substring(0,5) : parts[0].substring(11, 16);
+          pfData.push({ name: timeStr || 'N/A', Portfolio: parseFloat(parts[2]) });
         }
       });
 
-      // Sujungiame duomenis pagal laiką
+      // Sujungiame pagal laiką
       const timeMap: Record<string, any> = {};
-      kbData.forEach(d => { timeMap[d.time] = { name: d.time, Knowledge: d.responseTime }; });
-      pfData.forEach(d => { 
-        if (!timeMap[d.time]) timeMap[d.time] = { name: d.time };
-        timeMap[d.time].Portfolio = d.responseTime;
+      
+      kbData.forEach(d => {
+        if (!timeMap[d.name]) timeMap[d.name] = { name: d.name };
+        timeMap[d.name].Knowledge = d.Knowledge;
       });
 
-      responseTimes = Object.values(timeMap).filter(d => d.name).slice(-20);
-    } catch (e) { /* ignore */ }
+      pfData.forEach(d => {
+        if (!timeMap[d.name]) timeMap[d.name] = { name: d.name };
+        timeMap[d.name].Portfolio = d.Portfolio;
+      });
+
+      // Paimame paskutinius 20 įrašų
+      responseTimes = Object.values(timeMap).filter(d => d.name !== 'N/A').slice(-20);
+      
+    } catch (e) { 
+      console.error("Klaida skaitant uptime:", e);
+    }
 
     // 7. Grupuojame aliarmus pagal savaitės dieną ir valandą
   const heatmapData: any[] = [];
