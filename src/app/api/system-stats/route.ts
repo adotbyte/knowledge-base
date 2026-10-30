@@ -72,11 +72,12 @@ export async function GET() {
     const alertsFile = readFileSync('/host/tmp/alerts_history.log', 'utf8');
     alerts = alertsFile.trim().split('\n').map(line => JSON.parse(line)).reverse();
     
-    // Skaičiuojame, kiek kartų buvo sėkmingai restartuota
     selfHealingCount = alerts.filter((a: any) => 
       a.message.includes('sėkmingai restartuotas') || a.message.includes('sėkmingai paleistas')
     ).length;
-  } catch (e) { /* ignore */ }
+  } catch (e) { 
+    console.error('Nepavyko perskaityti alerts_history.log:', e); 
+  }
 
     return NextResponse.json({
       success: true,
