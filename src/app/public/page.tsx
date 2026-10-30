@@ -8,6 +8,15 @@ import ThemeToggle from '../components/ThemeToggle';
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
 
+function stripMarkdown(text: string) {
+  return text
+    .replace(/[#*`_~]/g, '') // Pašalina #, *, `, _, ~
+    .replace(/---/g, '')     // Pašalina ---
+    .replace(/\n/g, ' ')     // Pakeičia naujas eilutes į tarpus
+    .replace(/\s+/g, ' ')    // Pašalina dvigubus tarpus
+    .trim();
+}
+
 async function PublicNotesContent({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const { q } = await searchParams;
   const searchQuery = q?.replace('#', '').trim();
@@ -56,9 +65,9 @@ async function PublicNotesContent({ searchParams }: { searchParams: Promise<{ q?
             </div>
           )}
           
-          <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-3 mb-4">
-            {note.content.substring(0, 150)}...
-          </p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mb-4 leading-relaxed">
+              {stripMarkdown(note.content).substring(0, 150)}...
+            </p>
 
           {note.attachments && note.attachments.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-4">
