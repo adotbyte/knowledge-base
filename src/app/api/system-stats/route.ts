@@ -208,6 +208,45 @@ export async function GET() {
     pingHistory = Object.values(grouped);
   } catch (e) { /* ignore */ }
 
+      // 8.1. Nuskaitome ping istoriją SAVAITĖS grafikui (sugrupuota pagal dieną)
+    let weeklyPingHistory: any[] = [];
+    try {
+      const weeklyPings = await prisma.pingLog.findMany({
+        orderBy: { createdAt: 'asc' },
+        take: 1000, // Imame daugiau duomenų
+      });
+
+      const weeklyGrouped: Record<string, any> = {};
+
+      weeklyPings.forEach(p => {
+        // Suformatuojame datą kaip MMMM-DD (pvz., 10-30)
+        const dateKey = p.createdAt.toLocaleDateString('lt-LT', { month: '2-digit', day: '2-digit', timeZone: 'Europe/Vilnius' });
+        
+        if (!weeklyGrouped[dateKey]) {
+          weeklyGrouped[dateKey] = { name: dateKey, counts: {} };
+        }
+        
+        const g = weeklyGrouped[dateKey];
+        if (!g.counts[p.target]) {
+          g.counts[p.target] = { sum: 0, count: 0 };
+        }
+        g.counts[p.target].sum += p.latency;
+        g.counts[p.target].count += 1;
+      });
+
+      // Paverčiame sumas į vidurkius
+      weeklyPingHistory = Object.values(weeklyGrouped).map((dayData: any) => {
+        const result: any = { name: dayData.name };
+        Object.keys(dayData.counts).forEach(target => {
+          result[target] = parseFloat((dayData.counts[target].sum / dayData.counts[target].count).toFixed(1));
+        });
+        return result;
+      }).slice(-7); // Paimame tik paskutines 7 dienas
+
+    } catch (e) { 
+      console.error('Klaida skaičiuojant savaitės pingus:', e); 
+    }
+
         return NextResponse.json({
       success: true,
       data: {
@@ -233,6 +272,7 @@ export async function GET() {
         responseTimes: responseTimes,
         heatmapData: heatmapData,
         pingHistory: pingHistory,
+        weeklyPingHistory: weeklyPingHistory,
         serverStats: serverStats
       },
     });
