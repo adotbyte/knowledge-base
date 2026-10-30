@@ -131,13 +131,37 @@ export async function GET() {
 
     // Sujungiame ir paverčiame į gražų formatą grafikui
     const allData = [
-      ...pfData.map(d => ({ name: new Date(d.time * 1000).toLocaleTimeString('lt-LT', { hour: '2-digit', minute: '2-digit' }), Portfolio: d.responseTime })),
-      ...kbData.map(d => ({ name: new Date(d.time * 1000).toLocaleTimeString('lt-LT', { hour: '2-digit', minute: '2-digit' }), Knowledge: d.responseTime }))
+      ...pfData.map(d => ({ name: isNaN(d.time) ? '--:--' : new Date(d.time * 1000).toLocaleTimeString('lt-LT', { hour: '2-digit', minute: '2-digit' }), Portfolio: d.responseTime })),
+      ...kbData.map(d => ({ name: isNaN(d.time) ? '--:--' : new Date(d.time * 1000).toLocaleTimeString('lt-LT', { hour: '2-digit', minute: '2-digit' }), Knowledge: d.responseTime }))
     ];
 
     // Surikiuojame pagal laiką
     responseTimes = allData.sort((a, b) => a.name.localeCompare(b.name)).slice(-20);
   } catch (e) { /* ignore */ }
+
+    // 7. Grupuojame aliarmus pagal savaitės dieną ir valandą
+  const heatmapData: any[] = [];
+  const days = ['Sekmadienis', 'Pirmadienis', 'Antradienis', 'Trečiadienis', 'Ketvirtadienis', 'Penktadienis', 'Šeštadienis'];
+  
+  // Sukuriame tuščią tinklelį
+  for (let h = 0; h < 24; h++) {
+    const row: any = { hour: `${h.toString().padStart(2, '0')}:00` };
+    days.forEach(day => row[day] = 0);
+    heatmapData.push(row);
+  }
+
+  // Užpildome duomenis
+  alerts.forEach((alert: any) => {
+    try {
+      const date = new Date(alert.time);
+      const dayName = days[date.getDay()];
+      const hour = date.getHours();
+      
+      if (heatmapData[hour]) {
+        heatmapData[hour][dayName]++;
+      }
+    } catch (e) { /* ignore */ }
+  });
 
         return NextResponse.json({
       success: true,
@@ -162,6 +186,7 @@ export async function GET() {
           knowledge: knowledgeUptime,
         },
         responseTimes: responseTimes,
+        heatmapData: heatmapData,
       },
     });
   } catch (error) {

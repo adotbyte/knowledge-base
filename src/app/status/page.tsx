@@ -2,12 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { ScatterChart, Scatter, LineChart, Line, XAxis, YAxis, ZAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+
 import Navbar from '../components/Navbar';
 
 export default function StatusPage() {
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const days = ['Sekmadienis', 'Pirmadienis', 'Antradienis', 'Trečiadienis', 'Ketvirtadienis', 'Penktadienis', 'Šeštadienis'];
 
   useEffect(() => {
     const fetchStats = () => {
@@ -108,6 +110,56 @@ export default function StatusPage() {
             </ResponsiveContainer>
           </div>
         </div>
+
+                {/* ALERT HEATMAP */}
+        <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm mb-8 overflow-x-auto">
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6">Alert Frequency (by Day & Hour)</h3>
+          <div className="h-[300px] w-full min-w-[600px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                <XAxis 
+                  type="category" 
+                  dataKey="hour" 
+                  name="Hour" 
+                  stroke="#9ca3af" 
+                  fontSize={10} 
+                  tickLine={false} 
+                  axisLine={false} 
+                />
+                <YAxis 
+                  type="category" 
+                  dataKey="day" 
+                  name="Day" 
+                  stroke="#9ca3af" 
+                  fontSize={10} 
+                  tickLine={false} 
+                  axisLine={false}
+                  allowDuplicatedCategory={false}
+                />
+                <ZAxis type="number" dataKey="count" range={[20, 400]} />
+                <Tooltip 
+                  cursor={{ strokeDasharray: '3 3' }}
+                  contentStyle={{ backgroundColor: '#1f2937', borderColor: '#374151', color: '#fff', borderRadius: '8px' }}
+                  formatter={(value: any, name: any, props: any) => [`${props.payload.count} alerts`, 'Frequency']}
+                />
+                <Scatter 
+                  data={stats.heatmapData.flatMap((row: any) => 
+                    days.map(day => ({ 
+                      hour: row.hour, 
+                      day, 
+                      count: row[day] || 0 
+                    }))
+                  ).filter((d: any) => d.count > 0)} 
+                  fill="#ef4444" 
+                  shape="circle" 
+                />
+              </ScatterChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        
 
         {/* Sistemos resursai */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
