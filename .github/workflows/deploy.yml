@@ -14,11 +14,6 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Apply migrations
-      run: npx prisma db push
-    - name: Install dependencies
-      run: npm ci
-
     - name: Create .env file
       run: |
         cat << 'EOF' > .env
@@ -43,16 +38,20 @@ jobs:
       run: |
         docker compose up -d --build
 
-    # --- VIENINTELIS DB INICIALIZAVIMO ŽINGSNIS ---
-    - name: Wait for DB and initialize schema
+    # --- DB INICIALIZAVIMO IR PRISMA MIGRACIJŲ ŽINGSNIS ---
+    - name: Wait for DB and apply Prisma schema
       run: |
         echo "Waiting for PostgreSQL to be ready..."
         sleep 5
-        echo "Applying safe database schema updates..."
-        # Nukopijuojame SQL failą į DB konteinerį ir jį įvykdome
+        
+        echo "Applying Prisma schema (db push) from inside the web container..."
+        # Vykdome prisma db push web konteinerio viduje, priverstinai naudodami 7 versiją
+        docker exec knowledge_web npx prisma@7 db push --skip-generate || true
+        
+        echo "Applying additional SQL if needed..."
         docker cp init-db.sql knowledge_db:/tmp/init-db.sql
         docker exec -i knowledge_db psql -U knowledge -d knowledge_db -f /tmp/init-db.sql || true
-    # ---------------------------------------------
+    # ------------------------------------------------------
 
     - name: Clean up dangling images
       run: |
