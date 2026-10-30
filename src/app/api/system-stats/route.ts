@@ -79,7 +79,37 @@ export async function GET() {
     console.error('Nepavyko perskaityti alerts_history.log:', e); 
   }
 
-    return NextResponse.json({
+  // 5. Skaičiuojame Uptime procentą
+  let portfolioUptime = 100;
+  let knowledgeUptime = 100;
+
+  try {
+    const uptimeFile = readFileSync('/host/tmp/uptime_history.log', 'utf8');
+    const lines = uptimeFile.trim().split('\n').filter(Boolean);
+    
+    let pfTotal = 0, pfUp = 0;
+    let kbTotal = 0, kbUp = 0;
+
+    lines.forEach(line => {
+      const parts = line.split(' ');
+      if (parts.length === 2) {
+        // Portfolio formatas: timestamp status
+        pfTotal++;
+        if (parts[1] === '1') pfUp++;
+      } else if (parts.length === 3 && parts[0] === 'kb') {
+        // KB formatas: kb timestamp status
+        kbTotal++;
+        if (parts[2] === '1') kbUp++;
+      }
+    });
+
+    if (pfTotal > 0) portfolioUptime = Math.round((pfUp / pfTotal) * 100);
+    if (kbTotal > 0) knowledgeUptime = Math.round((kbUp / kbTotal) * 100);
+  } catch (e) {
+    // Jei failo nėra, paliekame 100%
+  }
+
+        return NextResponse.json({
       success: true,
       data: {
         system: {
@@ -87,8 +117,6 @@ export async function GET() {
           memory: { total: memTotal, used: memUsed, free: memFree },
           uptimeDays,
           diskUsage,
-          alerts: alerts,
-          selfHealingCount: selfHealingCount,
         },
         websites: [
           { name: 'Portfolio (morkunas.info)', status: portfolioStatus },
@@ -97,6 +125,12 @@ export async function GET() {
         containers: containers.filter((c: any) => 
           ['resume_website', 'portfolio_db', 'cloudflared', 'knowledge_web', 'knowledge_db', 'cloudflared-kb'].includes(c.name)
         ),
+        alerts: alerts,
+        selfHealingCount: selfHealingCount,
+        uptime: {
+          portfolio: portfolioUptime,
+          knowledge: knowledgeUptime,
+        },
       },
     });
   } catch (error) {

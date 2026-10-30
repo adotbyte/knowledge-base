@@ -59,6 +59,32 @@ export default function StatusPage() {
             </div>
           ))}
         </div>
+                {/* UPTIME STATS */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+          <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm flex items-center justify-between">
+            <div>
+              <h3 className="font-bold text-gray-900 dark:text-white">Portfolio Uptime</h3>
+              <p className="text-xs text-gray-500 mt-1">Based on recent checks</p>
+            </div>
+            <span className={`text-2xl font-black ${
+              stats.uptime.portfolio > 95 ? 'text-green-500' : 'text-red-500'
+            }`}>
+              {stats.uptime.portfolio}%
+            </span>
+          </div>
+
+          <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm flex items-center justify-between">
+            <div>
+              <h3 className="font-bold text-gray-900 dark:text-white">Knowledge Base Uptime</h3>
+              <p className="text-xs text-gray-500 mt-1">Based on recent checks</p>
+            </div>
+            <span className={`text-2xl font-black ${
+              stats.uptime.knowledge > 95 ? 'text-green-500' : 'text-red-500'
+            }`}>
+              {stats.uptime.knowledge}%
+            </span>
+          </div>
+        </div>
 
         {/* Sistemos resursai */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
