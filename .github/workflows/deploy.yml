@@ -14,6 +14,9 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
+    - name: Apply migrations
+      run: npx prisma migrate deploy
+
     - name: Create .env file
       run: |
         cat << 'EOF' > .env
