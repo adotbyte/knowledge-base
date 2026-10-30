@@ -104,8 +104,8 @@ export default function StatusPage() {
                   itemStyle={{ color: '#60a5fa' }}
                 />
                 <Legend />
-                <Line type="monotone" dataKey="Portfolio" stroke="#3b82f6" strokeWidth={2} dot={true} connectNulls={true} />
-                <Line type="monotone" dataKey="Knowledge" stroke="#10b981" strokeWidth={2} dot={true} connectNulls={true} />
+                <Line type="monotone" dataKey="Portfolio" stroke="#3b82f6" strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="Knowledge" stroke="#10b981" strokeWidth={2} dot={false} />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -133,7 +133,7 @@ export default function StatusPage() {
           </div>
         </div>
         
-                {/* PING STATISTIKA */}
+        {/* PING STATISTIKA */}
         <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm mb-8">
           <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6">Ping Statistics</h3>
           {stats?.serverStats ? (
@@ -148,18 +148,24 @@ export default function StatusPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                  
                   {/* Cloudflare */}
                   <tr>
                     <td className="py-3 flex items-center gap-2 text-gray-700 dark:text-gray-300 font-medium">
                       <span className="w-3 h-3 rounded-full bg-[#f59e0b]"></span> Cloudflare
                     </td>
-                      <td className={`py-3 text-right font-medium ${
-                        stats.serverStats['Cloudflare']?.avg < 10 ? 'text-green-500' :
-                        stats.serverStats['Cloudflare']?.avg < 30 ? 'text-yellow-500' :
-                        'text-red-500'
-                      }`}>
-                        {stats.serverStats['Cloudflare']?.avg || '-'}
-                      </td>
+                    <td className={`py-3 text-right font-medium ${
+                      stats.serverStats['Cloudflare']?.avg < 10 ? 'text-green-500' :
+                      stats.serverStats['Cloudflare']?.avg < 30 ? 'text-yellow-500' : 'text-red-500'
+                    }`}>
+                      {stats.serverStats['Cloudflare']?.avg || '-'}
+                    </td>
+                    <td className="py-3 text-right text-gray-600 dark:text-gray-400">
+                      {stats.serverStats['Cloudflare']?.min || '-'}
+                    </td>
+                    <td className="py-3 text-right text-gray-600 dark:text-gray-400">
+                      {stats.serverStats['Cloudflare']?.max || '-'}
+                    </td>
                   </tr>
                   
                   {/* Google */}
@@ -167,13 +173,18 @@ export default function StatusPage() {
                     <td className="py-3 flex items-center gap-2 text-gray-700 dark:text-gray-300 font-medium">
                       <span className="w-3 h-3 rounded-full bg-[#10b981]"></span> Google
                     </td>
-                        <td className={`py-3 text-right font-medium ${
-                        stats.serverStats['Google']?.avg < 10 ? 'text-green-500' :
-                        stats.serverStats['Google']?.avg < 30 ? 'text-yellow-500' :
-                        'text-red-500'
-                      }`}>
-                        {stats.serverStats['Google']?.avg || '-'}
-                      </td>
+                    <td className={`py-3 text-right font-medium ${
+                      stats.serverStats['Google']?.avg < 10 ? 'text-green-500' :
+                      stats.serverStats['Google']?.avg < 30 ? 'text-yellow-500' : 'text-red-500'
+                    }`}>
+                      {stats.serverStats['Google']?.avg || '-'}
+                    </td>
+                    <td className="py-3 text-right text-gray-600 dark:text-gray-400">
+                      {stats.serverStats['Google']?.min || '-'}
+                    </td>
+                    <td className="py-3 text-right text-gray-600 dark:text-gray-400">
+                      {stats.serverStats['Google']?.max || '-'}
+                    </td>
                   </tr>
 
                   {/* Skynet_Warsaw */}
@@ -183,10 +194,15 @@ export default function StatusPage() {
                     </td>
                     <td className={`py-3 text-right font-medium ${
                       stats.serverStats['Skynet_Warsaw']?.avg < 10 ? 'text-green-500' :
-                      stats.serverStats['Skynet_Warsaw']?.avg < 30 ? 'text-yellow-500' :
-                      'text-red-500'
+                      stats.serverStats['Skynet_Warsaw']?.avg < 30 ? 'text-yellow-500' : 'text-red-500'
                     }`}>
                       {stats.serverStats['Skynet_Warsaw']?.avg || '-'}
+                    </td>
+                    <td className="py-3 text-right text-gray-600 dark:text-gray-400">
+                      {stats.serverStats['Skynet_Warsaw']?.min || '-'}
+                    </td>
+                    <td className="py-3 text-right text-gray-600 dark:text-gray-400">
+                      {stats.serverStats['Skynet_Warsaw']?.max || '-'}
                     </td>
                   </tr>
 
@@ -197,12 +213,18 @@ export default function StatusPage() {
                     </td>
                     <td className={`py-3 text-right font-medium ${
                       stats.serverStats['Hetzner_Frankfurt']?.avg < 10 ? 'text-green-500' :
-                      stats.serverStats['Hetzner_Frankfurt']?.avg < 30 ? 'text-yellow-500' :
-                      'text-red-500'
+                      stats.serverStats['Hetzner_Frankfurt']?.avg < 30 ? 'text-yellow-500' : 'text-red-500'
                     }`}>
                       {stats.serverStats['Hetzner_Frankfurt']?.avg || '-'}
                     </td>
+                    <td className="py-3 text-right text-gray-600 dark:text-gray-400">
+                      {stats.serverStats['Hetzner_Frankfurt']?.min || '-'}
+                    </td>
+                    <td className="py-3 text-right text-gray-600 dark:text-gray-400">
+                      {stats.serverStats['Hetzner_Frankfurt']?.max || '-'}
+                    </td>
                   </tr>
+
                 </tbody>
               </table>
             </div>
