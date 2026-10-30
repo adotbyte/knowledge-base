@@ -5,14 +5,12 @@ import { execSync } from 'node:child_process';
 import { unstable_noStore as noStore } from 'next/cache';
 
 export async function GET() {
-    // Šis maršrutas visada turi būti dinaminis
   noStore();
   try {
-    // 1. Nuskaitome CPU apkrovimą
+    // 1. Sistemos resursai (CPU, RAM, Diskas)
     const loadAvg = os.loadavg();
     const load = `${loadAvg[0].toFixed(2)}, ${loadAvg[1].toFixed(2)}, ${loadAvg[2].toFixed(2)}`;
 
-    // 2. Nuskaitome RAM iš /proc/meminfo (kaip darėme portfolio)
     let memTotal = "0G", memUsed = "0G", memFree = "0G";
     try {
       const memInfo = fs.readFileSync('/host/proc/meminfo', 'utf8');
@@ -26,46 +24,62 @@ export async function GET() {
         memUsed = (usedKb / 1048576).toFixed(1) + 'G';
         memFree = (availableKb / 1048576).toFixed(1) + 'G';
       }
-    } catch (e) { console.error('Nepavyko perskaityti meminfo:', e); }
+    } catch (e) { /* ignore */ }
 
-    // 3. Uptime
     let uptimeDays = 0;
     try {
       const uptimeInfo = fs.readFileSync('/host/proc/uptime', 'utf8');
       uptimeDays = Math.floor(parseFloat(uptimeInfo.split(' ')[0]) / 86400);
-    } catch (e) { console.error('Nepavyko perskaityti uptime:', e); }
+    } catch (e) { /* ignore */ }
 
-    // 4. Disko užimtumas
     let diskUsage = "0%";
     try {
       const dfOutput = execSync('df -h / | tail -1').toString().trim();
-      const parts = dfOutput.split(/\s+/);
-      diskUsage = parts[4]; // Use% stulpelis
-    } catch (e) { console.error('Nepavyko patikrinti disko:', e); }
+      diskUsage = dfOutput.split(/\s+/)[4];
+    } catch (e) { /* ignore */ }
 
-    // 5. Docker konteineriai
+    // 2. Svetainių HTTP patikrinimas
+    const checkUrl = async (url: string) => {
+      try {
+        const res = await fetch(url, { method: 'HEAD', cache: 'no-store' });
+        return res.status; // Grąžina 200, 302, 403 ir t.t.
+      } catch (e) {
+        return 0; // Klaida
+      }
+    };
+
+    const portfolioStatus = await checkUrl('https://morkunas.info');
+    const knowledgeStatus = await checkUrl('https://knowledge.morkunas.info');
+
+    // 3. Konteinerių sąrašas
     let containers: any[] = [];
     try {
-      // Gauname sąrašą per mūsų socket-proxy
       const dockerRes = await fetch('http://socket-proxy:2375/containers/json?all=true', { cache: 'no-store' });
       if (dockerRes.ok) {
         const data = await dockerRes.json();
         containers = data.map((c: any) => ({
           name: c.Names[0].replace('/', ''),
-          state: c.State, // running, exited, etc.
-          image: c.Image,
+          state: c.State,
         }));
       }
-    } catch (e) { console.error('Nepavyko pasiekti Docker:', e); }
+    } catch (e) { /* ignore */ }
 
     return NextResponse.json({
       success: true,
       data: {
-        load,
-        memory: { total: memTotal, used: memUsed, free: memFree },
-        uptimeDays,
-        diskUsage,
-        containers,
+        system: {
+          load,
+          memory: { total: memTotal, used: memUsed, free: memFree },
+          uptimeDays,
+          diskUsage,
+        },
+        websites: [
+          { name: 'Portfolio (morkunas.info)', status: portfolioStatus },
+          { name: 'Knowledge Base (knowledge.morkunas.info)', status: knowledgeStatus },
+        ],
+        containers: containers.filter((c: any) => 
+          ['resume_website', 'portfolio_db', 'cloudflared', 'knowledge_web', 'knowledge_db', 'cloudflared-kb'].includes(c.name)
+        ),
       },
     });
   } catch (error) {

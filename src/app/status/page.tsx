@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Navbar from '../components/Navbar';
 
 export default function StatusPage() {
   const [stats, setStats] = useState<any>(null);
@@ -20,42 +21,61 @@ export default function StatusPage() {
         .catch(console.error);
     };
 
-    fetchStats(); // Pirmas paleidimas
-    const interval = setInterval(fetchStats, 5000); // Kas 5 sekundes
-
+    fetchStats();
+    const interval = setInterval(fetchStats, 10000); // Atnaujiname kas 10 sek.
     return () => clearInterval(interval);
   }, []);
 
-  if (loading) return <div className="p-10 text-center animate-pulse">Loading System Stats...</div>;
+  if (loading) return <div className="p-10 text-center animate-pulse">Loading Status...</div>;
   if (!stats) return <div className="p-10 text-center text-red-500">Failed to load stats.</div>;
 
   return (
-    <div className="min-h-screen bg-gray-50/50 dark:bg-gray-950 p-6 md:p-10 font-sans">
-      <div className="max-w-5xl mx-auto">
+    <div className="min-h-screen bg-gray-50/50 dark:bg-gray-950 font-sans">
+      <Navbar />
+      <main className="max-w-5xl mx-auto px-6 py-10">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-black text-gray-900 dark:text-white">Live System Status</h1>
-            <p className="text-gray-500 text-sm mt-1">Updates every 5 seconds</p>
+            <h1 className="text-3xl font-black text-gray-900 dark:text-white">System Health</h1>
+            <p className="text-gray-500 text-sm mt-1">Real-time status of all projects and services.</p>
           </div>
           <Link href="/" className="text-sm font-bold text-blue-600 hover:underline">&larr; Back to Notes</Link>
         </div>
 
-        {/* Stats Grid */}
+        {/* Svetainės */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+          {stats.websites.map((site: any) => (
+            <div key={site.name} className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm flex items-center justify-between">
+              <div>
+                <h3 className="font-bold text-gray-900 dark:text-white">{site.name}</h3>
+                <p className="text-xs text-gray-500 mt-1">HTTP Status: {site.status || 'Error'}</p>
+              </div>
+              <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                site.status === 200 || site.status === 302 || site.status === 307 || site.status === 403
+                  ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                  : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+              }`}>
+                {site.status === 200 || site.status === 302 || site.status === 307 || site.status === 403 ? 'ONLINE' : 'OFFLINE'}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        {/* Sistemos resursai */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           <div className="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
             <div className="text-xl mb-1">⏱️</div>
             <h3 className="text-xs font-bold text-gray-500 uppercase">Uptime</h3>
-            <p className="text-2xl font-black text-gray-900 dark:text-white">{stats.uptimeDays} days</p>
+            <p className="text-2xl font-black text-gray-900 dark:text-white">{stats.system.uptimeDays} days</p>
           </div>
           <div className="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
             <div className="text-xl mb-1">🧠</div>
             <h3 className="text-xs font-bold text-gray-500 uppercase">Load</h3>
-            <p className="text-2xl font-black text-gray-900 dark:text-white">{stats.load}</p>
+            <p className="text-2xl font-black text-gray-900 dark:text-white">{stats.system.load}</p>
           </div>
           <div className="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
             <div className="text-xl mb-1">💾</div>
             <h3 className="text-xs font-bold text-gray-500 uppercase">Disk</h3>
-            <p className="text-2xl font-black text-gray-900 dark:text-white">{stats.diskUsage}</p>
+            <p className="text-2xl font-black text-gray-900 dark:text-white">{stats.system.diskUsage}</p>
           </div>
           <div className="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
             <div className="text-xl mb-1">🐳</div>
@@ -66,18 +86,9 @@ export default function StatusPage() {
           </div>
         </div>
 
-        {/* Memory Bar */}
-        <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm mb-8">
-          <h3 className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">RAM Usage</h3>
-          <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
-            <span>{stats.memory.used} used / {stats.memory.total} total</span>
-            <span className="text-green-600">{stats.memory.free} free</span>
-          </div>
-        </div>
-
-        {/* Docker Containers List */}
+        {/* Konteineriai */}
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-6">
-          <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Docker Containers</h3>
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Critical Containers</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {stats.containers.map((c: any) => (
               <div key={c.name} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-xl">
@@ -91,7 +102,7 @@ export default function StatusPage() {
             ))}
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }
