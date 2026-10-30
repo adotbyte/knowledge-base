@@ -110,34 +110,39 @@ export async function GET() {
     // Jei failo nėra, paliekame 100%
   }
 
-    // 6. Renkame atsako laikus grafikui (paskutiniai 20 patikrinimų)
-  let responseTimes: any[] = [];
-  try {
-    const uptimeFile = readFileSync('/host/tmp/uptime_history.log', 'utf8');
-    const lines = uptimeFile.trim().split('\n').filter(Boolean).slice(-40);
+        // 6. Renkame atsako laikus grafikui (paskutiniai 20 patikrinimų)
+    let responseTimes: any[] = [];
+    try {
+      const uptimeFile = readFileSync('/host/tmp/uptime_history.log', 'utf8');
+      const lines = uptimeFile.trim().split('\n').filter(Boolean).slice(-40);
 
-    let pfData: any[] = [];
-    let kbData: any[] = [];
+      let pfData: any[] = [];
+      let kbData: any[] = [];
 
-    lines.forEach(line => {
-      const parts = line.split(' ');
-      if (parts.length === 3) {
-        // Portfolio: YYYY-MM-DD status time
-        pfData.push({ date: parts[0], responseTime: parseFloat(parts[2]) });
-      } else if (parts.length === 4 && parts[0] === 'kb') {
-        // KB: kb YYYY-MM-DD status time
-        kbData.push({ date: parts[1], responseTime: parseFloat(parts[3]) });
-      }
-    });
+      lines.forEach(line => {
+        const parts = line.split(' ');
+        // KB formatas: kb YYYY-MM-DD status time
+        if (parts.length >= 4 && parts[0] === 'kb') {
+          const timeOnly = parts[1].split(' ')[1]?.substring(0, 5) || parts[1].substring(11, 16);
+          kbData.push({ time: timeOnly, responseTime: parseFloat(parts[3]) });
+        } 
+        // Portfolio formatas: YYYY-MM-DD status time (arba YYYY-MM-DD HH:MM:SS status time)
+        else if (parts.length >= 2) {
+          const timeOnly = parts[0].split(' ')[1]?.substring(0, 5) || parts[0].substring(11, 16);
+          pfData.push({ time: timeOnly, responseTime: parseFloat(parts[2] || parts[1]) });
+        }
+      });
 
-    const allData = [
-      ...pfData.map(d => ({ name: d.date.substring(5), Portfolio: d.responseTime })),
-      ...kbData.map(d => ({ name: d.date.substring(5), Knowledge: d.responseTime }))
-    ];
+      // Sujungiame duomenis pagal laiką
+      const timeMap: Record<string, any> = {};
+      kbData.forEach(d => { timeMap[d.time] = { name: d.time, Knowledge: d.responseTime }; });
+      pfData.forEach(d => { 
+        if (!timeMap[d.time]) timeMap[d.time] = { name: d.time };
+        timeMap[d.time].Portfolio = d.responseTime;
+      });
 
-    // Surikiuojame pagal laiką (šiuo atveju pagal datą, bet kadangi ji vienoda, paliekame eilės tvarką)
-    responseTimes = allData.slice(-20);
-  } catch (e) { /* ignore */ }
+      responseTimes = Object.values(timeMap).filter(d => d.name).slice(-20);
+    } catch (e) { /* ignore */ }
 
     // 7. Grupuojame aliarmus pagal savaitės dieną ir valandą
   const heatmapData: any[] = [];
