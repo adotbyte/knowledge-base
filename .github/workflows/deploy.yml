@@ -16,6 +16,11 @@ jobs:
 
     - name: Apply migrations
       run: npx prisma db push
+    - name: Install dependencies
+      run: npm ci
+
+- name: Apply schema
+  run: npx prisma db push
 
     - name: Create .env file
       run: |
