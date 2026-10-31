@@ -1,6 +1,6 @@
 # 🧠 AI-Powered Knowledge Base
 
-A personal, self-hosted knowledge base with AI capabilities, built with Next.js 16, Prisma, PostgreSQL, and Google Gemini. 
+A personal, self-hosted knowledge base with AI capabilities, built with Next.js 16, Prisma, PostgreSQL, and Google Gemini.
 
 This isn't just a note-taking app; it's a full-stack platform that reads, analyzes, and generates content using AI, protected by Cloudflare Zero Trust and deployed via a self-hosted CI/CD pipeline.
 
@@ -25,7 +25,7 @@ This isn't just a note-taking app; it's a full-stack platform that reads, analyz
   - **AI Summarize:** Generate bullet-point summaries of long notes.
   - **AI Improve:** Automatically fix grammar and format Markdown.
   - **AI Generate:** Create comprehensive notes from a single topic prompt.
-  - **RAG Search:** Ask questions and get answers based *only* on your own notes.
+  - **RAG Search:** Ask questions and get answers based _only_ on your own notes.
   - **AI Code Reviewer & Explainer:** Paste code to find bugs or get line-by-line explanations.
   - **AI Config Generator:** Generate production-ready Docker configs.
 - **📎 File Attachments:** Upload images and PDFs.
@@ -51,11 +51,13 @@ This project is designed to run entirely on self-hosted hardware (specifically, 
 ## 🚀 Getting Started
 
 ### Prerequisites
+
 - Node.js 22+
 - Docker & Docker Compose
 - A Google Gemini API Key
 
 ### Environment Variables
+
 Create a `.env` file in the root directory:
 
 ```env
