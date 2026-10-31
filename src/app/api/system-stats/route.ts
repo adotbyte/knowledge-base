@@ -227,18 +227,19 @@ export async function GET() {
     // ---------------------------------------------------
 
     // Grupuojame laiko grafikui
-    const grouped: Record<string, any> = {};
-    
+    const grouped: Record<number, any> = {};
+
     allRecentPings.forEach(p => {
-      const timeKey = p.createdAt.toLocaleTimeString('lt-LT', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Vilnius' });
+      // Naudojame timestamp kaip raktą (unikalu visam laikui)
+      const timeKey = p.createdAt.getTime(); 
       
       if (!grouped[timeKey]) {
-        grouped[timeKey] = { name: timeKey };
+        grouped[timeKey] = { timestamp: timeKey };
       }
       grouped[timeKey][p.target] = p.latency;
     });
 
-    pingHistory = Object.values(grouped);
+    pingHistory = Object.values(grouped).sort((a, b) => a.timestamp - b.timestamp);
   } catch (e) { 
     console.error('Ping stats error:', e); 
   }

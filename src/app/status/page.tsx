@@ -29,6 +29,18 @@ export default function StatusPage() {
     return () => clearInterval(interval);
   }, []);
 
+  // --- PAGALBINĖS FUNKCIJOS GRAFIKAMS ---
+  const formatXAxis = (tickItem: any) => {
+    if (!tickItem) return '';
+    return new Date(tickItem).toLocaleTimeString('lt-LT', { hour: '2-digit', minute: '2-digit' });
+  };
+
+  const formatTooltipLabel = (label: any) => {
+    if (!label) return '';
+    return new Date(label).toLocaleString('lt-LT', { dateStyle: 'short', timeStyle: 'short' });
+  };
+  // ---------------------------------------
+
   if (loading) return <div className="p-10 text-center animate-pulse">Loading Status...</div>;
   if (!stats) return <div className="p-10 text-center text-red-500">Failed to load stats.</div>;
 
@@ -112,23 +124,34 @@ export default function StatusPage() {
           </div>
         </div>
 
-                    {/* PING LATENCY CHART */}
+        {/* PING LATENCY CHART */}
         <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm mb-8">
           <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6">Ping Latency (ms)</h3>
           <div className="h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={stats.pingHistory}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#374151" vertical={false} />
-                <XAxis dataKey="name" stroke="#9ca3af" fontSize={12} tickLine={false} axisLine={false} />
+                <XAxis 
+                  dataKey="timestamp" 
+                  type="number" 
+                  scale="time" 
+                  domain={['dataMin', 'dataMax']} 
+                  stroke="#9ca3af" 
+                  fontSize={12} 
+                  tickLine={false} 
+                  axisLine={false}
+                  tickFormatter={formatXAxis}
+                />
                 <YAxis stroke="#9ca3af" fontSize={12} tickLine={false} axisLine={false} unit="ms" />
                 <Tooltip 
                   contentStyle={{ backgroundColor: '#1f2937', borderColor: '#374151', color: '#fff', borderRadius: '8px' }}
+                  labelFormatter={formatTooltipLabel}
                 />
                 <Legend />
-                <Line type="monotone" dataKey="Cloudflare" stroke="#f59e0b" strokeWidth={2} dot={true} connectNulls={true} />
-                <Line type="monotone" dataKey="Skynet_Warsaw" stroke="#3b82f6" strokeWidth={2} dot={true} connectNulls={true} />
-                <Line type="monotone" dataKey="Hetzner_Frankfurt" stroke="#ef4444" strokeWidth={2} dot={true} connectNulls={true} />
-                <Line type="monotone" dataKey="Google" stroke="#10b981" strokeWidth={2} dot={true} connectNulls={true} />
+                <Line type="monotone" dataKey="Cloudflare" stroke="#f59e0b" strokeWidth={2} dot={true} connectNulls={false} />
+                <Line type="monotone" dataKey="Skynet_Warsaw" stroke="#3b82f6" strokeWidth={2} dot={true} connectNulls={false} />
+                <Line type="monotone" dataKey="Hetzner_Frankfurt" stroke="#ef4444" strokeWidth={2} dot={true} connectNulls={false} />
+                <Line type="monotone" dataKey="Google" stroke="#10b981" strokeWidth={2} dot={true} connectNulls={false} />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -234,7 +257,7 @@ export default function StatusPage() {
           )}
         </div>
 
-                        {/* WEEKLY PING LATENCY CHART */}
+        {/* WEEKLY PING LATENCY CHART */}
         <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm mb-8">
           <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6">Weekly Ping Average (ms)</h3>
           <div className="h-[300px] w-full">
@@ -256,7 +279,7 @@ export default function StatusPage() {
           </div>
         </div>
 
-                {/* MONTHLY UPTIME CHART */}
+        {/* MONTHLY UPTIME CHART */}
         <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm mb-8">
           <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6">Monthly Uptime (%)</h3>
           <div className="h-[300px] w-full">
@@ -277,9 +300,7 @@ export default function StatusPage() {
           </div>
         </div>
 
-
-
-                {/* ALERT HEATMAP */}
+        {/* ALERT HEATMAP */}
         <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm mb-8 overflow-x-auto">
           <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6">Alert Frequency (by Day & Hour)</h3>
           <div className="h-[300px] w-full min-w-[600px]">
@@ -326,12 +347,7 @@ export default function StatusPage() {
             </ResponsiveContainer>
           </div>
         </div>
-
-
-
-
-        
-
+  
         {/* Sistemos resursai */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           <div className="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
@@ -381,7 +397,8 @@ export default function StatusPage() {
             ))}
           </div>
         </div>
-            {/* ALERT HISTORY */}
+        
+        {/* ALERT HISTORY */}
         <div className="mt-8 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-6">
           <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
             <span>🚨</span> Recent Alerts
