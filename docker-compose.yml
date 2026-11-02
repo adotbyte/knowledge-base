@@ -3,6 +3,8 @@ services:
     image: postgres:16-alpine
     container_name: knowledge_db
     restart: unless-stopped
+    mem_limit: 1g # <-- Duomenų bazei pakanka 1GB
+    cpus: 1.0 # <-- 1 branduolys
     environment:
       POSTGRES_USER: knowledge
       POSTGRES_PASSWORD: ${DB_PASSWORD}
@@ -17,6 +19,8 @@ services:
     image: tecnativa/docker-socket-proxy:v0.5.0
     container_name: knowledge_socket_proxy
     restart: unless-stopped
+    mem_limit: 64m # <-- Labai lengvas servisas
+    cpus: 0.1 # <-- Jam beveik nereikia CPU
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
@@ -29,10 +33,12 @@ services:
     build: .
     container_name: knowledge_web
     restart: unless-stopped
+    mem_limit: 2g # <-- Daugiau RAM, nes apdoroja AI ir failus
+    cpus: 2.0 # <-- 2 branduoliai, kad AI užklausos nestrigtų
     ports:
-      - "3080:3000"
+      - '3080:3000'
     volumes:
-      - /proc:/host/proc:ro  # <-- SVARBU DASHBOARD'UI (RAM, UPTIME)
+      - /proc:/host/proc:ro
       - /home/audrius/knowledge-uploads:/app/uploads
       - /tmp:/host/tmp:ro
     environment:
