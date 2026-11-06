@@ -1,44 +1,45 @@
-import NextAuth from "next-auth";
-import GitHub from "next-auth/providers/github";
-import { PrismaAdapter } from "@auth/prisma-adapter";
-import prisma from "./prisma";
+import NextAuth from 'next-auth';
+import GitHub from 'next-auth/providers/github';
+import { PrismaAdapter } from '@auth/prisma-adapter';
+import prisma from './prisma';
+import { authConfig } from '../../auth.config';
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  ...authConfig,
   adapter: PrismaAdapter(prisma),
   providers: [
     GitHub({
       clientId: process.env.AUTH_GITHUB_ID,
       clientSecret: process.env.AUTH_GITHUB_SECRET,
-      issuer: "https://github.com/login/oauth",
     }),
   ],
-  session: { strategy: "jwt" },
-  pages: { signIn: "/login" },
+  session: { strategy: 'jwt' },
+  pages: { signIn: '/login' },
   trustHost: true, // <-- BŪTINAS Cloudflare
   cookies: {
     csrfToken: {
-      name: "authjs.csrf-token",
+      name: 'authjs.csrf-token',
       options: {
         httpOnly: true,
-        sameSite: "none", // <-- BŪTINAS tuneliui
-        path: "/",
+        sameSite: 'none', // <-- BŪTINAS tuneliui
+        path: '/',
         secure: true, // <-- BŪTINAS, kai sameSite=none
       },
     },
     sessionToken: {
-      name: "authjs.session-token",
+      name: 'authjs.session-token',
       options: {
         httpOnly: true,
-        sameSite: "none",
-        path: "/",
+        sameSite: 'none',
+        path: '/',
         secure: true,
       },
     },
     callbackUrl: {
-      name: "authjs.callback-url",
+      name: 'authjs.callback-url',
       options: {
-        sameSite: "none",
-        path: "/",
+        sameSite: 'none',
+        path: '/',
         secure: true,
       },
     },
