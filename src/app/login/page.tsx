@@ -45,6 +45,13 @@ export default function LoginPage() {
             </>
           )}
         </button>
+        <button
+          onClick={() => signIn('google', { callbackUrl: '/' })}
+          className="mt-4 flex w-full items-center justify-center gap-3 rounded-lg bg-red-600 px-4 py-3 font-semibold text-white transition hover:bg-red-700"
+        >
+          {/* Google ikona */}
+          Prisijungti su Google
+        </button>
 
         <p className="text-center text-xs text-gray-500 dark:text-gray-400">
           Prisijungę sutinkate su mūsų privatumo politika.

@@ -2,8 +2,8 @@ import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import Link from 'next/link';
 import { Suspense } from 'react';
-import PublicSearchBar from '../components/PublicSearchBar';
-import ThemeToggle from '../components/ThemeToggle';
+import PublicSearchBar from '../../components/PublicSearchBar';
+import ThemeToggle from '../../components/ThemeToggle';
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });

@@ -1,8 +1,14 @@
 import NextAuth from 'next-auth';
 import GitHub from 'next-auth/providers/github';
+import Google from 'next-auth/providers/google';
 import { PrismaAdapter } from '@auth/prisma-adapter';
 import prisma from './prisma';
-import { authConfig } from '../../auth.config';
+import { authConfig } from '../auth.config';
+
+const isProduction = process.env.NODE_ENV === 'production';
+const cookieOptions = isProduction
+  ? { httpOnly: true, sameSite: 'none' as const, secure: true, path: '/' }
+  : { httpOnly: true, sameSite: 'lax' as const, secure: false, path: '/' };
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
@@ -11,43 +17,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     GitHub({
       clientId: process.env.AUTH_GITHUB_ID,
       clientSecret: process.env.AUTH_GITHUB_SECRET,
+      allowDangerousEmailAccountLinking: true,
+    }),
+    Google({
+      clientId: process.env.AUTH_GOOGLE_ID,
+      clientSecret: process.env.AUTH_GOOGLE_SECRET,
+      allowDangerousEmailAccountLinking: true,
     }),
   ],
-  session: { strategy: 'jwt' },
-  pages: { signIn: '/login' },
-  trustHost: true, // <-- BŪTINAS Cloudflare
+  trustHost: true,
   cookies: {
-    csrfToken: {
-      name: 'authjs.csrf-token',
-      options: {
-        httpOnly: true,
-        sameSite: 'none', // <-- BŪTINAS tuneliui
-        path: '/',
-        secure: true, // <-- BŪTINAS, kai sameSite=none
-      },
-    },
-    sessionToken: {
-      name: 'authjs.session-token',
-      options: {
-        httpOnly: true,
-        sameSite: 'none',
-        path: '/',
-        secure: true,
-      },
-    },
-    callbackUrl: {
-      name: 'authjs.callback-url',
-      options: {
-        sameSite: 'none',
-        path: '/',
-        secure: true,
-      },
-    },
-  },
-  callbacks: {
-    session({ session, token }) {
-      if (session.user) session.user.id = token.sub as string;
-      return session;
-    },
+    csrfToken: { name: 'authjs.csrf-token', options: cookieOptions },
+    sessionToken: { name: 'authjs.session-token', options: cookieOptions },
+    callbackUrl: { name: 'authjs.callback-url', options: cookieOptions },
   },
 });

@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { notFound } from 'next/navigation';
-import MarkdownRenderer from '../../components/MarkdownRenderer';
+import MarkdownRenderer from '../../../components/MarkdownRenderer';
 import Link from 'next/link';
 import { Suspense } from 'react';
 
@@ -22,34 +22,39 @@ async function SharedNoteContent({ params }: { params: Promise<{ id: string }> }
   }
 
   return (
-    <div className="bg-white dark:bg-gray-900 p-8 md:p-12 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-800">
-      <h1 className="text-4xl font-black text-gray-900 dark:text-white mb-4">{note.title}</h1>
-      
+    <div className="rounded-3xl border border-gray-100 bg-white p-8 shadow-sm md:p-12 dark:border-gray-800 dark:bg-gray-900">
+      <h1 className="mb-4 text-4xl font-black text-gray-900 dark:text-white">{note.title}</h1>
+
       {note.tags.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-8 border-b border-gray-100 dark:border-gray-800 pb-6">
+        <div className="mb-8 flex flex-wrap gap-2 border-b border-gray-100 pb-6 dark:border-gray-800">
           {note.tags.map((tag) => (
-            <span key={tag.id} className="px-2 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-bold rounded-md">
+            <span
+              key={tag.id}
+              className="rounded-md bg-blue-50 px-2 py-1 text-xs font-bold text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
+            >
               #{tag.name}
             </span>
           ))}
         </div>
       )}
 
-      <div className="bg-gray-50 dark:bg-gray-950 p-6 rounded-2xl border border-gray-100 dark:border-gray-800">
+      <div className="rounded-2xl border border-gray-100 bg-gray-50 p-6 dark:border-gray-800 dark:bg-gray-950">
         <MarkdownRenderer content={note.content} />
       </div>
-       {/* --- NAUJAS: FAILŲ SĄRAŠAS --- */}
+      {/* --- NAUJAS: FAILŲ SĄRAŠAS --- */}
       {note.attachments && note.attachments.length > 0 && (
         <div className="mt-6">
-          <h3 className="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Attachments</h3>
+          <h3 className="mb-3 text-sm font-bold tracking-wider text-gray-500 uppercase dark:text-gray-400">
+            Attachments
+          </h3>
           <div className="flex flex-wrap gap-2">
             {note.attachments.map((file: any) => (
-              <a 
-                key={file.id} 
-                href={file.url} 
-                target="_blank" 
+              <a
+                key={file.id}
+                href={file.url}
+                target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
               >
                 📎 {file.name}
               </a>
@@ -59,7 +64,7 @@ async function SharedNoteContent({ params }: { params: Promise<{ id: string }> }
       )}
       {/* ------------------------------ */}
 
-      <p className="text-xs text-gray-400 mt-8 text-center">
+      <p className="mt-8 text-center text-xs text-gray-400">
         Shared on {new Date(note.updatedAt).toLocaleDateString()}
       </p>
     </div>
@@ -69,21 +74,28 @@ async function SharedNoteContent({ params }: { params: Promise<{ id: string }> }
 // 2. Pagrindinis puslapis dabar yra SINCHRONINIS (be async ir be await params)
 export default function SharedNotePage({ params }: { params: Promise<{ id: string }> }) {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 py-12 px-6">
-      <div className="max-w-3xl mx-auto">
+    <div className="min-h-screen bg-gray-50 px-6 py-12 dark:bg-gray-950">
+      <div className="mx-auto max-w-3xl">
         <div className="mb-8 flex items-center justify-between">
-          <Link href="https://knowledge.morkunas.info" className="text-sm font-bold text-blue-600 hover:underline">
+          <Link
+            href="https://knowledge.morkunas.info"
+            className="text-sm font-bold text-blue-600 hover:underline"
+          >
             &larr; Go to my Knowledge Base
           </Link>
-          <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Shared Note</span>
+          <span className="text-xs font-bold tracking-wider text-gray-400 uppercase">
+            Shared Note
+          </span>
         </div>
 
-        <Suspense fallback={
-          <div className="bg-white dark:bg-gray-900 p-12 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-800 text-center animate-pulse">
-            <div className="h-8 bg-gray-200 dark:bg-gray-800 rounded w-3/4 mx-auto mb-4"></div>
-            <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-1/2 mx-auto"></div>
-          </div>
-        }>
+        <Suspense
+          fallback={
+            <div className="animate-pulse rounded-3xl border border-gray-100 bg-white p-12 text-center shadow-sm dark:border-gray-800 dark:bg-gray-900">
+              <div className="mx-auto mb-4 h-8 w-3/4 rounded bg-gray-200 dark:bg-gray-800"></div>
+              <div className="mx-auto h-4 w-1/2 rounded bg-gray-200 dark:bg-gray-800"></div>
+            </div>
+          }
+        >
           {/* Perduodame params kaip Promise į vidinį komponentą */}
           <SharedNoteContent params={params} />
         </Suspense>

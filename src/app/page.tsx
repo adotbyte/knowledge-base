@@ -10,17 +10,17 @@ import {
   toggleFileShare,
 } from './actions';
 import { Suspense } from 'react';
-import MarkdownRenderer from './components/MarkdownRenderer';
-import CopyButton from './components/CopyButton';
-import ExportButton from './components/ExportButton';
-import ThemeToggle from './components/ThemeToggle';
-import GenerateNoteButton from './components/GenerateNoteButton';
-import DeleteConfirmButton from './components/DeleteConfirmButton';
-import AISearch from './components/AISearch';
-import ActionButton from './components/ActionButton';
-import Navbar from './components/Navbar';
-import SearchBar from './SearchBar';
-import CommandPalette from './components/CommandPalette';
+import MarkdownRenderer from '@/components/MarkdownRenderer';
+import CopyButton from '@/components/CopyButton';
+import ExportButton from '@/components/ExportButton';
+import ThemeToggle from '@/components/ThemeToggle';
+import GenerateNoteButton from '@/components/GenerateNoteButton';
+import DeleteConfirmButton from '@/components/DeleteConfirmButton';
+import AISearch from '@/components/AISearch';
+import ActionButton from '@/components/ActionButton';
+import Navbar from '@/components/Navbar';
+import SearchBar from '@/components/SearchBar';
+import CommandPalette from '@/components/CommandPalette';
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
