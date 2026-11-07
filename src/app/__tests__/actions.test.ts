@@ -1,39 +1,13 @@
-import { vi } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
-// 1. Užmockiname auth() funkciją, kad ji negrautų Next.js headers()
+// 1. Užmockiname auth() funkciją (turi būti PIRMAS, prieš bet kokius importus iš actions)
 vi.mock('@/app/auth', () => ({
   auth: vi.fn().mockResolvedValue({
     user: { id: 'test-user-id', email: 'test@example.com' },
   }),
 }));
 
-// 2. Užmockiname Next.js revalidatePath, kad testai nekristų
-vi.mock('next/cache', () => ({
-  revalidatePath: vi.fn(),
-}));
-
-// 3. Užmockiname Prisma klientą (jei dar to nepadarėte)
-vi.mock('@/app/prisma', () => ({
-  default: {
-    note: {
-      create: vi.fn().mockResolvedValue({ id: 'note-123' }),
-      delete: vi.fn().mockResolvedValue({}),
-    },
-  },
-}));
-
-import { describe, it, expect, beforeEach } from 'vitest';
-import { createNote, deleteNote } from '../actions';
-import prisma from '../prisma';
-
-// 1. Apgauname next/server, kad Vitest jo neieškotų
-vi.mock('next/server', () => ({
-  NextResponse: {
-    json: vi.fn(),
-  },
-}));
-
-// 2. Apgauname Prisma
+// 2. Užmockiname Prisma
 vi.mock('../prisma', () => ({
   default: {
     note: {
@@ -44,23 +18,27 @@ vi.mock('../prisma', () => ({
   },
 }));
 
-// 3. Apgauname revalidatePath
+// 3. Užmockiname revalidatePath
 vi.mock('next/cache', () => ({
   revalidatePath: vi.fn(),
 }));
+
+// 4. Dabar galime importuoti actions ir prisma
+import { createNote, deleteNote } from '../actions';
+import prisma from '../prisma';
 
 describe('Server Actions Security', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('should create a note with admin user (Cloudflare Access mode)', async () => {
+  it('should create a note with the session user ID', async () => {
     // Nustatome, kad Prisma sėkmingai sukuria įrašą
     vi.mocked(prisma.note.create).mockResolvedValueOnce({
       id: 'note-1',
       title: 'Test',
       content: 'Test content',
-      userId: 'admin',
+      userId: 'test-user-id',
     } as any);
 
     const formData = new FormData();
@@ -69,17 +47,17 @@ describe('Server Actions Security', () => {
 
     await createNote(formData);
 
-    // Patikriname, ar Prisma buvo iškviesta su "admin"
+    // Patikriname, ar Prisma buvo iškviesta su "test-user-id"
     expect(prisma.note.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
-          userId: 'admin', // <-- Dabar tikimės "admin"
+          userId: 'test-user-id', // <-- Dabar tikimės sesijos vartotojo ID
         }),
       })
     );
   });
 
-  it('should delete a note with admin user', async () => {
+  it('should delete a note with the session user ID', async () => {
     vi.mocked(prisma.note.delete).mockResolvedValueOnce({ id: 'note-1' } as any);
 
     const formData = new FormData();
@@ -89,7 +67,7 @@ describe('Server Actions Security', () => {
 
     expect(prisma.note.delete).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: { id: 'note-1', userId: 'admin' }, // <-- Dabar tikimės "admin"
+        where: { id: 'note-1', userId: 'test-user-id' }, // <-- Dabar tikimės sesijos vartotojo ID
       })
     );
   });
