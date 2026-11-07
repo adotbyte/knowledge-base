@@ -7,11 +7,17 @@ import { writeFile, mkdir, access } from 'fs/promises';
 import { constants } from 'fs';
 import { join } from 'path';
 import { redirect } from 'next/navigation';
+import { auth } from '@/app/auth';
 
 // Pagalbinė funkcija vartotojo ID gauti
 async function getUserId() {
-  // Cloudflare Access jau mus apsaugojo, todėl naudojame fiksuotą vartotoją
-  return 'admin';
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    throw new Error('Neprisijungęs vartotojas');
+  }
+
+  return session.user.id;
 }
 
 // 1. CREATE NOTE

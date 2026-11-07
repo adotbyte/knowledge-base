@@ -5,13 +5,21 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { Suspense } from 'react';
 import Navbar from '@/components/Navbar';
+import { auth } from '@/app/auth'; // <-- Pridėkite šį importą
+import { redirect } from 'next/navigation'; // <-- Pridėkite šį importą
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
 
 async function EditForm({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const userId = 'admin';
+
+  // 1. Gauname sesiją
+  const session = await auth();
+  if (!session?.user?.id) {
+    redirect('/login');
+  }
+  const userId = session.user.id; // <-- Naudojame tikrą ID
 
   const note = await prisma.note.findUnique({
     where: { id: id, userId: userId },

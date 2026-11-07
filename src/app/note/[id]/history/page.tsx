@@ -4,19 +4,25 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import { Suspense } from 'react';
+import { auth } from '@/app/auth'; // <-- Pridėkite šį importą
+import { redirect } from 'next/navigation'; // <-- Pridėkite šį importą
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
 
 async function HistoryContent({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params; // <-- params išsprendžiami ČIA (Suspense viduje)
+  const { id } = await params;
 
-  // 1. Patikriname, ar vartotojas prisijungęs
-  const userId = 'admin';
+  // 1. Gauname sesiją
+  const session = await auth();
+  if (!session?.user?.id) {
+    redirect('/login');
+  }
+  const userId = session.user.id; // <-- Naudojame tikrą ID
 
   // 2. Ieškome užrašo TIK to vartotojo
   const note = await prisma.note.findUnique({
-    where: { id: id, userId: userId }, // <-- Pakeista iš "admin" į userId
+    where: { id: id, userId: userId },
     include: {
       versions: {
         orderBy: { createdAt: 'desc' },
