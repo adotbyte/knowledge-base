@@ -40,4 +40,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       options: cookieOptions,
     },
   },
+  // ✅ CALLBACKS TURI BŪTI ČIA, NextAuth({ ... }) VIDUJE
+  callbacks: {
+    session({ session, token }) {
+      if (session.user && token.sub) {
+        session.user.id = token.sub;
+      }
+      return session;
+    },
+  },
 });

@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
+import { auth } from './auth';
 import {
   createNote,
   deleteNote,
@@ -31,11 +32,20 @@ async function ProtectedContent({
 }: {
   searchParams: Promise<{ q?: string; tag?: string }>;
 }) {
-  // 1. Cloudflare Access jau mus apsaugojo, todėl naudojame fiksuotą vartotoją
-  const userId = 'admin';
+  // 1. Gauname sesiją
+  const session = await auth();
 
+  // 2. Griežtas patikrinimas
+  if (!session?.user?.id) {
+    return <div>Neprisijungęs. Prašome uždaryti šį langą ir prisijungti iš naujo.</div>;
+  }
+
+  // 3. Ištraukiame paieškos parametrus
   const { q, tag } = await searchParams;
   const searchQuery = q?.replace('#', '').trim();
+
+  // 4. Naudojame TIKRĄ vartotojo ID
+  const userId = session.user.id;
 
   const notes = await prisma.note.findMany({
     where: {
