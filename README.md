@@ -1,7 +1,5 @@
 # 🧠 AI-Powered Knowledge Base
 
-# 🧠 AI-Powered Knowledge Base
-
 A personal, self-hosted knowledge base with AI capabilities, built with Next.js 16, Prisma, PostgreSQL, and Google Gemini.
 
 This isn't just a note-taking app; it's a full-stack platform that reads, analyzes, and generates content using AI, protected by a multi-user Role-Based Access Control (RBAC) system and deployed via a self-hosted CI/CD pipeline.
@@ -74,16 +72,14 @@ DB_PASSWORD=your_secure_password
 
 ### AI
 
-```GEMINI_API_KEY=your_gemini_api_key
-
-```
+````GEMINI_API_KEY=your_gemini_api_key
 
 ### Authentication
 
 ```AUTH_SECRET=your_auth_secret
 AUTH_URL=http://localhost:3000
 AUTH_TRUST_HOST=true
-```
+````
 
 ### OAuth Providers
 
@@ -132,12 +128,8 @@ This project uses **Vitest** for unit testing. Run:
 **Audrius Morkūnas**
 
 - [Portfolio](https://morkunas.info)
-- [Live Knowledge Base](https://knowledge.morkunas.info/public)
+- [Live Knowledge Base](https://knowledge.morkunas.info)
 
 ## 📄 License
 
 This project is licensed under the MIT License.
-
-```
-
-```
