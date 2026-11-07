@@ -1,4 +1,28 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { vi } from 'vitest';
+
+// 1. Užmockiname auth() funkciją, kad ji negrautų Next.js headers()
+vi.mock('@/app/auth', () => ({
+  auth: vi.fn().mockResolvedValue({
+    user: { id: 'test-user-id', email: 'test@example.com' },
+  }),
+}));
+
+// 2. Užmockiname Next.js revalidatePath, kad testai nekristų
+vi.mock('next/cache', () => ({
+  revalidatePath: vi.fn(),
+}));
+
+// 3. Užmockiname Prisma klientą (jei dar to nepadarėte)
+vi.mock('@/app/prisma', () => ({
+  default: {
+    note: {
+      create: vi.fn().mockResolvedValue({ id: 'note-123' }),
+      delete: vi.fn().mockResolvedValue({}),
+    },
+  },
+}));
+
+import { describe, it, expect, beforeEach } from 'vitest';
 import { createNote, deleteNote } from '../actions';
 import prisma from '../prisma';
 
@@ -32,7 +56,12 @@ describe('Server Actions Security', () => {
 
   it('should create a note with admin user (Cloudflare Access mode)', async () => {
     // Nustatome, kad Prisma sėkmingai sukuria įrašą
-    vi.mocked(prisma.note.create).mockResolvedValueOnce({ id: 'note-1', title: 'Test', content: 'Test content', userId: 'admin' } as any);
+    vi.mocked(prisma.note.create).mockResolvedValueOnce({
+      id: 'note-1',
+      title: 'Test',
+      content: 'Test content',
+      userId: 'admin',
+    } as any);
 
     const formData = new FormData();
     formData.append('title', 'Test');
