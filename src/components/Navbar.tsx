@@ -2,32 +2,35 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import ExportButton from '@/components/ExportButton';
-import ThemeToggle from '@/components/ThemeToggle'; // Pataisytas dvigubas brūkšnys
-import LogoutButton from '@/components/LogoutButton';
 import { useSession } from 'next-auth/react';
+import ExportButton from '@/components/ExportButton';
+import ThemeToggle from '@/components/ThemeToggle';
+import LogoutButton from '@/components/LogoutButton';
 
 export default function Navbar() {
   const { data: session } = useSession();
   const [isOpen, setIsOpen] = useState(false);
 
-  const isAdmin = session?.user?.email === 'adotbyte@gmail.com'; // <-- Jūsų el. paštas
+  // 1. TIK ADMINUI MATOMOS NUORODOS
+  const ADMIN_EMAIL = 'adotbyte@gmail.com'; // <-- Jūsų el. paštas
+  const isAdmin = session?.user?.email === ADMIN_EMAIL;
 
-  // Bazinės nuorodos visiems
-  const baseLinks = [{ name: 'Public View', href: '/public' }];
-
-  // Administracinės nuorodos
   const adminLinks = [
     { name: 'Dashboard', href: '/dashboard' },
     { name: 'Docker', href: '/docker' },
     { name: 'Live Status', href: '/status' },
+  ];
+
+  // 2. VISIEMS PRISIJUNGUSIEMS MATOMOS NUORODOS (AI įrankiai)
+  const userLinks = [
     { name: 'Code Reviewer', href: '/code-review' },
     { name: 'Config Gen', href: '/config-generator' },
     { name: 'Explainer', href: '/explainer' },
+    { name: 'Public View', href: '/public' },
   ];
 
-  // Sujungiame pagal rolę
-  const links = isAdmin ? [...adminLinks, ...baseLinks] : baseLinks;
+  // Sujungiame: admin mato viską, paprastas vartotojas - tik AI įrankius
+  const links = isAdmin ? [...adminLinks, ...userLinks] : userLinks;
 
   return (
     <nav className="sticky top-0 z-50 border-b border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
@@ -55,8 +58,6 @@ export default function Navbar() {
           ))}
           <ThemeToggle />
           <ExportButton />
-
-          {/* TIESIOG ĮDEDAME KOMPONENTĄ */}
           <LogoutButton />
         </div>
 
@@ -103,7 +104,6 @@ export default function Navbar() {
           ))}
           <div className="flex items-center justify-between border-t border-gray-100 pt-4 dark:border-gray-800">
             <ExportButton />
-            {/* TIESIOG ĮDEDAME KOMPONENTĄ */}
             <LogoutButton />
           </div>
         </div>
