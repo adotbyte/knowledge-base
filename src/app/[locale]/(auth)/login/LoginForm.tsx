@@ -57,7 +57,7 @@ export default function LoginForm({ translations }: LoginFormProps) {
         <div className="flex justify-center">
           <Turnstile
             siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || '1x00000000000000000000AA'}
-            options={{ language: 'auto' }}
+            options={{ language: 'language' }}
             onSuccess={() => setIsVerified(true)}
             onError={() => setIsVerified(false)}
             onExpire={() => setIsVerified(false)}
