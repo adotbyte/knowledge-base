@@ -24,6 +24,7 @@ export default async function LoginPage({ params }: { params: Promise<{ locale: 
         privacy: t('privacy'),
         loading: t('loading'),
       }}
+      language={locale}
     />
   );
 }
