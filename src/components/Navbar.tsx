@@ -58,7 +58,7 @@ export default function Navbar() {
           ))}
           <ThemeToggle />
           <ExportButton />
-          <LogoutButton />
+          {session && <LogoutButton />}
         </div>
 
         {/* Mobile meniu mygtukas */}
@@ -104,7 +104,7 @@ export default function Navbar() {
           ))}
           <div className="flex items-center justify-between border-t border-gray-100 pt-4 dark:border-gray-800">
             <ExportButton />
-            <LogoutButton />
+            {session && <LogoutButton />}
           </div>
         </div>
       )}
