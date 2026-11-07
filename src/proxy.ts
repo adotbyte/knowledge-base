@@ -13,7 +13,13 @@ export default async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
   // 1. Nurodome puslapius, kurie prieinami BE prisijungimo
-  const isPublicRoute = pathname.startsWith('/demo') || pathname.startsWith('/login');
+  const isPublicRoute =
+    pathname.startsWith('/demo') ||
+    pathname.startsWith('/public') ||
+    pathname.startsWith('/code-review') ||
+    pathname.startsWith('/config-generator') ||
+    pathname.startsWith('/explainer') ||
+    pathname.startsWith('/login');
 
   // 2. Jei neprisijungęs ir bando patekti į apsaugotą puslapį -> į login
   if (!isLoggedIn && !isPublicRoute) {

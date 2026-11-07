@@ -4,8 +4,12 @@ import { useState } from 'react';
 import { generateConfig } from '../actions';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import Link from 'next/link';
+import { useSession } from 'next-auth/react';
 
 export default function ConfigGeneratorPage() {
+  const { data: session, status } = useSession();
+  const isLoggedIn = !!session;
+
   const [service, setService] = useState('');
   const [requirements, setRequirements] = useState('');
   const [result, setResult] = useState<string | null>(null);
@@ -13,7 +17,7 @@ export default function ConfigGeneratorPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!service.trim()) return;
+    if (!service.trim() || !isLoggedIn) return;
 
     setLoading(true);
     setResult(null);
@@ -26,7 +30,7 @@ export default function ConfigGeneratorPage() {
       const res = await generateConfig(formData);
       setResult(res);
     } catch (error) {
-      setResult('Failed to generate configuration.');
+      setResult('Norėdami naudotis AI funkcijomis, turite prisijungti.');
     } finally {
       setLoading(false);
     }
@@ -77,13 +81,36 @@ export default function ConfigGeneratorPage() {
                   className="w-full resize-none rounded-xl border border-gray-200 bg-gray-50 p-3 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-950 dark:text-white"
                 />
               </div>
-              <button
-                type="submit"
-                disabled={loading || !service.trim()}
-                className="flex items-center justify-center gap-2 rounded-xl bg-emerald-600 py-3 font-bold text-white transition-colors hover:bg-emerald-700 disabled:opacity-50"
-              >
-                {loading ? <span className="animate-pulse">Generating...</span> : 'Generate Config'}
-              </button>
+
+              {/* Pranešimas neprisijungusiems */}
+              {!isLoggedIn && status !== 'loading' && (
+                <div className="rounded-xl border border-blue-200 bg-blue-50 p-4 text-center dark:border-blue-900/30 dark:bg-blue-900/20">
+                  <p className="text-sm font-semibold text-blue-700 dark:text-blue-300">
+                    Norėdami naudotis AI funkcijomis, turite prisijungti.
+                  </p>
+                  <Link
+                    href="/login"
+                    className="mt-2 inline-block rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-blue-700"
+                  >
+                    Prisijungti
+                  </Link>
+                </div>
+              )}
+
+              {/* Mygtukas rodomas tik prisijungusiems */}
+              {isLoggedIn && (
+                <button
+                  type="submit"
+                  disabled={loading || !service.trim()}
+                  className="flex items-center justify-center gap-2 rounded-xl bg-emerald-600 py-3 font-bold text-white transition-colors hover:bg-emerald-700 disabled:opacity-50"
+                >
+                  {loading ? (
+                    <span className="animate-pulse">Generating...</span>
+                  ) : (
+                    'Generate Config'
+                  )}
+                </button>
+              )}
             </form>
           </div>
 

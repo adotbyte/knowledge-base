@@ -1,19 +1,22 @@
 'use client';
 
 import { useState } from 'react';
-import { explainCode } from '../actions'; // <-- Kviečiame explainCode
+import { explainCode } from '../actions';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import Link from 'next/link';
+import { useSession } from 'next-auth/react';
 
-// <-- Funkcija privalo vadintis iš didžiosios raidės ir būti "export default"
 export default function ExplainerPage() {
+  const { data: session, status } = useSession();
+  const isLoggedIn = !!session;
+
   const [code, setCode] = useState('');
-  const [explanation, setExplanation] = useState<string | null>(null); // <-- Pakeistas pavadinimas
+  const [explanation, setExplanation] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!code.trim()) return;
+    if (!code.trim() || !isLoggedIn) return;
 
     setLoading(true);
     setExplanation(null);
@@ -22,11 +25,10 @@ export default function ExplainerPage() {
     formData.append('code', code);
 
     try {
-      // <-- Kviečiame explainCode, o ne reviewCode
       const result = await explainCode(formData);
       setExplanation(result);
     } catch (error) {
-      setExplanation('Sorry, an error occurred while explaining the code.');
+      setExplanation('Norėdami naudotis AI funkcijomis, turite prisijungti.');
     } finally {
       setLoading(false);
     }
@@ -68,27 +70,51 @@ export default function ExplainerPage() {
                   className="w-full resize-none rounded-xl border border-gray-200 bg-gray-50 p-3 font-mono text-sm text-gray-900 outline-none focus:ring-2 focus:ring-orange-500 dark:border-gray-700 dark:bg-gray-950 dark:text-white"
                 />
               </div>
-              <button
-                type="submit"
-                disabled={loading || !code.trim()}
-                className="flex items-center justify-center gap-2 rounded-xl bg-orange-600 py-3 font-bold text-white transition-colors hover:bg-orange-700 disabled:opacity-50"
-              >
-                {loading ? (
-                  <span className="animate-pulse">Explaining...</span>
-                ) : (
-                  <>
-                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-                      />
-                    </svg>
-                    Explain Code
-                  </>
-                )}
-              </button>
+
+              {/* Pranešimas neprisijungusiems */}
+              {!isLoggedIn && status !== 'loading' && (
+                <div className="rounded-xl border border-blue-200 bg-blue-50 p-4 text-center dark:border-blue-900/30 dark:bg-blue-900/20">
+                  <p className="text-sm font-semibold text-blue-700 dark:text-blue-300">
+                    Norėdami naudotis AI funkcijomis, turite prisijungti.
+                  </p>
+                  <Link
+                    href="/login"
+                    className="mt-2 inline-block rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-blue-700"
+                  >
+                    Prisijungti
+                  </Link>
+                </div>
+              )}
+
+              {/* Mygtukas rodomas tik prisijungusiems */}
+              {isLoggedIn && (
+                <button
+                  type="submit"
+                  disabled={loading || !code.trim()}
+                  className="flex items-center justify-center gap-2 rounded-xl bg-orange-600 py-3 font-bold text-white transition-colors hover:bg-orange-700 disabled:opacity-50"
+                >
+                  {loading ? (
+                    <span className="animate-pulse">Explaining...</span>
+                  ) : (
+                    <>
+                      <svg
+                        className="h-5 w-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                        />
+                      </svg>
+                      Explain Code
+                    </>
+                  )}
+                </button>
+              )}
             </form>
           </div>
 
