@@ -4,19 +4,27 @@ import { redirect } from 'next/navigation';
 import { connection } from 'next/server';
 import StatusContent from './StatusContent';
 
-// 1. Dinaminė dalis
 async function StatusProtectedContent() {
-  await connection(); // Priverčiame būti dinamišku
+  await connection();
+
   const session = await auth();
 
-  if (!session) {
+  // 1. Patikriname, ar apskritai yra sesija IR vartotojas
+  if (!session || !session.user) {
     redirect('/login');
+  }
+
+  // 2. Dabar TypeScript žino, kad session.user tikrai egzistuoja.
+  const ADMIN_EMAIL = 'adotbyte@gmail.com'; // Įrašykite savo el. paštą
+
+  // 3. Tikriname el. paštą (naudojame ?. dėl saugumo)
+  if (session.user.email !== ADMIN_EMAIL) {
+    redirect('/'); // Ne adminus nukreipiame į pradžią
   }
 
   return <StatusContent />;
 }
 
-// 2. Puslapis su Suspense
 export default function StatusPage() {
   return (
     <Suspense

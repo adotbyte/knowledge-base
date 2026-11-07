@@ -4,21 +4,28 @@ import { Suspense } from 'react';
 import Link from 'next/link';
 import { auth } from '@/app/auth';
 import { redirect } from 'next/navigation';
+import { connection } from 'next/server';
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
 
-// ✅ VISKAS TURI BŪTI FUNKCIJOS VIDUJE
 async function DashboardContent() {
-  // 1. Gauname sesiją
+  await connection(); // Next.js 16 reikalavimas
+
   const session = await auth();
 
-  // 2. Jei nėra sesijos – nukreipiame į login
-  if (!session?.user?.id) {
+  // 1. Patikriname, ar vartotojas prisijungęs
+  if (!session || !session.user) {
     redirect('/login');
   }
 
-  // 3. Naudojame tikrąjį vartotojo ID
+  // 2. TIKRINAME, AR TAI ADMINISTRATORIUS
+  const ADMIN_EMAIL = 'adotbyte@gmail.com'; // <-- Įrašykite savo el. paštą!
+
+  if (session.user.email !== ADMIN_EMAIL) {
+    redirect('/'); // Ne adminus nukreipiame į pradžią
+  }
+
   const userId = session.user.id;
 
   // 1. Pagrindinė statistika
@@ -155,7 +162,6 @@ async function DashboardContent() {
   );
 }
 
-// ✅ PAGRINDINIS PUSLAPIS
 export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-gray-50/50 p-6 md:p-10 dark:bg-gray-950">

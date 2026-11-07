@@ -5,19 +5,29 @@ import Link from 'next/link';
 import ExportButton from '@/components/ExportButton';
 import ThemeToggle from '@/components/ThemeToggle'; // Pataisytas dvigubas brūkšnys
 import LogoutButton from '@/components/LogoutButton';
+import { useSession } from 'next-auth/react';
 
 export default function Navbar() {
+  const { data: session } = useSession();
   const [isOpen, setIsOpen] = useState(false);
 
-  const links = [
+  const isAdmin = session?.user?.email === 'adotbyte@gmail.com'; // <-- Jūsų el. paštas
+
+  // Bazinės nuorodos visiems
+  const baseLinks = [{ name: 'Public View', href: '/public' }];
+
+  // Administracinės nuorodos
+  const adminLinks = [
     { name: 'Dashboard', href: '/dashboard' },
     { name: 'Docker', href: '/docker' },
     { name: 'Live Status', href: '/status' },
     { name: 'Code Reviewer', href: '/code-review' },
     { name: 'Config Gen', href: '/config-generator' },
     { name: 'Explainer', href: '/explainer' },
-    { name: 'Public View', href: '/public' },
   ];
+
+  // Sujungiame pagal rolę
+  const links = isAdmin ? [...adminLinks, ...baseLinks] : baseLinks;
 
   return (
     <nav className="sticky top-0 z-50 border-b border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">

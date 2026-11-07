@@ -2,8 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 
-// Next.js 16 reikalauja "proxy" funkcijos eksporto
-export async function proxy(request: NextRequest) {
+export default async function proxy(request: NextRequest) {
   // 1. Nuskaitome sesijos tokeną
   const token = await getToken({
     req: request,
@@ -35,6 +34,7 @@ export const config = {
      * Apsaugome visus maršrutus, išskyrus:
      * - /api/auth (NextAuth)
      * - /_next/static, /_next/image, /favicon.ico (statiniai failai)
+     * - /login (prisijungimo puslapis)
      */
     '/((?!api/auth|_next/static|_next/image|favicon.ico).*)',
   ],
