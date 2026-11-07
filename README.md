@@ -13,7 +13,6 @@ This isn't just a note-taking app; it's a full-stack platform that reads, analyz
 
 ## 📸 Screenshots
 
-![Home Page](./screenshots/home-black.png)
 ![AI Search](./screenshots/home-white.png)
 ![Demo](./screenshots/demo.png)
 
@@ -72,14 +71,14 @@ DB_PASSWORD=your_secure_password
 
 ### AI
 
-````GEMINI_API_KEY=your_gemini_api_key
+GEMINI_API_KEY=your_gemini_api_key
 
 ### Authentication
 
 ```AUTH_SECRET=your_auth_secret
 AUTH_URL=http://localhost:3000
 AUTH_TRUST_HOST=true
-````
+```
 
 ### OAuth Providers
 
