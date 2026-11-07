@@ -30,7 +30,10 @@ services:
       - internal_net
 
   web:
-    build: .
+    build:
+      context: .
+      args:
+        - NEXT_PUBLIC_TURNSTILE_SITE_KEY=${NEXT_PUBLIC_TURNSTILE_SITE_KEY}
     container_name: knowledge_web
     restart: unless-stopped
     mem_limit: 2g # <-- Daugiau RAM, nes apdoroja AI ir failus

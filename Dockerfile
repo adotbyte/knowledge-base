@@ -23,6 +23,10 @@ ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy"
 # Sugeneruojame Prisma klientą
 RUN npx prisma generate --schema=prisma/schema.prisma
 
+# Turnstile
+ARG NEXT_PUBLIC_TURNSTILE_SITE_KEY
+ENV NEXT_PUBLIC_TURNSTILE_SITE_KEY=$NEXT_PUBLIC_TURNSTILE_SITE_KEY
+
 # Pastatome Next.js aplikaciją
 RUN npm run build
 

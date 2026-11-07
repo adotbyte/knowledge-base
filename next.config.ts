@@ -19,6 +19,9 @@ const nextConfig: NextConfig = {
       },
     },
   },
+  env: {
+    NEXT_PUBLIC_TURNSTILE_SITE_KEY: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY,
+  },
 
   // --- PRIDĖTI SAUGUMO ANTRAŠTĖS ---
   async headers() {
@@ -38,7 +41,7 @@ const nextConfig: NextConfig = {
           {
             key: 'Content-Security-Policy',
             value:
-              "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: https://*.googleusercontent.com; font-src 'self' data:; connect-src 'self' https://generativelanguage.googleapis.com;",
+              "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: https:; font-src 'self' data:; frame-src 'self' https://challenges.cloudflare.com; connect-src 'self' https://generativelanguage.googleapis.com https://challenges.cloudflare.com;",
           },
         ],
       },
