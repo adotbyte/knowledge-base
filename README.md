@@ -67,22 +67,17 @@ Create a `.env` file in the root directory:
 ```env
 # Database
 DB_PASSWORD=your_secure_password
-```
 
-### AI
-
+# AI
 GEMINI_API_KEY=your_gemini_api_key
 
-### Authentication
-
-```AUTH_SECRET=your_auth_secret
+# Authentication
+AUTH_SECRET=your_auth_secret
 AUTH_URL=http://localhost:3000
 AUTH_TRUST_HOST=true
-```
 
-### OAuth Providers
-
-```AUTH_GOOGLE_ID=your_google_client_id
+# OAuth Providers
+AUTH_GOOGLE_ID=your_google_client_id
 AUTH_GOOGLE_SECRET=your_google_client_secret
 AUTH_GITHUB_ID=your_github_client_id
 AUTH_GITHUB_SECRET=your_github_client_secret
