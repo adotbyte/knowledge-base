@@ -6,21 +6,25 @@ import { SessionProvider } from 'next-auth/react';
 
 const inter = Inter({ subsets: ['latin'] });
 
-export const metadata: Metadata = {
-  title: 'Knowledge Base',
-  description: 'My personal knowledge base',
-  manifest: '/manifest.json',
-};
-
 export const viewport: Viewport = {
   themeColor: '#2563eb',
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+          scriptProps={{ 'data-cfasync': 'false' }}
+        >
           <SessionProvider>{children}</SessionProvider>
         </ThemeProvider>
       </body>

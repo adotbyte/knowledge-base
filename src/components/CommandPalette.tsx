@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl'; // <-- Vertimams
 import { searchNotes } from '../app/actions';
 
 export default function CommandPalette() {
+  const t = useTranslations('Components'); // <-- Vertimų hook'as
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<any[]>([]);
@@ -58,7 +60,7 @@ export default function CommandPalette() {
     >
       <div
         className="w-full max-w-xl overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-2xl dark:border-gray-800 dark:bg-gray-900"
-        onClick={(e) => e.stopPropagation()} // Neleidžia užsidaryti paspaudus viduje
+        onClick={(e) => e.stopPropagation()}
       >
         {/* Paieškos laukelis */}
         <div className="flex items-center border-b border-gray-100 px-4 py-3 dark:border-gray-800">
@@ -79,7 +81,7 @@ export default function CommandPalette() {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search notes... (Press Esc to close)"
+            placeholder={t('commandSearchPlaceholder')} // <-- VERTIMAS
             className="w-full bg-transparent text-lg text-gray-900 placeholder-gray-400 outline-none dark:text-white"
             autoFocus
           />
@@ -91,9 +93,9 @@ export default function CommandPalette() {
         {/* Rezultatai */}
         <div className="max-h-[60vh] overflow-y-auto p-2">
           {results.length === 0 && query.trim().length > 0 && !isSearching ? (
-            <div className="p-4 text-center text-sm text-gray-500">No notes found.</div>
+            <div className="p-4 text-center text-sm text-gray-500">{t('commandNoResults')}</div> // <-- VERTIMAS
           ) : results.length === 0 && query.trim().length === 0 ? (
-            <div className="p-4 text-center text-sm text-gray-400">Type to search...</div>
+            <div className="p-4 text-center text-sm text-gray-400">{t('commandTypeToSearch')}</div> // <-- VERTIMAS
           ) : (
             results.map((note) => (
               <button
@@ -108,7 +110,6 @@ export default function CommandPalette() {
                   <span className="font-bold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-white">
                     {note.title}
                   </span>
-                  {/* Jei yra failų, parodome mažą ikoną */}
                   {note.attachments && note.attachments.length > 0 && (
                     <span className="text-xs text-gray-400">📎 {note.attachments.length}</span>
                   )}

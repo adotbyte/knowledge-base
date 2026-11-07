@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { useTranslations } from 'next-intl'; // <-- Vertimams
 import { generateNote } from '../app/actions';
 
 export default function GenerateNoteButton() {
+  const t = useTranslations('Components'); // <-- Vertimų hook'as
   const [isOpen, setIsOpen] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -23,7 +25,7 @@ export default function GenerateNoteButton() {
       setIsOpen(false);
     } catch (error) {
       console.error(error);
-      alert('Failed to generate note.');
+      alert(t('generateError')); // <-- VERTIMAS
     } finally {
       setIsGenerating(false);
     }
@@ -34,18 +36,17 @@ export default function GenerateNoteButton() {
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
       <div className="animate-in fade-in zoom-in w-full max-w-md rounded-2xl border border-gray-100 bg-white p-6 shadow-2xl duration-200 dark:border-gray-800 dark:bg-gray-900">
         <h3 className="mb-2 flex items-center gap-2 text-lg font-bold text-gray-900 dark:text-white">
-          <span>✨</span> AI Note Generator
+          <span>✨</span> {t('aiNoteGenerator')} {/* <-- VERTIMAS */}
         </h3>
         <p className="mb-6 text-sm text-gray-500 dark:text-gray-400">
-          Enter a topic, and the AI ​​will write a complete note for you, including code and
-          explanations..
+          {t('aiNoteGeneratorDescription')} {/* <-- VERTIMAS */}
         </p>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <input
             type="text"
             name="topic"
-            placeholder="E.g., How to install PostgreSQL with Docker"
+            placeholder={t('topicPlaceholder')} // <-- VERTIMAS
             required
             className="w-full rounded-xl border border-gray-200 bg-gray-50 p-3 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-purple-500 dark:border-gray-700 dark:bg-gray-950 dark:text-white"
             autoFocus
@@ -57,14 +58,19 @@ export default function GenerateNoteButton() {
               onClick={() => setIsOpen(false)}
               className="rounded-lg px-4 py-2 text-sm font-semibold text-gray-600 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
             >
-              Cancel
+              {t('cancel')} {/* <-- VERTIMAS */}
             </button>
             <button
               type="submit"
               disabled={isGenerating}
               className="flex items-center gap-2 rounded-lg bg-purple-600 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-purple-700 disabled:opacity-50"
             >
-              {isGenerating ? <span className="animate-pulse">Generating...</span> : 'Generate'}
+              {isGenerating ? (
+                <span className="animate-pulse">{t('generating')}</span>
+              ) : (
+                t('generate')
+              )}{' '}
+              {/* <-- VERTIMAS */}
             </button>
           </div>
         </form>
@@ -86,10 +92,9 @@ export default function GenerateNoteButton() {
             d="M13 10V3L4 14h7v7l9-11h-7z"
           />
         </svg>
-        Generate with AI
+        {t('generateWithAi')} {/* <-- VERTIMAS */}
       </button>
 
-      {/* Naudojame createPortal, kad modalinis langas atsidurtų pačiame <body> viršuje */}
       {mounted && isOpen ? createPortal(modalContent, document.body) : null}
     </>
   );

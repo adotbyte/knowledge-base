@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl'; // <-- Vertimams
 import { getDockerContainers, controlContainer } from '../app/actions';
 import { useRouter } from 'next/navigation';
 
@@ -13,19 +14,18 @@ type Container = {
 };
 
 export default function DockerManager() {
+  const t = useTranslations('Components'); // <-- Vertimų hook'as
   const [containers, setContainers] = useState<Container[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const router = useRouter();
 
-  // Funkcija duomenų užkrovimui
   const fetchContainers = async () => {
     const data = await getDockerContainers();
     setContainers(data);
     setLoading(false);
   };
 
-  // Užkrauname duomenis ir nustatome automatinį atnaujinimą kas 5 sekundes
   useEffect(() => {
     fetchContainers();
     const interval = setInterval(fetchContainers, 5000);
@@ -35,7 +35,7 @@ export default function DockerManager() {
   const handleAction = async (id: string, action: 'start' | 'stop' | 'restart') => {
     setActionLoading(`${id}-${action}`);
     await controlContainer(id, action);
-    await fetchContainers(); // Atsinaujiname sąrašą iškart po veiksmo
+    await fetchContainers();
     setActionLoading(null);
     router.refresh();
   };
@@ -43,7 +43,7 @@ export default function DockerManager() {
   if (loading) {
     return (
       <div className="animate-pulse p-10 text-center text-gray-500">
-        Loading Docker containers...
+        {t('dockerLoading')} {/* <-- VERTIMAS */}
       </div>
     );
   }
@@ -55,7 +55,6 @@ export default function DockerManager() {
           key={container.id}
           className="flex flex-col justify-between gap-4 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm md:flex-row md:items-center dark:border-gray-800 dark:bg-gray-900"
         >
-          {/* Konteinerio informacija */}
           <div className="flex-1">
             <div className="mb-1 flex items-center gap-3">
               <h3 className="font-mono text-lg font-bold text-gray-900 dark:text-white">
@@ -75,7 +74,6 @@ export default function DockerManager() {
             <p className="mt-1 text-xs text-gray-400">{container.status}</p>
           </div>
 
-          {/* Valdymo mygtukai */}
           <div className="flex items-center gap-2">
             {container.state !== 'running' && (
               <button
@@ -83,7 +81,8 @@ export default function DockerManager() {
                 disabled={!!actionLoading}
                 className="rounded-lg bg-green-600 px-3 py-1.5 text-xs font-bold text-white transition-colors hover:bg-green-700 disabled:opacity-50"
               >
-                {actionLoading === `${container.id}-start` ? '...' : 'Start'}
+                {actionLoading === `${container.id}-start` ? '...' : t('dockerStart')}{' '}
+                {/* <-- VERTIMAS */}
               </button>
             )}
 
@@ -94,14 +93,16 @@ export default function DockerManager() {
                   disabled={!!actionLoading}
                   className="rounded-lg bg-orange-500 px-3 py-1.5 text-xs font-bold text-white transition-colors hover:bg-orange-600 disabled:opacity-50"
                 >
-                  {actionLoading === `${container.id}-restart` ? '...' : 'Restart'}
+                  {actionLoading === `${container.id}-restart` ? '...' : t('dockerRestart')}{' '}
+                  {/* <-- VERTIMAS */}
                 </button>
                 <button
                   onClick={() => handleAction(container.id, 'stop')}
                   disabled={!!actionLoading}
                   className="rounded-lg bg-red-600 px-3 py-1.5 text-xs font-bold text-white transition-colors hover:bg-red-700 disabled:opacity-50"
                 >
-                  {actionLoading === `${container.id}-stop` ? '...' : 'Stop'}
+                  {actionLoading === `${container.id}-stop` ? '...' : t('dockerStop')}{' '}
+                  {/* <-- VERTIMAS */}
                 </button>
               </>
             )}

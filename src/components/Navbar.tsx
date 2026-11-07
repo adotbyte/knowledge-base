@@ -1,32 +1,44 @@
 'use client';
 
-import { useState } from 'react';
-import Link from 'next/link';
+import { useState, Suspense } from 'react';
+import { Link, usePathname } from '@/i18n/routing'; // <-- Naudojame next-intl Link
 import { useSession } from 'next-auth/react';
+import { useTranslations } from 'next-intl'; // <-- Vertimams
 import ExportButton from '@/components/ExportButton';
 import ThemeToggle from '@/components/ThemeToggle';
 import LogoutButton from '@/components/LogoutButton';
+import dynamic from 'next/dynamic';
+
+// Dinaminis LanguageSwitcher įkėlimas (kad nebreakintų build)
+const LanguageSwitcher = dynamic(() => import('@/components/LanguageSwitcher'), {
+  ssr: false,
+  loading: () => (
+    <div className="h-8 w-16 animate-pulse rounded bg-gray-100 dark:bg-gray-800"></div>
+  ),
+});
 
 export default function Navbar() {
   const { data: session } = useSession();
   const [isOpen, setIsOpen] = useState(false);
+  const t = useTranslations('Navigation'); // <-- Vertimų hook'as
+  const pathname = usePathname();
 
   // 1. TIK ADMINUI MATOMOS NUORODOS
-  const ADMIN_EMAIL = 'adotbyte@gmail.com'; // <-- Jūsų el. paštas
+  const ADMIN_EMAIL = 'adotbyte@gmail.com';
   const isAdmin = session?.user?.email === ADMIN_EMAIL;
 
   const adminLinks = [
-    { name: 'Dashboard', href: '/dashboard' },
-    { name: 'Docker', href: '/docker' },
-    { name: 'Live Status', href: '/status' },
+    { name: t('dashboard'), href: '/dashboard' },
+    { name: t('docker'), href: '/docker' },
+    { name: t('status'), href: '/status' },
   ];
 
-  // 2. VISIEMS PRISIJUNGUSIEMS MATOMOS NUORODOS (AI įrankiai)
+  // 2. VISIEMS PRISIJUNGUSIEMS MATOMOS NUORODOS
   const userLinks = [
-    { name: 'Code Reviewer', href: '/code-review' },
-    { name: 'Config Gen', href: '/config-generator' },
-    { name: 'Explainer', href: '/explainer' },
-    { name: 'Public View', href: '/public' },
+    { name: t('codeReview'), href: '/code-review' },
+    { name: t('configGen'), href: '/config-generator' },
+    { name: t('explainer'), href: '/explainer' },
+    { name: t('publicView'), href: '/public' },
   ];
 
   // Sujungiame: admin mato viską, paprastas vartotojas - tik AI įrankius
@@ -51,11 +63,22 @@ export default function Navbar() {
             <Link
               key={link.href}
               href={link.href}
-              className="text-sm font-semibold text-gray-500 transition-colors hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
+              className={`text-sm font-semibold transition-colors hover:text-blue-600 dark:hover:text-blue-400 ${
+                pathname === link.href
+                  ? 'text-blue-600 dark:text-blue-400'
+                  : 'text-gray-500 dark:text-gray-400'
+              }`}
             >
               {link.name}
             </Link>
           ))}
+          <Suspense
+            fallback={
+              <div className="h-8 w-16 animate-pulse rounded bg-gray-100 dark:bg-gray-800"></div>
+            }
+          >
+            <LanguageSwitcher />
+          </Suspense>
           <ThemeToggle />
           <ExportButton />
           {session && <LogoutButton />}
@@ -63,6 +86,13 @@ export default function Navbar() {
 
         {/* Mobile meniu mygtukas */}
         <div className="flex items-center gap-2 md:hidden">
+          <Suspense
+            fallback={
+              <div className="h-8 w-16 animate-pulse rounded bg-gray-100 dark:bg-gray-800"></div>
+            }
+          >
+            <LanguageSwitcher />
+          </Suspense>
           <ThemeToggle />
           <button
             onClick={() => setIsOpen(!isOpen)}
