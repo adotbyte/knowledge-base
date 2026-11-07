@@ -16,6 +16,7 @@ interface LoginFormProps {
     privacy: string;
     loading: string; // <-- Jau pridėta
   };
+  language: string;
 }
 
 export default function LoginForm({ translations }: LoginFormProps) {
