@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { explainCode } from '../actions'; // <-- Kviečiame explainCode
-import MarkdownRenderer from '../../components/MarkdownRenderer';
+import MarkdownRenderer from '@/components/MarkdownRenderer';
 import Link from 'next/link';
 
 // <-- Funkcija privalo vadintis iš didžiosios raidės ir būti "export default"

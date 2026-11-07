@@ -3,7 +3,7 @@ import GitHub from 'next-auth/providers/github';
 import Google from 'next-auth/providers/google';
 import { PrismaAdapter } from '@auth/prisma-adapter';
 import prisma from './prisma';
-import { authConfig } from '../auth.config';
+import { authConfig } from '@/auth.config';
 
 const isProduction = process.env.NODE_ENV === 'production';
 const cookieOptions = isProduction

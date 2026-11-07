@@ -5,8 +5,10 @@ import { execSync } from 'node:child_process';
 import { unstable_noStore as noStore } from 'next/cache';
 import { readFileSync } from 'fs';
 import prisma from '../../prisma';
+import { connection } from 'next/server';
 
 export async function GET() {
+  await connection();
   noStore();
   try {
     // 1. Sistemos resursai (CPU, RAM, Diskas)

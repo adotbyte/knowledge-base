@@ -11,7 +11,7 @@ import { redirect } from 'next/navigation';
 // Pagalbinė funkcija vartotojo ID gauti
 async function getUserId() {
   // Cloudflare Access jau mus apsaugojo, todėl naudojame fiksuotą vartotoją
-  return "admin";
+  return 'admin';
 }
 
 // 1. CREATE NOTE
@@ -19,15 +19,18 @@ export async function createNote(formData: FormData) {
   const userId = await getUserId();
   const title = formData.get('title') as string;
   const content = formData.get('content') as string;
-  const tagsString = formData.get('tags') as string; 
+  const tagsString = formData.get('tags') as string;
   const files = formData.getAll('files') as File[];
 
   if (!title || !content) {
     throw new Error('Title and content are required.');
   }
 
-  const tagNames = tagsString 
-    ? tagsString.split(',').map(tag => tag.trim()).filter(Boolean) 
+  const tagNames = tagsString
+    ? tagsString
+        .split(',')
+        .map((tag) => tag.trim())
+        .filter(Boolean)
     : [];
 
   const note = await prisma.note.create({
@@ -44,19 +47,19 @@ export async function createNote(formData: FormData) {
     },
   });
 
-    // Tvarkome failus
+  // Tvarkome failus
   if (files && files.length > 0 && files[0].size > 0) {
     const uploadDir = join(process.cwd(), 'uploads');
     await mkdir(uploadDir, { recursive: true });
 
     for (const file of files) {
       if (file.size === 0) continue;
-      
+
       const bytes = await file.arrayBuffer();
       const buffer = Buffer.from(bytes);
       const uniqueName = `${Date.now()}-${file.name.replace(/\s+/g, '-')}`;
       const filePath = join(uploadDir, uniqueName);
-      
+
       // 1. PIRMA įrašome failą į diską
       await writeFile(filePath, buffer);
 
@@ -89,11 +92,14 @@ export async function createNote(formData: FormData) {
           const response = await ai.interactions.create({
             model: 'gemini-3.8-flash',
             input: [
-              { type: 'text', text: 'Describe this image briefly. If it contains text or code, extract it. If it is an error message, suggest a fix. Respond in Lithuanian.' },
-              { type: 'image', data: base64Image, mime_type: file.type }
+              {
+                type: 'text',
+                text: 'Describe this image briefly. If it contains text or code, extract it. If it is an error message, suggest a fix. Respond in Lithuanian.',
+              },
+              { type: 'image', data: base64Image, mime_type: file.type },
             ],
           });
-          
+
           if (response.output_text) {
             aiDescription = `\n\n---\n### 🖼️ AI Image Analysis (${file.name})\n${response.output_text}`;
           }
@@ -106,13 +112,13 @@ export async function createNote(formData: FormData) {
       if (ai && file.type === 'application/pdf') {
         try {
           const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
-          
+
           // Nurodome worker failo kelią
           pdfjs.GlobalWorkerOptions.workerSrc = `file://${process.cwd()}/public/pdf.worker.mjs`;
-          
+
           const uint8Array = new Uint8Array(buffer);
           const pdf = await pdfjs.getDocument({ data: uint8Array }).promise;
-          
+
           const page = await pdf.getPage(1);
           const textContent = await page.getTextContent();
           const extractedText = textContent.items
@@ -200,8 +206,11 @@ export async function updateNote(id: string, formData: FormData) {
     });
   }
 
-  const tagNames = tagsString 
-    ? tagsString.split(',').map(tag => tag.trim()).filter(Boolean) 
+  const tagNames = tagsString
+    ? tagsString
+        .split(',')
+        .map((tag) => tag.trim())
+        .filter(Boolean)
     : [];
 
   await prisma.note.update({
@@ -270,7 +279,7 @@ export async function summarizeNote(formData: FormData) {
     input: prompt,
   });
 
-  const summary = response.output_text || "No response generated.";
+  const summary = response.output_text || 'No response generated.';
 
   await prisma.note.update({
     where: { id: note.id },
@@ -356,12 +365,14 @@ export async function askKnowledgeBase(query: string) {
     take: 15,
   });
 
-  if (notes.length === 0) return "Your knowledge base is empty.";
+  if (notes.length === 0) return 'Your knowledge base is empty.';
 
-  const context = notes.map(note => {
-    const tags = note.tags.map(t => `#${t.name}`).join(', ');
-    return `--- NOTE: ${note.title} (Tags: ${tags}) ---\n${note.content}`;
-  }).join('\n\n');
+  const context = notes
+    .map((note) => {
+      const tags = note.tags.map((t) => `#${t.name}`).join(', ');
+      return `--- NOTE: ${note.title} (Tags: ${tags}) ---\n${note.content}`;
+    })
+    .join('\n\n');
 
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) throw new Error('GEMINI_API_KEY is missing');
@@ -374,7 +385,7 @@ export async function askKnowledgeBase(query: string) {
     input: prompt,
   });
 
-  return response.output_text || "No response generated.";
+  return response.output_text || 'No response generated.';
 }
 
 // 9. EXPORT NOTES
@@ -391,7 +402,7 @@ export async function exportNotes() {
   notes.forEach((note) => {
     markdownContent += `## ${note.title}\n\n`;
     if (note.tags.length > 0) {
-      markdownContent += `**Tags:** ${note.tags.map(t => `#${t.name}`).join(', ')}\n\n`;
+      markdownContent += `**Tags:** ${note.tags.map((t) => `#${t.name}`).join(', ')}\n\n`;
     }
     markdownContent += `${note.content}\n\n---\n\n`;
   });
@@ -403,7 +414,7 @@ export async function exportNotes() {
 export async function reviewCode(formData: FormData) {
   await getUserId(); // Patikriname, ar prisijungęs
   const code = formData.get('code') as string;
-  const language = formData.get('language') as string || 'unknown';
+  const language = (formData.get('language') as string) || 'unknown';
 
   if (!code) throw new Error('Code is required');
 
@@ -432,7 +443,7 @@ Respond in the same language as the code comments (if any). Be concise but thoro
       input: prompt,
     });
 
-    return response.output_text || "No response generated.";
+    return response.output_text || 'No response generated.';
   } catch (error) {
     console.error('AI Code Review Error:', error);
     throw new Error('Failed to review code');
@@ -443,7 +454,7 @@ Respond in the same language as the code comments (if any). Be concise but thoro
 export async function generateConfig(formData: FormData) {
   await getUserId();
   const serviceName = formData.get('serviceName') as string;
-  const requirements = formData.get('requirements') as string || '';
+  const requirements = (formData.get('requirements') as string) || '';
 
   if (!serviceName) throw new Error('Service name is required');
 
@@ -467,7 +478,7 @@ Return the response in Markdown format with code blocks.`;
     input: prompt,
   });
 
-  return response.output_text || "No response generated.";
+  return response.output_text || 'No response generated.';
 }
 
 // AI Code Explainer
@@ -495,7 +506,7 @@ ${code}
     input: prompt,
   });
 
-  return response.output_text || "No response generated.";
+  return response.output_text || 'No response generated.';
 }
 
 // File share
@@ -520,7 +531,7 @@ export async function searchNotes(query: string) {
 
   const notes = await prisma.note.findMany({
     where: {
-      userId: (await getUserId()), // <-- Dinaminis ID
+      userId: await getUserId(), // <-- Dinaminis ID
       OR: [
         { title: { contains: query, mode: 'insensitive' } },
         { content: { contains: query, mode: 'insensitive' } },
@@ -545,9 +556,11 @@ export async function searchNotes(query: string) {
 export async function getDockerContainers() {
   await getUserId();
   try {
-    const res = await fetch('http://socket-proxy:2375/containers/json?all=true', { cache: 'no-store' });
+    const res = await fetch('http://socket-proxy:2375/containers/json?all=true', {
+      cache: 'no-store',
+    });
     if (!res.ok) throw new Error('Failed to fetch containers');
-    
+
     const data = await res.json();
     return data.map((c: any) => ({
       id: c.Id,

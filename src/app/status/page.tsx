@@ -18,7 +18,7 @@ import {
   Legend,
 } from 'recharts';
 
-import Navbar from '../../components/Navbar';
+import Navbar from '@/components/Navbar';
 
 export default function StatusPage() {
   const [stats, setStats] = useState<any>(null);

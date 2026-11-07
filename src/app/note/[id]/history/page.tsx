@@ -2,7 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import MarkdownRenderer from '../../../../components/MarkdownRenderer';
+import MarkdownRenderer from '@/components/MarkdownRenderer';
 import { Suspense } from 'react';
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });

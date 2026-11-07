@@ -1,5 +1,5 @@
-import DockerManager from '../../components/DockerManager';
-import Navbar from '../../components/Navbar';
+import DockerManager from '@/components/DockerManager';
+import Navbar from '@/components/Navbar';
 import Link from 'next/link';
 
 export default function DockerPage() {

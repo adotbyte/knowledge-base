@@ -4,7 +4,7 @@ import { updateNote } from '../../../actions';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { Suspense } from 'react';
-import Navbar from '../../../../components/Navbar';
+import Navbar from '@/components/Navbar';
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });

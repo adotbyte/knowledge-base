@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { notFound } from 'next/navigation';
-import MarkdownRenderer from '../../../components/MarkdownRenderer';
+import MarkdownRenderer from '@/components/MarkdownRenderer';
 import Link from 'next/link';
 import { Suspense } from 'react';
 

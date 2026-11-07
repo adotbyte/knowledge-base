@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { reviewCode } from '../actions';
-import MarkdownRenderer from '../../components/MarkdownRenderer';
+import MarkdownRenderer from '@/components/MarkdownRenderer';
 import Link from 'next/link';
 
 export default function CodeReviewPage() {
