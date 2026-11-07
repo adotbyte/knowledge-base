@@ -1,13 +1,14 @@
+// src/app/docker/page.tsx
 import { auth } from '@/app/auth';
 import { redirect } from 'next/navigation';
-import StatusContent from './Docker'; // Importuojame jūsų sukurtą komponentą
+import DockerContent from './DockerContent'; // Importuojame teisingu keliu
 
-export default async function Docker() {
+export default async function DockerPage() {
   const session = await auth();
 
   if (!session) {
     redirect('/login');
   }
 
-  return <Docker />;
+  return <DockerContent />;
 }
