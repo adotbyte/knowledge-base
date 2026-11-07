@@ -3,6 +3,7 @@
 
 import { signIn } from 'next-auth/react';
 import { useState } from 'react';
+import Link from 'next/link';
 
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
@@ -52,7 +53,14 @@ export default function LoginPage() {
           {/* Google ikona */}
           Prisijungti su Google
         </button>
-
+        <div className="mt-6 border-t border-gray-200 pt-6 dark:border-gray-700">
+          <Link
+            href="/demo"
+            className="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-3 font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+          >
+            Peržiūrėti demo be prisijungimo
+          </Link>
+        </div>
         <p className="text-center text-xs text-gray-500 dark:text-gray-400">
           Prisijungę sutinkate su mūsų privatumo politika.
         </p>
