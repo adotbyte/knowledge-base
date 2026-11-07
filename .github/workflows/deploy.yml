@@ -2,7 +2,7 @@ name: Deploy Knowledge Base
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ['main']
   workflow_dispatch:
 
 jobs:
@@ -11,48 +11,49 @@ jobs:
     timeout-minutes: 15
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Create .env file
-      run: |
-        cat << 'EOF' > .env
-        DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-        GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
-        AUTH_SECRET=${{ secrets.AUTH_SECRET }}
-        AUTH_GITHUB_ID=${{ secrets.AUTH_GITHUB_ID }}
-        AUTH_GITHUB_SECRET=${{ secrets.AUTH_GITHUB_SECRET }}
-        AUTH_URL=${{ secrets.AUTH_URL }}
-        NEXTAUTH_URL=${{ secrets.NEXTAUTH_URL }}
-        AUTH_TRUST_HOST=${{ secrets.AUTH_TRUST_HOST }}
-        AUTH_COOKIE_SECURE=${{ secrets.AUTH_COOKIE_SECURE }}
-        AUTH_COOKIE_SAME_SITE=${{ secrets.AUTH_COOKIE_SAME_SITE }}
-        NEXT_SERVER_ACTIONS_ENCRYPTION_KEY=${{ secrets.NEXT_SERVER_ACTIONS_ENCRYPTION_KEY }}
-        EOF
+      - name: Create .env file
+        run: |
+          cat << 'EOF' > .env
+          DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+          GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
+          AUTH_SECRET=${{ secrets.AUTH_SECRET }}
+          AUTH_GITHUB_ID=${{ secrets.AUTH_GITHUB_ID }}
+          AUTH_GITHUB_SECRET=${{ secrets.AUTH_GITHUB_SECRET }}
+          AUTH_TRUST_HOST=${{ secrets.AUTH_TRUST_HOST }}
+          AUTH_COOKIE_SECURE=${{ secrets.AUTH_COOKIE_SECURE }}
+          AUTH_COOKIE_SAME_SITE=${{ secrets.AUTH_COOKIE_SAME_SITE }}
+          NEXT_SERVER_ACTIONS_ENCRYPTION_KEY=${{ secrets.NEXT_SERVER_ACTIONS_ENCRYPTION_KEY }}
+          AUTH_GOOGLE_ID=${{ secrets.AUTH_GOOGLE_ID }}
+          AUTH_GOOGLE_SECRET=${{ secrets.AUTH_GOOGLE_SECRET }}
+          AUTH_COOKIE_DOMAIN=${{ secrets.AUTH_COOKIE_DOMAIN }}
+          EOF
 
-    - name: Stop old containers and Clean up
-      run: |
-        docker compose down --remove-orphans || true
+      - name: Stop old containers and Clean up
+        run: |
+          docker compose down --remove-orphans || true
 
-    - name: Build and Deploy
-      run: |
-        docker compose up -d --build
+      - name: Build and Deploy
+        run: |
+          docker compose up -d --build
 
-    # --- DB INICIALIZAVIMO IR PRISMA MIGRACIJŲ ŽINGSNIS ---
-    - name: Wait for DB and apply Prisma schema
-      run: |
-        echo "Waiting for PostgreSQL to be ready..."
-        sleep 5
-        
-        echo "Applying Prisma schema (db push) from inside the web container..."
-        # Vykdome prisma db push web konteinerio viduje, priverstinai naudodami 7 versiją
-        docker exec knowledge_web npx prisma@7 db push --skip-generate || true
-        
-        echo "Applying additional SQL if needed..."
-        docker cp init-db.sql knowledge_db:/tmp/init-db.sql
-        docker exec -i knowledge_db psql -U knowledge -d knowledge_db -f /tmp/init-db.sql || true
-    # ------------------------------------------------------
+      # --- DB INICIALIZAVIMO IR PRISMA MIGRACIJŲ ŽINGSNIS ---
+      - name: Wait for DB and apply Prisma schema
+        run: |
+          echo "Waiting for PostgreSQL to be ready..."
+          sleep 5
 
-    - name: Clean up dangling images
-      run: |
-        docker image prune -f
+          echo "Applying Prisma schema (db push) from inside the web container..."
+          # Vykdome prisma db push web konteinerio viduje, priverstinai naudodami 7 versiją
+          docker exec knowledge_web npx prisma@7 db push --skip-generate || true
+
+          echo "Applying additional SQL if needed..."
+          docker cp init-db.sql knowledge_db:/tmp/init-db.sql
+          docker exec -i knowledge_db psql -U knowledge -d knowledge_db -f /tmp/init-db.sql || true
+      # ------------------------------------------------------
+
+      - name: Clean up dangling images
+        run: |
+          docker image prune -f
