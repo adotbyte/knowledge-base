@@ -1,8 +1,10 @@
 # 🧠 AI-Powered Knowledge Base
 
+# 🧠 AI-Powered Knowledge Base
+
 A personal, self-hosted knowledge base with AI capabilities, built with Next.js 16, Prisma, PostgreSQL, and Google Gemini.
 
-This isn't just a note-taking app; it's a full-stack platform that reads, analyzes, and generates content using AI, protected by Cloudflare Zero Trust and deployed via a self-hosted CI/CD pipeline.
+This isn't just a note-taking app; it's a full-stack platform that reads, analyzes, and generates content using AI, protected by a multi-user Role-Based Access Control (RBAC) system and deployed via a self-hosted CI/CD pipeline.
 
 ![Next.js](https://img.shields.io/badge/Next.js-16-black?style=for-the-badge&logo=next.js)
 ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
@@ -15,9 +17,12 @@ This isn't just a note-taking app; it's a full-stack platform that reads, analyz
 
 ![Home Page](./screenshots/home-black.png)
 ![AI Search](./screenshots/home-white.png)
+![Demo](./screenshots/demo.png)
 
 ## ✨ Features
 
+- **🔐 Multi-User & Role-Based Access (RBAC):** Secure login via Google & GitHub. Admin-only routes for Docker/System management, and isolated personal notes for regular users.
+- **👀 Read-Only Demo Mode:** Unauthenticated visitors can explore AI tools and public notes in a "read-only" state without consuming Gemini API quotas.
 - **📝 Markdown Notes:** Create, edit, and delete notes with a beautiful, responsive UI (Dark/Light mode).
 - **🏷️ Tags & Search:** Organize notes with tags and search through titles, content, and tags.
 - **⌨️ Command Palette (`Ctrl + K`):** A global, lightning-fast search modal to navigate your knowledge instantly.
@@ -34,18 +39,19 @@ This isn't just a note-taking app; it's a full-stack platform that reads, analyz
   - **Public File Sharing:** Generate secure, shareable links for files.
 - **📜 Version History:** Every note edit creates a new version. Roll back to any previous state.
 - **🌐 Public Portfolio:** A public-facing page (`/public`) to showcase your shared notes.
-- **📊 Live Dashboard:** Monitor your Raspberry Pi's CPU, RAM, Uptime, and Docker containers in real-time.
-- **🔒 Security:** Protected by Cloudflare Zero Trust (Access) and Turnstile.
+- **📊 Live Dashboard:** Monitor your Raspberry Pi's CPU, RAM, Uptime, and Docker containers in real-time (Admin only).
+- **🛡️ API Cost Protection:** Google Cloud Spend Cap integration and strict session-based validation to prevent API abuse.
 
 ## 🏗️ Architecture
 
 This project is designed to run entirely on self-hosted hardware (specifically, a Raspberry Pi 5).
 
-- **Frontend/Backend:** Next.js 16 (App Router, Server Actions, React 19).
+- **Frontend/Backend:** Next.js 16 (App Router, Server Actions, React 19, Route Groups).
 - **Database:** PostgreSQL (via Docker) with Prisma ORM.
+- **Auth:** NextAuth.js v5 (Auth.js) with Prisma Adapter and JWT strategy.
 - **AI Engine:** Google Gemini (via `@google/genai`).
 - **Deployment:** Docker Compose, managed by GitHub Actions (Self-hosted runner).
-- **Networking:** Cloudflare Tunnels (zero open inbound ports) and Zero Trust Access.
+- **Networking:** Cloudflare Tunnels (zero open inbound ports).
 - **File Storage:** Docker Bind Mounts for persistent local storage.
 
 ## 🚀 Getting Started
@@ -55,6 +61,7 @@ This project is designed to run entirely on self-hosted hardware (specifically, 
 - Node.js 22+
 - Docker & Docker Compose
 - A Google Gemini API Key
+- Google & GitHub OAuth Credentials
 
 ### Environment Variables
 
@@ -67,10 +74,16 @@ DB_PASSWORD=your_secure_password
 # AI
 GEMINI_API_KEY=your_gemini_api_key
 
-# Auth / Security (For local dev or Cloudflare bypass)
+# Authentication
 AUTH_SECRET=your_auth_secret
+AUTH_URL=http://localhost:3000
 AUTH_TRUST_HOST=true
-```
+
+# OAuth Providers
+AUTH_GOOGLE_ID=your_google_client_id
+AUTH_GOOGLE_SECRET=your_google_client_secret
+AUTH_GITHUB_ID=your_github_client_id
+AUTH_GITHUB_SECRET=your_github_client_secret
 
 ### Installation (Local Development)
 
@@ -116,3 +129,4 @@ This project uses **Vitest** for unit testing. Run:
 ## 📄 License
 
 This project is licensed under the MIT License.
+```
