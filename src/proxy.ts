@@ -2,7 +2,9 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 
+// Next.js 16 reikalauja "proxy" funkcijos eksporto
 export async function proxy(request: NextRequest) {
+  // 1. Nuskaitome sesijos tokeną
   const token = await getToken({
     req: request,
     secret: process.env.AUTH_SECRET,
@@ -12,15 +14,28 @@ export async function proxy(request: NextRequest) {
   const isLoggedIn = !!token;
   const isOnLoginPage = request.nextUrl.pathname.startsWith('/login');
 
+  // 2. Jei neprisijungęs ir bando patekti ne į /login -> nukreipiame į /login
   if (!isLoggedIn && !isOnLoginPage) {
     return NextResponse.redirect(new URL('/login', request.nextUrl));
   }
+
+  // 3. Jei prisijungęs ir bando patekti į /login -> nukreipiame į /
   if (isLoggedIn && isOnLoginPage) {
     return NextResponse.redirect(new URL('/', request.nextUrl));
   }
+
+  // 4. Visais kitais atvejais praleidžiame
   return NextResponse.next();
 }
 
+// Nustatome, kuriems maršrutams taikyti apsaugą
 export const config = {
-  matcher: ['/((?!api/auth|_next/static|_next/image|favicon.ico).*)'],
+  matcher: [
+    /*
+     * Apsaugome visus maršrutus, išskyrus:
+     * - /api/auth (NextAuth)
+     * - /_next/static, /_next/image, /favicon.ico (statiniai failai)
+     */
+    '/((?!api/auth|_next/static|_next/image|favicon.ico).*)',
+  ],
 };
