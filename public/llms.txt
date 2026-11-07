@@ -1,0 +1,15 @@
+# Knowledge Base
+
+> Asmeninė, su AI integruota žinių bazė, leidžianti kurti užrašus, analizuoti failus ir naudotis AI įrankiais.
+
+## Pagrindiniai puslapiai
+
+- [Pagrindinis puslapis](https://knowledge.morkunas.info/): Jūsų asmeniniai užrašai ir paieška.
+- [Viešieji užrašai](https://knowledge.morkunas.info/public): Viešai bendrinami žinių bazės įrašai.
+- [Demo režimas](https://knowledge.morkunas.info/demo): Aplikacijos peržiūra be prisijungimo.
+
+## AI Įrankiai
+
+- [Code Reviewer](https://knowledge.morkunas.info/code-review): AI kodo analizė ir klaidų paieška.
+- [Config Generator](https://knowledge.morkunas.info/config-generator): Docker ir serverių konfigūracijų generavimas.
+- [Code Explainer](https://knowledge.morkunas.info/explainer): Kodo paaiškinimas žingsnis po žingsnio.

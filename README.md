@@ -122,7 +122,7 @@ This project uses **Vitest** for unit testing. Run:
 **Audrius Morkūnas**
 
 - [Portfolio](https://morkunas.info)
-- [Live Knowledge Base](https://knowledge.morkunas.info)
+- [Live Knowledge Base](https://knowledge.morkunas.info/demo)
 
 ## 📄 License
 
