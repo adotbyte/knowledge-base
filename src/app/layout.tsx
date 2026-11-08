@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   description: 'My personal knowledge base',
   manifest: '/manifest.json',
   icons: {
-    icon: '/icon.svg', // <-- PRIDĖTA FAVICON
+    icon: '/icon.svg?v=2', // <-- PRIDĖTA FAVICON
   },
 };
 
