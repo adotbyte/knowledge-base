@@ -28,6 +28,7 @@ export default async function proxy(request: NextRequest) {
     pathname.includes('/config-generator') ||
     pathname.includes('/explainer') ||
     pathname.includes('/api/system-stats') ||
+    pathname.includes('/api/ping') ||
     pathname.includes('/manifest.json') ||
     pathname.includes('/icon.svg') || // <-- JAU YRA
     pathname.includes('/_next') ||
@@ -40,6 +41,7 @@ export default async function proxy(request: NextRequest) {
     if (
       pathname.includes('/manifest.json') ||
       pathname.includes('/api/system-stats') ||
+      pathname.includes('/api/ping') ||
       pathname.includes('/icon.svg') // <-- PRIDĖKITE ŠIĄ EILUTĘ
     ) {
       return NextResponse.next();
