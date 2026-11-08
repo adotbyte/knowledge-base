@@ -47,13 +47,8 @@ jobs:
           echo "Waiting for PostgreSQL to be ready..."
           sleep 5
 
-          echo "Applying Prisma schema (db push) from inside the web container..."
-          # Vykdome prisma db push web konteinerio viduje, priverstinai naudodami 7 versiją
-          docker exec knowledge_web npx prisma@7 db push --skip-generate || true
-
-          echo "Applying additional SQL if needed..."
-          docker cp init-db.sql knowledge_db:/tmp/init-db.sql
-          docker exec -i knowledge_db psql -U knowledge -d knowledge_db -f /tmp/init-db.sql || true
+          echo "Applying Prisma schema (db push) from within the web container..."
+          docker exec knowledge_web npx prisma@7 db push || true
       # ------------------------------------------------------
 
       - name: Clean up dangling images
