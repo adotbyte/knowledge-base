@@ -10,7 +10,7 @@ async function StatusWrapper({ params }: { params: Promise<{ locale: string }> }
   setRequestLocale(locale);
   const t = await getTranslations('Status');
 
-  return <StatusContent params={params} />;
+  return <StatusContent />;
 }
 
 // 2. Pagrindinis puslapis (sinchroninis, be params)

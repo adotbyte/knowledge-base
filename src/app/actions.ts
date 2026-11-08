@@ -604,10 +604,13 @@ export async function controlContainer(containerId: string, action: 'start' | 's
 
 export async function deleteAccount() {
   const session = await auth();
-  if (!session?.user?.id) throw new Error('Neprisijungęs');
+  if (!session?.user?.id) {
+    throw new Error('Neprisijungęs vartotojas');
+  }
 
-  // Ištriname vartotoją. Jei DB yra Cascade, visi jo užrašai išsitrins automatiškai.
   await prisma.user.delete({
     where: { id: session.user.id },
   });
+
+  revalidatePath('/', 'page');
 }

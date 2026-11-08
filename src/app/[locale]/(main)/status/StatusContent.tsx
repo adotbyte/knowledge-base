@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Link } from '@/i18n/routing'; // Naudojame next-intl Link
+import { Link } from '@/i18n/routing';
 import {
   BarChart,
   Bar,
@@ -19,8 +19,8 @@ import {
 } from 'recharts';
 import { useTranslations } from 'next-intl';
 
-// ✅ PRIIMAME params
-export default function StatusContent({ params }: { params: Promise<{ locale: string }> }) {
+export default function StatusContent() {
+  // <-- BE params
   const t = useTranslations('Status');
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
