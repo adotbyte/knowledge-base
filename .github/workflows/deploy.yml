@@ -42,13 +42,13 @@ jobs:
           docker compose up -d --build
 
       # --- DB INICIALIZAVIMO IR PRISMA MIGRACIJŲ ŽINGSNIS ---
-        - name: Wait for DB and apply Prisma schema
-          run: |
-            echo "Waiting for PostgreSQL to be ready..."
-            sleep 5
+      - name: Wait for DB and apply Prisma schema
+        run: |
+          echo "Waiting for PostgreSQL to be ready..."
+          sleep 5
 
-            echo "Applying Prisma schema (db push) from within the web container..."
-            docker exec -e DATABASE_URL="postgresql://knowledge:${{ secrets.DB_PASSWORD }}@db:5432/knowledge_db?schema=public" knowledge_web npx prisma@7 db push --config=prisma.config.ts || true
+          echo "Applying Prisma schema (db push) from within the web container..."
+          docker exec -e DATABASE_URL="postgresql://knowledge:${{ secrets.DB_PASSWORD }}@db:5432/knowledge_db?schema=public" knowledge_web npx prisma@7 db push --config=prisma.config.ts || true
       # ------------------------------------------------------
 
       - name: Clean up dangling images
