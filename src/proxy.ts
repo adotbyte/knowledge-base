@@ -9,6 +9,21 @@ const intlMiddleware = createMiddleware(routing);
 
 export default async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
+  const userAgent = request.headers.get('user-agent') || '';
+
+  // ✅ 1. PATIKRINAME, AR TAI GOOGLEBOT
+  const isGooglebot = userAgent.includes('Googlebot');
+
+  // ✅ 2. JEI TAI GOOGLEBOT, PRALEIDŽIAME JĮ (leidžiame matyti turinį)
+  // Svarbu: čia galite nurodyti tik viešus puslapius, kuriuos norite rodyti Google
+  if (isGooglebot) {
+    // Leidžiame Googlebot matyti pagrindinį puslapį ir kitus viešus puslapius
+    if (pathname === '/' || pathname === '/lt' || pathname === '/en') {
+      // Grąžiname next-intl middleware atsakymą, bet ne peradresuojame į login
+      return intlMiddleware(request);
+    }
+    // Kitur Googlebot vis tiek bus nukreiptas (jei norite, kad matytų tik pagrindinį)
+  }
 
   const isPublicRoute =
     pathname.includes('/login') ||
