@@ -1,11 +1,10 @@
-export const instant = false; // ✅ PRIVERČIAME BŪTI DINAMINĮ
+export const instant = false;
 
 import { Link } from '@/i18n/routing';
 import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { auth } from '@/app/auth';
 import {
-  createNote,
   deleteNote,
   toggleShare,
   summarizeNote,
@@ -18,16 +17,13 @@ import { redirect } from 'next/navigation';
 import { connection } from 'next/server';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import CopyButton from '@/components/CopyButton';
-import GenerateNoteButton from '@/components/GenerateNoteButton';
 import DeleteConfirmButton from '@/components/DeleteConfirmButton';
 import ActionButton from '@/components/ActionButton';
 import HomeClient from '@/components/HomeClient';
-import MarkdownEditor from '@/components/MarkdownEditor';
-import { useState } from 'react';
+import HomeFormClient from '@/components/HomeFormClient'; // <-- PRIDĖTAS IMPORTAS
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
-const [content, setContent] = useState('');
 
 // 1. Apsaugotas turinys (serverinis)
 async function ProtectedContent({
@@ -64,80 +60,7 @@ async function ProtectedContent({
     <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
       {/* LEFT COLUMN: Create Form */}
       <div className="lg:col-span-1">
-        <div className="sticky top-6 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-bold text-gray-900 dark:text-white">{t('addNewNote')}</h2>
-            <GenerateNoteButton />
-          </div>
-          <form action={createNote} className="flex flex-col gap-4">
-            <div>
-              <label
-                htmlFor="title"
-                className="mb-1 block text-xs font-bold tracking-wider text-gray-700 uppercase dark:text-gray-300"
-              >
-                {t('title')}
-              </label>
-              <input
-                type="text"
-                id="title"
-                name="title"
-                placeholder={t('titlePlaceholder')}
-                required
-                className="w-full rounded-xl border border-gray-200 bg-gray-50 p-3 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-950 dark:text-white"
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="content"
-                className="mb-1 block text-xs font-bold tracking-wider text-gray-700 uppercase dark:text-gray-300"
-              >
-                {t('content')}
-              </label>
-              <MarkdownEditor
-                value={content}
-                onChange={setContent}
-                placeholder={t('contentPlaceholder')}
-                minHeight="200px"
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="tags"
-                className="mb-1 block text-xs font-bold tracking-wider text-gray-700 uppercase dark:text-gray-300"
-              >
-                {t('tags')}
-              </label>
-              <input
-                type="text"
-                id="tags"
-                name="tags"
-                placeholder={t('tagsPlaceholder')}
-                className="w-full rounded-xl border border-gray-200 bg-gray-50 p-3 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-950 dark:text-white"
-              />
-            </div>
-            <div className="pointer-events-none relative z-10 mt-2">
-              <label
-                htmlFor="files"
-                className="mb-1 block text-xs font-bold tracking-wider text-gray-700 uppercase dark:text-gray-300"
-              >
-                {t('attachments')}
-              </label>
-              <input
-                type="file"
-                id="files"
-                name="files"
-                multiple
-                className="pointer-events-auto w-full rounded-xl border border-gray-200 bg-gray-50 p-2 text-sm text-gray-900 transition-none file:mr-4 file:rounded-lg file:border-0 file:bg-blue-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-blue-700 hover:file:bg-blue-100 dark:border-gray-700 dark:bg-gray-950 dark:text-white dark:file:bg-gray-800 dark:file:text-gray-300 dark:hover:file:bg-gray-700"
-              />
-            </div>
-            <button
-              type="submit"
-              className="mt-2 rounded-xl bg-blue-600 py-3 font-bold text-white shadow-lg shadow-blue-200 transition-colors hover:bg-blue-700 dark:shadow-none"
-            >
-              {t('saveNote')}
-            </button>
-          </form>
-        </div>
+        <HomeFormClient /> {/* <-- Pakeista */}
       </div>
 
       {/* RIGHT COLUMN: Notes List */}
@@ -313,7 +236,6 @@ export default function Home({
         <Suspense
           fallback={
             <div className="flex min-h-screen items-center justify-center">
-              {/* ✅ Spinner be teksto */}
               <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-500 border-t-transparent"></div>
             </div>
           }
