@@ -243,5 +243,17 @@
   "Metadata": {
     "title": "Knowledge Base",
     "description": "My personal knowledge base"
+  },
+  "Privacy": {
+    "title": "Privacy Policy",
+    "intro": "This privacy policy explains how \"Knowledge Base\" collects, uses, and protects your personal data.",
+    "section1Title": "1. What data do we collect?",
+    "section1Text": "We collect your name and email address when you sign in via Google or GitHub. We also store your created notes and uploaded files.",
+    "section2Title": "2. How do we use your data?",
+    "section2Text": "Your data is used only to allow you to use the application. We do not use your data for advertising.",
+    "section3Title": "3. Third parties",
+    "section3Text": "We use Google Gemini AI to process your notes (e.g., summarization). Your content is not used for training AI models.",
+    "section4Title": "4. Your rights",
+    "section4Text": "You can delete your account and all related data at any time independently through your profile page. You can also contact us via email if you have any additional questions."
   }
 }

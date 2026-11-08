@@ -29,6 +29,7 @@ export default async function proxy(request: NextRequest) {
     pathname.includes('/login') ||
     pathname.includes('/demo') ||
     pathname.includes('/public') ||
+    pathname.includes('/privacy') ||
     pathname.includes('/code-review') ||
     pathname.includes('/config-generator') ||
     pathname.includes('/explainer') ||

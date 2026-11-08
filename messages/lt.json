@@ -243,5 +243,17 @@
   "Metadata": {
     "title": "Knowledge Base",
     "description": "Mano asmeninė žinių bazė"
+  },
+  "Privacy": {
+    "title": "Privatumo politika",
+    "intro": "Ši privatumo politika paaiškina, kaip „Knowledge Base“ renka, naudoja ir saugo jūsų asmens duomenis.",
+    "section1Title": "1. Kokius duomenis renkame?",
+    "section1Text": "Mes renkame jūsų vardą ir el. pašto adresą, kai prisijungiate per Google arba GitHub. Taip pat saugome jūsų sukurtus užrašus ir įkeltus failus.",
+    "section2Title": "2. Kaip naudojame duomenis?",
+    "section2Text": "Jūsų duomenys naudojami tik tam, kad galėtumėte naudotis aplikacija. Mes nenaudojame jūsų duomenų reklamai.",
+    "section3Title": "3. Trečiosios šalys",
+    "section3Text": "Mes naudojame Google Gemini AI, kad galėtume apdoroti jūsų užrašus (pvz., apibendrinti). Jūsų turinys nėra naudojamas AI modelių mokymui.",
+    "section4Title": "4. Jūsų teisės",
+    "section4Text": "Galite bet kada ištrinti savo paskyrą ir visus su ja susijusius duomenis savarankiškai per savo profilio puslapį. Taip pat galite susisiekti su mumis el. paštu, jei turite papildomų klausimų."
   }
 }

@@ -112,7 +112,14 @@ export default function LoginForm({ translations, language }: LoginFormProps) {
         </div>
 
         <p className="text-center text-xs text-gray-500 dark:text-gray-400">
-          {translations.privacy}
+          <Link
+            href="/privacy"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline transition-colors hover:text-blue-600 dark:hover:text-blue-400"
+          >
+            {translations.privacy}
+          </Link>
         </p>
       </div>
     </div>
