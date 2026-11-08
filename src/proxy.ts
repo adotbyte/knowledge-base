@@ -29,6 +29,7 @@ export default async function proxy(request: NextRequest) {
     pathname.includes('/explainer') ||
     pathname.includes('/api/system-stats') ||
     pathname.includes('/manifest.json') ||
+    pathname.includes('/icon.svg') ||
     pathname.includes('/_next') ||
     pathname.includes('/api') ||
     pathname.includes('/llms.txt') ||
