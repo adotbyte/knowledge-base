@@ -18,10 +18,11 @@ This isn't just a note-taking app; it's a full-stack platform that reads, analyz
 
 ## ✨ Features
 
-- **🌍 Full Internationalization (i18n):** Complete Lithuanian and English translation with `next-intl`. Automatic browser locale detection and language switcher.
+- **🌍 Full Internationalization (i18n):** Complete Lithuanian and English translation with `next-intl`. Automatic browser locale detection and a built-in language switcher.
 - **🔐 Multi-User & Role-Based Access (RBAC):** Secure login via Google & GitHub. Admin-only routes for Docker/System management, and isolated personal notes for regular users.
-- **🤖 Cloudflare Turnstile:** Bot protection on the login page, localized to match the selected language.
+- **🤖 Cloudflare Turnstile:** Bot protection on the login page, automatically localized to match the selected language.
 - **👀 Read-Only Demo Mode:** Unauthenticated visitors can explore AI tools and public notes in a "read-only" state without consuming Gemini API quotas.
+- **🛡️ Self-Service Account Deletion:** Users can permanently delete their account and all associated data (notes, files, history) directly from their profile page using a custom, styled confirmation modal. Data is securely wiped thanks to Prisma `onDelete: Cascade`.
 - **📝 Markdown Notes:** Create, edit, and delete notes with a beautiful, responsive UI (Dark/Light mode).
 - **🏷️ Tags & Search:** Organize notes with tags and search through titles, content, and tags.
 - **⌨️ Command Palette (`Ctrl + K`):** A global, lightning-fast search modal to navigate your knowledge instantly.
@@ -39,6 +40,7 @@ This isn't just a note-taking app; it's a full-stack platform that reads, analyz
 - **📜 Version History:** Every note edit creates a new version. Roll back to any previous state.
 - **🌐 Public Portfolio:** A public-facing page (`/public`) to showcase your shared notes.
 - **📊 Live Dashboard:** Monitor your Raspberry Pi's CPU, RAM, Uptime, and Docker containers in real-time (Admin only).
+- **📱 Fully Responsive Navbar:** Optimized for mobile and desktop with a clean, animated hamburger menu.
 - **🛡️ API Cost Protection:** Google Cloud Spend Cap integration and strict session-based validation to prevent API abuse.
 - **🔍 SEO & AI Discoverability:** A-grade security headers (CSP, HSTS, etc.), `sitemap.xml`, `robots.txt`, `llms.txt`, and `ARD manifest` for AI agents.
 
