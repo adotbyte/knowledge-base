@@ -8,6 +8,7 @@ RUN apk add --no-cache openssl
 # Nukopijuojame package failus
 COPY package*.json ./
 COPY prisma ./prisma/
+COPY prisma.config.ts ./prisma.config.ts
 
 # Įdiegiame priklausomybes (su legacy-peer-deps, kad išvengtume konfliktų)
 RUN npm ci --legacy-peer-deps
@@ -49,11 +50,11 @@ COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 
 # ✅ SVARBU: Nukopijuojame VISĄ node_modules iš builder stadijos
-# Tai užtikrins, kad prisma CLI turės visus reikiamus failus (cli.js ir kt.)
 COPY --from=builder /app/node_modules ./node_modules
 
-# Nukopijuojame Prisma schemą
+# Nukopijuojame Prisma schemą ir config failą
 COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
 
 # Sukuriame uploads katalogą ir suteikiame teises
 RUN mkdir -p /app/uploads && chown -R nextjs:nodejs /app/uploads
