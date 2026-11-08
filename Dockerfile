@@ -43,16 +43,18 @@ RUN apk add --no-cache openssl
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Nukopijuojame tik tai, ko reikia produkcijai
+# Nukopijuojame standalone build (jau turi reikiamus node_modules)
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
+
+# ✅ SVARBU: Nukopijuojame VISĄ node_modules iš builder stadijos
+# Tai užtikrins, kad prisma CLI turės visus reikiamus failus (cli.js ir kt.)
+COPY --from=builder /app/node_modules ./node_modules
+
+# Nukopijuojame Prisma schemą
 COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
-COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
-COPY --from=builder /app/node_modules/.bin/prisma ./node_modules/.bin/prisma
-COPY --from=builder /app/node_modules/pdfjs-dist ./node_modules/pdfjs-dist
+
 # Sukuriame uploads katalogą ir suteikiame teises
 RUN mkdir -p /app/uploads && chown -R nextjs:nodejs /app/uploads
 
