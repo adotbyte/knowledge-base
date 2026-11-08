@@ -266,6 +266,10 @@
     "deleteAccount": "Delete Account",
     "deleting": "Deleting...",
     "confirmDeleteAccount": "Are you sure you want to delete your account? This action cannot be undone.",
-    "deleteError": "Failed to delete account. Please try again."
+    "deleteError": "Failed to delete account. Please try again.",
+    "confirmDeleteTitle": "Delete Account?",
+    "confirmDeleteDescription": "Are you sure you want to delete your account? All your notes and files will be permanently erased. This action cannot be undone.",
+    "confirmDeleteButton": "Yes, delete",
+    "cancel": "Cancel"
   }
 }

@@ -266,6 +266,10 @@
     "deleteAccount": "Ištrinti paskyrą",
     "deleting": "Trinama...",
     "confirmDeleteAccount": "Ar tikrai norite ištrinti savo paskyrą? Šio veiksmo atšaukti negalėsite.",
-    "deleteError": "Nepavyko ištrinti paskyros. Bandykite dar kartą."
+    "deleteError": "Nepavyko ištrinti paskyros. Bandykite dar kartą.",
+    "confirmDeleteTitle": "Ištrinti paskyrą?",
+    "confirmDeleteDescription": "Ar tikrai norite ištrinti savo paskyrą? Visi jūsų užrašai ir failai bus negrįžtamai ištrinti. Šio veiksmo atšaukti negalėsite.",
+    "confirmDeleteButton": "Taip, ištrinti",
+    "cancel": "Atšaukti"
   }
 }
