@@ -44,7 +44,9 @@ export default function DemoContent() {
             >
               <h2 className="text-lg font-bold text-gray-900 dark:text-white">{note.title}</h2>
               <div className="mt-4 rounded-xl bg-gray-50 p-4 font-mono text-sm dark:bg-gray-950">
-                <pre className="whitespace-pre-wrap">{note.content}</pre>
+                <pre className="whitespace-pre-wrap text-gray-900 dark:text-gray-100">
+                  {note.content}
+                </pre>
               </div>
               <div className="mt-3 flex gap-2">
                 {note.tags.map((tag) => (
