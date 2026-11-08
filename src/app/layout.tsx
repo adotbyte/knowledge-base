@@ -6,6 +6,15 @@ import { SessionProvider } from 'next-auth/react';
 
 const inter = Inter({ subsets: ['latin'] });
 
+export const metadata: Metadata = {
+  title: 'Knowledge Base',
+  description: 'My personal knowledge base',
+  manifest: '/manifest.json',
+  icons: {
+    icon: '/icon.svg', // <-- PRIDĖTA FAVICON
+  },
+};
+
 export const viewport: Viewport = {
   themeColor: '#2563eb',
 };
