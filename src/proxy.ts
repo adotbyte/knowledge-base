@@ -29,15 +29,19 @@ export default async function proxy(request: NextRequest) {
     pathname.includes('/explainer') ||
     pathname.includes('/api/system-stats') ||
     pathname.includes('/manifest.json') ||
-    pathname.includes('/icon.svg') ||
+    pathname.includes('/icon.svg') || // <-- JAU YRA
     pathname.includes('/_next') ||
     pathname.includes('/api') ||
     pathname.includes('/llms.txt') ||
     pathname.includes('/.well-known');
 
   if (isPublicRoute) {
-    // ✅ APEINAME intlMiddleware manifest.json ir api/system-stats
-    if (pathname.includes('/manifest.json') || pathname.includes('/api/system-stats')) {
+    // ✅ APEINAME intlMiddleware manifest.json, api/system-stats IR icon.svg
+    if (
+      pathname.includes('/manifest.json') ||
+      pathname.includes('/api/system-stats') ||
+      pathname.includes('/icon.svg') // <-- PRIDĖKITE ŠIĄ EILUTĘ
+    ) {
       return NextResponse.next();
     }
     return intlMiddleware(request);
