@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, Suspense } from 'react';
+import { useState, Suspense, useEffect } from 'react';
 import { Link, usePathname } from '@/i18n/routing';
 import { useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
@@ -40,9 +40,14 @@ export default function Navbar() {
 
   const links = isAdmin ? [...adminLinks, ...userLinks] : userLinks;
 
+  // Uždaryti mobilų meniu pasikeitus maršrutui
+  useEffect(() => {
+    setIsOpen(false);
+  }, [pathname]);
+
   return (
     <nav className="sticky top-0 z-50 border-b border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
+      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
         {/* Logotipas */}
         <Link href="/" className="flex items-center gap-3">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 font-black text-white">
@@ -53,7 +58,7 @@ export default function Navbar() {
           </h1>
         </Link>
 
-        {/* Desktop meniu */}
+        {/* Desktop meniu (nuo 768px) */}
         <div className="hidden items-center gap-2 md:flex md:gap-4">
           {links.map((link) => (
             <Link
@@ -77,8 +82,6 @@ export default function Navbar() {
           </Suspense>
           <ThemeToggle />
           <ExportButton />
-
-          {/* ✅ PROFILIO NUORODA */}
           {session && (
             <Link
               href="/profile"
@@ -104,11 +107,10 @@ export default function Navbar() {
               <span className="hidden lg:block">{session.user?.name || 'Profilis'}</span>
             </Link>
           )}
-
           {session && <LogoutButton />}
         </div>
 
-        {/* Mobile meniu mygtukas */}
+        {/* Mobile meniu mygtukas (iki 768px) */}
         <div className="flex items-center gap-2 md:hidden">
           <Suspense
             fallback={
@@ -121,6 +123,7 @@ export default function Navbar() {
           <button
             onClick={() => setIsOpen(!isOpen)}
             className="rounded-lg p-2 text-gray-600 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+            aria-label="Toggle menu"
           >
             <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               {isOpen ? (
@@ -143,21 +146,28 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile išskleidžiamas meniu */}
-      {isOpen && (
-        <div className="flex flex-col gap-4 border-t border-gray-100 bg-white px-6 py-4 shadow-lg md:hidden dark:border-gray-800 dark:bg-gray-900">
+      {/* Mobile išskleidžiamas meniu su animacija */}
+      <div
+        className={`fixed inset-x-0 top-16 z-40 transform border-t border-gray-100 bg-white shadow-lg transition-transform duration-300 ease-in-out md:hidden dark:border-gray-800 dark:bg-gray-900 ${
+          isOpen ? 'translate-y-0' : '-translate-y-full'
+        }`}
+      >
+        <div className="flex max-h-[calc(100vh-4rem)] flex-col gap-4 overflow-y-auto px-6 py-4">
           {links.map((link) => (
             <Link
               key={link.href}
               href={link.href}
               onClick={() => setIsOpen(false)}
-              className="text-base font-semibold text-gray-700 transition-colors hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400"
+              className={`text-base font-semibold transition-colors hover:text-blue-600 dark:hover:text-blue-400 ${
+                pathname === link.href
+                  ? 'text-blue-600 dark:text-blue-400'
+                  : 'text-gray-700 dark:text-gray-300'
+              }`}
             >
               {link.name}
             </Link>
           ))}
 
-          {/* ✅ PROFILIO NUORODA MOBILIAJAME MENIU */}
           {session && (
             <Link
               href="/profile"
@@ -189,6 +199,14 @@ export default function Navbar() {
             {session && <LogoutButton />}
           </div>
         </div>
+      </div>
+
+      {/* Fono uždengimas (overlay) mobile meniu atveju */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 top-16 z-30 bg-black/20 backdrop-blur-sm md:hidden"
+          onClick={() => setIsOpen(false)}
+        />
       )}
     </nav>
   );
