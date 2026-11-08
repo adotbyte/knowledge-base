@@ -40,7 +40,6 @@ export default function Navbar() {
 
   const links = isAdmin ? [...adminLinks, ...userLinks] : userLinks;
 
-  // Uždaryti mobilų meniu pasikeitus maršrutui
   useEffect(() => {
     setIsOpen(false);
   }, [pathname]);
