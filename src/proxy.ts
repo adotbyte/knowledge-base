@@ -4,27 +4,21 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 
-// ✅ Dabar createMiddleware priima tik vieną argumentą (routing)
 const intlMiddleware = createMiddleware(routing);
 
 export default async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const userAgent = request.headers.get('user-agent') || '';
 
-  // ✅ 1. PATIKRINAME, AR TAI GOOGLEBOT
+  // ✅ 1. GOOGLEBOT
   const isGooglebot = userAgent.includes('Googlebot');
-
-  // ✅ 2. JEI TAI GOOGLEBOT, PRALEIDŽIAME JĮ (leidžiame matyti turinį)
-  // Svarbu: čia galite nurodyti tik viešus puslapius, kuriuos norite rodyti Google
   if (isGooglebot) {
-    // Leidžiame Googlebot matyti pagrindinį puslapį ir kitus viešus puslapius
     if (pathname === '/' || pathname === '/lt' || pathname === '/en') {
-      // Grąžiname next-intl middleware atsakymą, bet ne peradresuojame į login
       return intlMiddleware(request);
     }
-    // Kitur Googlebot vis tiek bus nukreiptas (jei norite, kad matytų tik pagrindinį)
   }
 
+  // ✅ 2. VIEŠI MARŠRUTAI
   const isPublicRoute =
     pathname.includes('/login') ||
     pathname.includes('/demo') ||
@@ -41,9 +35,14 @@ export default async function proxy(request: NextRequest) {
     pathname.includes('/.well-known');
 
   if (isPublicRoute) {
+    // ✅ APEINAME intlMiddleware manifest.json ir api/system-stats
+    if (pathname.includes('/manifest.json') || pathname.includes('/api/system-stats')) {
+      return NextResponse.next();
+    }
     return intlMiddleware(request);
   }
 
+  // ✅ 3. PRIVATŪS MARŠRUTAI
   const token = await getToken({
     req: request,
     secret: process.env.AUTH_SECRET,
