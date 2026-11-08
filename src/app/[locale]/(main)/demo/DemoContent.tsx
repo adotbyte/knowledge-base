@@ -5,17 +5,19 @@ import { Link } from '@/i18n/routing';
 
 export default function DemoContent() {
   const t = useTranslations('Demo');
+
+  // ✅ Techninis turinys įrašytas tiesiogiai (be t('...'))
   const demoNotes = [
     {
       id: '1',
       title: t('note1Title'),
-      content: t('note1Content'),
+      content: t.raw('note1Content'), // <-- NAUDOJAME t.raw()
       tags: [t('note1Tag1'), t('note1Tag2')],
     },
     {
       id: '2',
       title: t('note2Title'),
-      content: t('note2Content'),
+      content: t.raw('note2Content'), // <-- NAUDOJAME t.raw()
       tags: [t('note2Tag1'), t('note2Tag2')],
     },
   ];

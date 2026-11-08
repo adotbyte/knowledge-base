@@ -4,12 +4,12 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 
+// ✅ Dabar createMiddleware priima tik vieną argumentą (routing)
 const intlMiddleware = createMiddleware(routing);
 
 export default async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
-  // 1. Nustatome, ar tai viešas puslapis (be kalbos prefikso)
   const isPublicRoute =
     pathname.includes('/login') ||
     pathname.includes('/demo') ||
@@ -22,12 +22,10 @@ export default async function proxy(request: NextRequest) {
     pathname.includes('/llms.txt') ||
     pathname.includes('/.well-known');
 
-  // 2. Jei tai viešas puslapis, leidžiame next-intl jį apdoroti (nukreipti į /lt arba /en)
   if (isPublicRoute) {
     return intlMiddleware(request);
   }
 
-  // 3. Jei tai privatus puslapis, tikriname sesiją
   const token = await getToken({
     req: request,
     secret: process.env.AUTH_SECRET,
@@ -35,7 +33,8 @@ export default async function proxy(request: NextRequest) {
   });
 
   if (!token) {
-    return NextResponse.redirect(new URL('/lt/login', request.nextUrl));
+    const loginUrl = new URL('/login', request.nextUrl);
+    return NextResponse.redirect(loginUrl);
   }
 
   return intlMiddleware(request);

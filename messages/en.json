@@ -168,7 +168,8 @@
     "note2Title": "Nginx Configuration",
     "note2Content": "Basic Nginx configuration looks like this:\n\n```nginx\nserver {\n  listen 80;\n  server_name example.com;\n}\n```",
     "note2Tag1": "Nginx",
-    "note2Tag2": "Web"
+    "note2Tag2": "Web",
+    "loading": "Loading..."
   },
   "Components": {
     "exportAll": "Export All",

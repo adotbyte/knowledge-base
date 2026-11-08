@@ -5,7 +5,6 @@ import { useState } from 'react';
 import { Link } from '@/i18n/routing';
 import { Turnstile } from '@marsidev/react-turnstile';
 
-// Apibrėžiame props tipą
 interface LoginFormProps {
   translations: {
     title: string;
@@ -14,36 +13,41 @@ interface LoginFormProps {
     google: string;
     demo: string;
     privacy: string;
-    loading: string; // <-- Jau pridėta
+    loading: string;
   };
   language: string;
 }
 
-export default function LoginForm({ translations }: LoginFormProps) {
-  const [isLoading, setIsLoading] = useState(false);
+export default function LoginForm({ translations, language }: LoginFormProps) {
+  // ✅ Atskiri būsenos kintamieji kiekvienam mygtukui
+  const [isGitHubLoading, setIsGitHubLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [isVerified, setIsVerified] = useState(false);
 
   const handleGitHubLogin = async () => {
     if (!isVerified) return;
-    setIsLoading(true);
+    setIsGitHubLoading(true);
     try {
       await signIn('github', { callbackUrl: '/' });
     } catch (error) {
       console.error('Login failed:', error);
-      setIsLoading(false);
+      setIsGitHubLoading(false);
     }
   };
 
   const handleGoogleLogin = async () => {
     if (!isVerified) return;
-    setIsLoading(true);
+    setIsGoogleLoading(true);
     try {
       await signIn('google', { callbackUrl: '/' });
     } catch (error) {
       console.error('Login failed:', error);
-      setIsLoading(false);
+      setIsGoogleLoading(false);
     }
   };
+
+  // ✅ Bendras "loading" rodymui (jei bent vienas kraunasi)
+  const isLoading = isGitHubLoading || isGoogleLoading;
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-900">
@@ -57,7 +61,7 @@ export default function LoginForm({ translations }: LoginFormProps) {
         <div className="flex justify-center">
           <Turnstile
             siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || '1x00000000000000000000AA'}
-            options={{ language: 'language' }}
+            options={{ language: language }}
             onSuccess={() => setIsVerified(true)}
             onError={() => setIsVerified(false)}
             onExpire={() => setIsVerified(false)}
@@ -71,8 +75,8 @@ export default function LoginForm({ translations }: LoginFormProps) {
             disabled={isLoading || !isVerified}
             className="flex w-full items-center justify-center gap-3 rounded-lg bg-gray-900 px-4 py-3 font-semibold text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-gray-700 dark:hover:bg-gray-600"
           >
-            {isLoading ? (
-              <span>{translations.loading}</span> // <-- PAKEISTA
+            {isGitHubLoading ? (
+              <span>{translations.loading}</span> // ✅ Tik GitHub rodo savo loading
             ) : (
               <>
                 <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
@@ -89,8 +93,11 @@ export default function LoginForm({ translations }: LoginFormProps) {
             disabled={isLoading || !isVerified}
             className="flex w-full items-center justify-center gap-3 rounded-lg bg-red-600 px-4 py-3 font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {isLoading ? <span>{translations.loading}</span> : <>{translations.google}</>}{' '}
-            {/* <-- PAKEISTA */}
+            {isGoogleLoading ? ( // ✅ Tik Google rodo savo loading
+              <span>{translations.loading}</span>
+            ) : (
+              <>{translations.google}</>
+            )}
           </button>
         </div>
 
