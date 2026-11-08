@@ -33,6 +33,8 @@ export default async function proxy(request: NextRequest) {
     pathname.includes('/code-review') ||
     pathname.includes('/config-generator') ||
     pathname.includes('/explainer') ||
+    pathname.includes('/api/system-stats') ||
+    pathname.includes('/manifest.json') ||
     pathname.includes('/_next') ||
     pathname.includes('/api') ||
     pathname.includes('/llms.txt') ||
