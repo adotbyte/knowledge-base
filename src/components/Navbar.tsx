@@ -1,15 +1,14 @@
 'use client';
 
 import { useState, Suspense } from 'react';
-import { Link, usePathname } from '@/i18n/routing'; // <-- Naudojame next-intl Link
+import { Link, usePathname } from '@/i18n/routing';
 import { useSession } from 'next-auth/react';
-import { useTranslations } from 'next-intl'; // <-- Vertimams
+import { useTranslations } from 'next-intl';
 import ExportButton from '@/components/ExportButton';
 import ThemeToggle from '@/components/ThemeToggle';
 import LogoutButton from '@/components/LogoutButton';
 import dynamic from 'next/dynamic';
 
-// Dinaminis LanguageSwitcher įkėlimas (kad nebreakintų build)
 const LanguageSwitcher = dynamic(() => import('@/components/LanguageSwitcher'), {
   ssr: false,
   loading: () => (
@@ -20,10 +19,9 @@ const LanguageSwitcher = dynamic(() => import('@/components/LanguageSwitcher'), 
 export default function Navbar() {
   const { data: session } = useSession();
   const [isOpen, setIsOpen] = useState(false);
-  const t = useTranslations('Navigation'); // <-- Vertimų hook'as
+  const t = useTranslations('Navigation');
   const pathname = usePathname();
 
-  // 1. TIK ADMINUI MATOMOS NUORODOS
   const ADMIN_EMAIL = 'adotbyte@gmail.com';
   const isAdmin = session?.user?.email === ADMIN_EMAIL;
 
@@ -33,7 +31,6 @@ export default function Navbar() {
     { name: t('status'), href: '/status' },
   ];
 
-  // 2. VISIEMS PRISIJUNGUSIEMS MATOMOS NUORODOS
   const userLinks = [
     { name: t('codeReview'), href: '/code-review' },
     { name: t('configGen'), href: '/config-generator' },
@@ -41,7 +38,6 @@ export default function Navbar() {
     { name: t('publicView'), href: '/public' },
   ];
 
-  // Sujungiame: admin mato viską, paprastas vartotojas - tik AI įrankius
   const links = isAdmin ? [...adminLinks, ...userLinks] : userLinks;
 
   return (
@@ -81,6 +77,34 @@ export default function Navbar() {
           </Suspense>
           <ThemeToggle />
           <ExportButton />
+
+          {/* ✅ PROFILIO NUORODA */}
+          {session && (
+            <Link
+              href="/profile"
+              className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-semibold text-gray-500 transition-colors hover:bg-gray-100 hover:text-blue-600 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-blue-400"
+              title="Profilis"
+            >
+              {session.user?.image ? (
+                <img
+                  src={session.user.image}
+                  alt="Profilis"
+                  className="h-7 w-7 rounded-full border border-gray-200 dark:border-gray-700"
+                />
+              ) : (
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                  />
+                </svg>
+              )}
+              <span className="hidden lg:block">{session.user?.name || 'Profilis'}</span>
+            </Link>
+          )}
+
           {session && <LogoutButton />}
         </div>
 
@@ -132,6 +156,34 @@ export default function Navbar() {
               {link.name}
             </Link>
           ))}
+
+          {/* ✅ PROFILIO NUORODA MOBILIAJAME MENIU */}
+          {session && (
+            <Link
+              href="/profile"
+              onClick={() => setIsOpen(false)}
+              className="flex items-center gap-3 text-base font-semibold text-gray-700 transition-colors hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400"
+            >
+              {session.user?.image ? (
+                <img
+                  src={session.user.image}
+                  alt="Profilis"
+                  className="h-8 w-8 rounded-full border border-gray-200 dark:border-gray-700"
+                />
+              ) : (
+                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                  />
+                </svg>
+              )}
+              <span>Profilis</span>
+            </Link>
+          )}
+
           <div className="flex items-center justify-between border-t border-gray-100 pt-4 dark:border-gray-800">
             <ExportButton />
             {session && <LogoutButton />}
