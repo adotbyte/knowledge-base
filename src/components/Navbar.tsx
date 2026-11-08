@@ -145,67 +145,57 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile išskleidžiamas meniu su animacija */}
-      <div
-        className={`fixed inset-x-0 top-16 z-40 transform border-t border-gray-100 bg-white shadow-lg transition-transform duration-300 ease-in-out md:hidden dark:border-gray-800 dark:bg-gray-900 ${
-          isOpen ? 'translate-y-0' : '-translate-y-full'
-        }`}
-      >
-        <div className="flex max-h-[calc(100vh-4rem)] flex-col gap-4 overflow-y-auto px-6 py-4">
-          {links.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              onClick={() => setIsOpen(false)}
-              className={`text-base font-semibold transition-colors hover:text-blue-600 dark:hover:text-blue-400 ${
-                pathname === link.href
-                  ? 'text-blue-600 dark:text-blue-400'
-                  : 'text-gray-700 dark:text-gray-300'
-              }`}
-            >
-              {link.name}
-            </Link>
-          ))}
+      {/* ✅ MOBILUS MENIU - paprastas, be animacijų */}
+      {isOpen && (
+        <div className="border-t border-gray-100 bg-white px-4 py-4 md:hidden dark:border-gray-800 dark:bg-gray-900">
+          <div className="flex flex-col gap-4">
+            {links.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={() => setIsOpen(false)}
+                className={`text-base font-semibold transition-colors hover:text-blue-600 dark:hover:text-blue-400 ${
+                  pathname === link.href
+                    ? 'text-blue-600 dark:text-blue-400'
+                    : 'text-gray-700 dark:text-gray-300'
+                }`}
+              >
+                {link.name}
+              </Link>
+            ))}
 
-          {session && (
-            <Link
-              href="/profile"
-              onClick={() => setIsOpen(false)}
-              className="flex items-center gap-3 text-base font-semibold text-gray-700 transition-colors hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400"
-            >
-              {session.user?.image ? (
-                <img
-                  src={session.user.image}
-                  alt="Profilis"
-                  className="h-8 w-8 rounded-full border border-gray-200 dark:border-gray-700"
-                />
-              ) : (
-                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+            {session && (
+              <Link
+                href="/profile"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center gap-3 text-base font-semibold text-gray-700 transition-colors hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400"
+              >
+                {session.user?.image ? (
+                  <img
+                    src={session.user.image}
+                    alt="Profilis"
+                    className="h-8 w-8 rounded-full border border-gray-200 dark:border-gray-700"
                   />
-                </svg>
-              )}
-              <span>Profilis</span>
-            </Link>
-          )}
+                ) : (
+                  <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                    />
+                  </svg>
+                )}
+                <span>Profilis</span>
+              </Link>
+            )}
 
-          <div className="flex items-center justify-between border-t border-gray-100 pt-4 dark:border-gray-800">
-            <ExportButton />
-            {session && <LogoutButton />}
+            <div className="flex items-center justify-between border-t border-gray-100 pt-4 dark:border-gray-800">
+              <ExportButton />
+              {session && <LogoutButton />}
+            </div>
           </div>
         </div>
-      </div>
-
-      {/* Fono uždengimas (overlay) mobile meniu atveju */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 top-16 z-30 bg-black/20 backdrop-blur-sm md:hidden"
-          onClick={() => setIsOpen(false)}
-        />
       )}
     </nav>
   );
