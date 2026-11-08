@@ -255,5 +255,17 @@
     "section3Text": "Mes naudojame Google Gemini AI, kad galėtume apdoroti jūsų užrašus (pvz., apibendrinti). Jūsų turinys nėra naudojamas AI modelių mokymui.",
     "section4Title": "4. Jūsų teisės",
     "section4Text": "Galite bet kada ištrinti savo paskyrą ir visus su ja susijusius duomenis savarankiškai per savo profilio puslapį. Taip pat galite susisiekti su mumis el. paštu, jei turite papildomų klausimų."
+  },
+  "Profile": {
+    "title": "Profilis",
+    "name": "Vardas",
+    "email": "El. paštas",
+    "id": "ID",
+    "dangerZone": "Pavojinga zona",
+    "dangerZoneDescription": "Ištrynus paskyrą, visi jūsų užrašai, failai ir istorija bus negrįžtamai ištrinti.",
+    "deleteAccount": "Ištrinti paskyrą",
+    "deleting": "Trinama...",
+    "confirmDeleteAccount": "Ar tikrai norite ištrinti savo paskyrą? Šio veiksmo atšaukti negalėsite.",
+    "deleteError": "Nepavyko ištrinti paskyros. Bandykite dar kartą."
   }
 }

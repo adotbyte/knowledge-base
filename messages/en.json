@@ -255,5 +255,17 @@
     "section3Text": "We use Google Gemini AI to process your notes (e.g., summarization). Your content is not used for training AI models.",
     "section4Title": "4. Your rights",
     "section4Text": "You can delete your account and all related data at any time independently through your profile page. You can also contact us via email if you have any additional questions."
+  },
+  "Profile": {
+    "title": "Profile",
+    "name": "Name",
+    "email": "Email",
+    "id": "ID",
+    "dangerZone": "Danger Zone",
+    "dangerZoneDescription": "Deleting your account will permanently erase all your notes, files, and history.",
+    "deleteAccount": "Delete Account",
+    "deleting": "Deleting...",
+    "confirmDeleteAccount": "Are you sure you want to delete your account? This action cannot be undone.",
+    "deleteError": "Failed to delete account. Please try again."
   }
 }
