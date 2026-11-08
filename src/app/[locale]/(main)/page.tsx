@@ -22,9 +22,12 @@ import GenerateNoteButton from '@/components/GenerateNoteButton';
 import DeleteConfirmButton from '@/components/DeleteConfirmButton';
 import ActionButton from '@/components/ActionButton';
 import HomeClient from '@/components/HomeClient';
+import MarkdownEditor from '@/components/MarkdownEditor';
+import { useState } from 'react';
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
+const [content, setContent] = useState('');
 
 // 1. Apsaugotas turinys (serverinis)
 async function ProtectedContent({
@@ -90,13 +93,11 @@ async function ProtectedContent({
               >
                 {t('content')}
               </label>
-              <textarea
-                id="content"
-                name="content"
+              <MarkdownEditor
+                value={content}
+                onChange={setContent}
                 placeholder={t('contentPlaceholder')}
-                required
-                rows={8}
-                className="w-full resize-none rounded-xl border border-gray-200 bg-gray-50 p-3 font-mono text-sm text-gray-900 outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-950 dark:text-white"
+                minHeight="200px"
               />
             </div>
             <div>
