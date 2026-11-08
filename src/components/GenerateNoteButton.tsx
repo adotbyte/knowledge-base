@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslations } from 'next-intl'; // <-- Vertimams
 import { generateNote } from '../app/actions';
+import { toast } from 'sonner';
 
 export default function GenerateNoteButton() {
   const t = useTranslations('Components'); // <-- Vertimų hook'as
@@ -22,10 +23,11 @@ export default function GenerateNoteButton() {
     const formData = new FormData(e.currentTarget);
     try {
       await generateNote(formData);
+      toast.success(t('noteGeneratedSuccess'));
       setIsOpen(false);
     } catch (error) {
       console.error(error);
-      alert(t('generateError')); // <-- VERTIMAS
+      toast.error(t('generateError'));
     } finally {
       setIsGenerating(false);
     }

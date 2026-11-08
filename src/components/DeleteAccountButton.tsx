@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { signOut } from 'next-auth/react';
 import { deleteAccount } from '@/app/actions';
 import { useTranslations } from 'next-intl';
+import { toast } from 'sonner';
 
 export default function DeleteAccountButton() {
   const t = useTranslations('Profile');
@@ -14,10 +15,11 @@ export default function DeleteAccountButton() {
     setIsDeleting(true);
     try {
       await deleteAccount();
+      toast.success(t('accountDeletedSuccess'));
       await signOut({ callbackUrl: '/login' });
     } catch (error) {
       console.error('Failed to delete account:', error);
-      alert(t('deleteError'));
+      toast.error(t('deleteError'));
       setIsDeleting(false);
       setIsOpen(false);
     }

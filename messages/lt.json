@@ -238,7 +238,9 @@
     "lastUpdated": "Paskutinis atnaujinimas",
     "noPreviousVersions": "Ankstesnių versijų nėra. Pradėkite redaguoti, kad sukurtumėte istoriją.",
     "versionHistory": "Versijų istorija",
-    "publicSearchPlaceholder": "Ieškoti viešų užrašų..."
+    "publicSearchPlaceholder": "Ieškoti viešų užrašų...",
+    "exportSuccess": "Užrašai sėkmingai eksportuoti!",
+    "noteGeneratedSuccess": "Užrašas sėkmingai sugeneruotas!"
   },
   "Metadata": {
     "title": "Knowledge Base",
@@ -270,6 +272,7 @@
     "confirmDeleteTitle": "Ištrinti paskyrą?",
     "confirmDeleteDescription": "Ar tikrai norite ištrinti savo paskyrą? Visi jūsų užrašai ir failai bus negrįžtamai ištrinti. Šio veiksmo atšaukti negalėsite.",
     "confirmDeleteButton": "Taip, ištrinti",
-    "cancel": "Atšaukti"
+    "cancel": "Atšaukti",
+    "accountDeletedSuccess": "Paskyra sėkmingai ištrinta."
   }
 }

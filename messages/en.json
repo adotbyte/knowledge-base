@@ -238,7 +238,9 @@
     "lastUpdated": "Last updated",
     "noPreviousVersions": "No previous versions yet. Start editing to create history.",
     "versionHistory": "Version History",
-    "publicSearchPlaceholder": "Search public notes..."
+    "publicSearchPlaceholder": "Search public notes...",
+    "exportSuccess": "Notes exported successfully!",
+    "noteGeneratedSuccess": "Note generated successfully!"
   },
   "Metadata": {
     "title": "Knowledge Base",
@@ -270,6 +272,7 @@
     "confirmDeleteTitle": "Delete Account?",
     "confirmDeleteDescription": "Are you sure you want to delete your account? All your notes and files will be permanently erased. This action cannot be undone.",
     "confirmDeleteButton": "Yes, delete",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "accountDeletedSuccess": "Account deleted successfully."
   }
 }

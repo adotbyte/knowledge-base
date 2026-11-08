@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react';
 import { Link } from '@/i18n/routing'; // <-- next-intl Link
 import { useTranslations } from 'next-intl'; // <-- Vertimams
 import { exportNotes } from '@/app/actions';
+import { toast } from 'sonner';
 
 export default function ExportButton() {
   const t = useTranslations('Components'); // <-- Vertimų hook'as
@@ -30,9 +31,10 @@ export default function ExportButton() {
 
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
+      toast.success(t('exportSuccess'));
     } catch (error) {
       console.error('Export failed:', error);
-      alert(t('exportError')); // <-- VERTIMAS
+      toast.error(t('exportError'));
     } finally {
       setIsExporting(false);
     }

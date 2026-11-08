@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from 'next-themes';
 import { SessionProvider } from 'next-auth/react';
+import { Toaster } from 'sonner';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -34,7 +35,10 @@ export default function RootLayout({
           disableTransitionOnChange
           scriptProps={{ 'data-cfasync': 'false' }}
         >
-          <SessionProvider>{children}</SessionProvider>
+          <SessionProvider>
+            {children}
+            <Toaster position="bottom-right" richColors />
+          </SessionProvider>
         </ThemeProvider>
       </body>
     </html>

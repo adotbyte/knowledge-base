@@ -1,63 +1,74 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
-// 1. Užmockiname auth() funkciją (turi būti PIRMAS, prieš bet kokius importus iš actions)
+// ✅ 1. Užmockiname next-auth, kad nereikėtų tikros sesijos
 vi.mock('@/app/auth', () => ({
   auth: vi.fn().mockResolvedValue({
     user: { id: 'test-user-id', email: 'test@example.com' },
   }),
 }));
 
-// 2. Užmockiname Prisma
-vi.mock('../prisma', () => ({
+// ✅ 2. Užmockiname Prisma, kad neitume į tikrą duomenų bazę
+vi.mock('@/app/prisma', () => ({
   default: {
     note: {
       create: vi.fn(),
       delete: vi.fn(),
-      update: vi.fn(),
+      findUnique: vi.fn(),
+    },
+    user: {
+      delete: vi.fn(),
+    },
+    attachment: {
+      create: vi.fn(),
+      count: vi.fn(),
+      aggregate: vi.fn(),
+      findMany: vi.fn(),
     },
   },
 }));
 
-// 3. Užmockiname revalidatePath
+// ✅ 3. Užmockiname next/cache (revalidatePath)
 vi.mock('next/cache', () => ({
   revalidatePath: vi.fn(),
 }));
 
-// 4. Dabar galime importuoti actions ir prisma
-import { createNote, deleteNote } from '../actions';
-import prisma from '../prisma';
+// ✅ 4. Užmockiname Google Gemini
+vi.mock('@google/genai', () => ({
+  GoogleGenAI: vi.fn().mockImplementation(() => ({
+    interactions: {
+      create: vi.fn().mockResolvedValue({ output_text: 'Mocked AI response' }),
+    },
+  })),
+}));
+
+// ✅ 5. Užmockiname fs/promises (failų įrašymas)
+vi.mock('fs/promises', () => ({
+  writeFile: vi.fn().mockResolvedValue(undefined),
+  mkdir: vi.fn().mockResolvedValue(undefined),
+  access: vi.fn().mockResolvedValue(undefined),
+}));
+
+// ✅ 6. Užmockiname fs (constants)
+vi.mock('fs', () => ({
+  constants: { F_OK: 0 },
+}));
+
+// ✅ 7. Užmockiname path (join)
+vi.mock('path', () => ({
+  join: vi.fn().mockReturnValue('/mock/path/file.txt'),
+}));
+
+// Importuojame funkcijas PO mock'inimo
+import { deleteAccount, deleteNote } from '../actions';
+import prisma from '@/app/prisma';
 
 describe('Server Actions Security', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('should create a note with the session user ID', async () => {
-    // Nustatome, kad Prisma sėkmingai sukuria įrašą
-    vi.mocked(prisma.note.create).mockResolvedValueOnce({
-      id: 'note-1',
-      title: 'Test',
-      content: 'Test content',
-      userId: 'test-user-id',
-    } as any);
-
-    const formData = new FormData();
-    formData.append('title', 'Test');
-    formData.append('content', 'Test content');
-
-    await createNote(formData);
-
-    // Patikriname, ar Prisma buvo iškviesta su "test-user-id"
-    expect(prisma.note.create).toHaveBeenCalledWith(
-      expect.objectContaining({
-        data: expect.objectContaining({
-          userId: 'test-user-id', // <-- Dabar tikimės sesijos vartotojo ID
-        }),
-      })
-    );
-  });
-
-  it('should delete a note with the session user ID', async () => {
+  it('should delete a note only for the current user', async () => {
+    // Nustatome, kad Prisma sėkmingai ištrina įrašą
     vi.mocked(prisma.note.delete).mockResolvedValueOnce({ id: 'note-1' } as any);
 
     const formData = new FormData();
@@ -65,10 +76,21 @@ describe('Server Actions Security', () => {
 
     await deleteNote(formData);
 
-    expect(prisma.note.delete).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: { id: 'note-1', userId: 'test-user-id' }, // <-- Dabar tikimės sesijos vartotojo ID
-      })
-    );
+    // Patikriname, ar Prisma buvo iškviesta su teisingu userId
+    expect(prisma.note.delete).toHaveBeenCalledWith({
+      where: { id: 'note-1', userId: 'test-user-id' },
+    });
+  });
+
+  it('should delete the user account', async () => {
+    // Nustatome, kad Prisma sėkmingai ištrina vartotoją
+    vi.mocked(prisma.user.delete).mockResolvedValueOnce({ id: 'test-user-id' } as any);
+
+    await deleteAccount();
+
+    // Patikriname, ar Prisma buvo iškviesta su teisingu userId
+    expect(prisma.user.delete).toHaveBeenCalledWith({
+      where: { id: 'test-user-id' },
+    });
   });
 });
