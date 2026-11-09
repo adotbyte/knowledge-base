@@ -37,6 +37,7 @@ This isn't just a note-taking app; it's a full-stack platform that reads, analyz
   - **AI Image Analysis:** AI describes images and extracts text (OCR).
   - **AI PDF Analysis:** AI extracts and summarizes text from PDF documents.
   - **Public File Sharing:** Generate secure, shareable links for files.
+- **⏱️ Rate Limiting:** All AI functions are protected by a rate limiter (5 requests per minute for most, 3 for note generation, 10 for RAG search) to prevent API abuse.
 - **📜 Version History:** Every note edit creates a new version. Roll back to any previous state.
 - **🌐 Public Portfolio:** A public-facing page (`/public`) to showcase your shared notes.
 - **📊 Live Dashboard:** Monitor your Raspberry Pi's CPU, RAM, Uptime, and Docker containers in real-time (Admin only).
@@ -55,6 +56,8 @@ This project is designed to run entirely on self-hosted hardware (specifically, 
 - **Deployment:** Docker Compose, managed by GitHub Actions (Self-hosted runner).
 - **Networking:** Cloudflare Tunnels (zero open inbound ports).
 - **File Storage:** Docker Bind Mounts for persistent local storage.
+- **Error Handling:** Toast notifications via `sonner` for user-friendly error messages.
+- **Code Editor:** Syntax highlighting and code completion via `@uiw/react-codemirror`.
 
 ## 🚀 Getting Started
 

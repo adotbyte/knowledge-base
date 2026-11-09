@@ -7,9 +7,17 @@
 - [Pagrindinis puslapis](https://knowledge.morkunas.info/): Jūsų asmeniniai užrašai ir paieška.
 - [Viešieji užrašai](https://knowledge.morkunas.info/public): Viešai bendrinami žinių bazės įrašai.
 - [Demo režimas](https://knowledge.morkunas.info/demo): Aplikacijos peržiūra be prisijungimo.
+- [Profilis](https://knowledge.morkunas.info/profile): Vartotojo profilis ir paskyros valdymas.
+- [Privatumo politika](https://knowledge.morkunas.info/privacy): Duomenų rinkimo ir saugojimo politika.
 
 ## AI Įrankiai
 
 - [Code Reviewer](https://knowledge.morkunas.info/code-review): AI kodo analizė ir klaidų paieška.
 - [Config Generator](https://knowledge.morkunas.info/config-generator): Docker ir serverių konfigūracijų generavimas.
 - [Code Explainer](https://knowledge.morkunas.info/explainer): Kodo paaiškinimas žingsnis po žingsnio.
+
+## Administratoriaus įrankiai
+
+- [Valdymo skydas](https://knowledge.morkunas.info/dashboard): Sistemos statistika ir valdymas.
+- [Docker valdymas](https://knowledge.morkunas.info/docker): Konteinerių valdymas realiuoju laiku.
+- [Sistemos būsena](https://knowledge.morkunas.info/status): Sistemos metrikos ir ping statistika.
