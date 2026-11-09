@@ -1,4 +1,4 @@
-const CACHE_NAME = 'knowledge-base-v1';
+const CACHE_NAME = 'knowledge-base-v2';
 const urlsToCache = [
   '/',
   '/manifest.json',
