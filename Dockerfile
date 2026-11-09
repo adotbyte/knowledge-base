@@ -52,9 +52,11 @@ COPY --from=builder /app/.next/static ./.next/static
 # ✅ SVARBU: Nukopijuojame VISĄ node_modules iš builder stadijos
 COPY --from=builder /app/node_modules ./node_modules
 
-# Nukopijuojame Prisma schemą ir config failą
+# Nukopijuojame Prisma schemą, config failą IR migracijas
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
+# ✅ PRIDĖTA: Migracijų katalogas
+COPY --from=builder /app/prisma/migrations ./prisma/migrations
 
 # Sukuriame uploads katalogą ir suteikiame teises
 RUN mkdir -p /app/uploads && chown -R nextjs:nodejs /app/uploads
