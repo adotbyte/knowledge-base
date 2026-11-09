@@ -22,6 +22,7 @@ import ActionButton from '@/components/ActionButton';
 import HomeClient from '@/components/HomeClient';
 import HomeFormClient from '@/components/HomeFormClient';
 import { FormSkeleton, NoteListSkeleton } from '@/components/Skeleton';
+import BackToTop from '@/components/BackToTop';
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
@@ -337,6 +338,8 @@ export default function Home({
           <HomeWrapper params={params} searchParams={searchParams} />
         </Suspense>
       </main>
+      {/* ✅ Back to Top mygtukas */}
+      <BackToTop />
     </div>
   );
 }
