@@ -6,6 +6,7 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
+import LightboxImage from '@/components/LightboxImage'; // <-- PRIDĖTA
 
 function CodeBlockCopyButton({ text }: { text: string }) {
   const t = useTranslations('Components');
@@ -102,17 +103,12 @@ export default function MarkdownRenderer({ content }: { content: string }) {
             }
             return null;
           },
+          // ✅ PAKEISTA DALIS
           img({ src, alt, ...props }: any) {
             if (!src) return null;
             return (
               <span className="my-4 block">
-                <img
-                  src={src}
-                  alt={alt || 'Paveikslėlis'}
-                  className="max-w-full rounded-xl border border-gray-200 dark:border-gray-700"
-                  referrerPolicy="no-referrer"
-                  {...props}
-                />
+                <LightboxImage src={src} alt={alt} width={props.width} height={props.height} />
                 {alt && (
                   <span className="mt-1 block text-center text-xs text-gray-500 dark:text-gray-400">
                     {alt}

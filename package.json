@@ -37,7 +37,8 @@
     "react-syntax-highlighter": "^16.1.2",
     "recharts": "^3.10.1",
     "remark-gfm": "^4.0.1",
-    "sonner": "^2.0.8"
+    "sonner": "^2.0.8",
+    "yet-another-react-lightbox": "^3.33.0"
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "^4",
