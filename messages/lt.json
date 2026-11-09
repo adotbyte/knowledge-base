@@ -240,7 +240,14 @@
     "versionHistory": "Versijų istorija",
     "publicSearchPlaceholder": "Ieškoti viešų užrašų...",
     "exportSuccess": "Užrašai sėkmingai eksportuoti!",
-    "noteGeneratedSuccess": "Užrašas sėkmingai sugeneruotas!"
+    "noteGeneratedSuccess": "Užrašas sėkmingai sugeneruotas!",
+    "commandNotes": "Užrašai",
+    "commandGoToDashboard": "Eiti į valdymo skydą",
+    "commandGoToDocker": "Eiti į Docker",
+    "commandGoToStatus": "Eiti į statusą",
+    "commandGoToProfile": "Atidaryti profilį",
+    "commandGoToPublic": "Eiti į viešus įrašus",
+    "commandLogout": "Atsijungti"
   },
   "Metadata": {
     "title": "Knowledge Base",

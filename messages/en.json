@@ -240,7 +240,14 @@
     "versionHistory": "Version History",
     "publicSearchPlaceholder": "Search public notes...",
     "exportSuccess": "Notes exported successfully!",
-    "noteGeneratedSuccess": "Note generated successfully!"
+    "noteGeneratedSuccess": "Note generated successfully!",
+    "commandNotes": "Notes",
+    "commandGoToDashboard": "Go to Dashboard",
+    "commandGoToDocker": "Go to Docker",
+    "commandGoToStatus": "Go to Status",
+    "commandGoToProfile": "Open Profile",
+    "commandGoToPublic": "Go to Public View",
+    "commandLogout": "Sign Out"
   },
   "Metadata": {
     "title": "Knowledge Base",
