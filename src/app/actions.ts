@@ -208,7 +208,7 @@ export async function toggleShare(formData: FormData) {
 export async function updateNote(id: string, formData: FormData) {
   const userId = await getUserId();
   const title = formData.get('title') as string;
-  let content = formData.get('content') as string; // <-- Pakeista į let
+  let content = formData.get('content') as string; // <-- TURI BŪTI let
   const tagsString = formData.get('tags') as string;
   const files = formData.getAll('files') as File[];
 
