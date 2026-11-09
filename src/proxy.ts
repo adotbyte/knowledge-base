@@ -59,7 +59,7 @@ export default async function proxy(request: NextRequest) {
   });
 
   if (!token) {
-    const loginUrl = new URL('/login', request.nextUrl);
+    const loginUrl = new URL('/lt/login', request.nextUrl);
     return NextResponse.redirect(loginUrl);
   }
 
