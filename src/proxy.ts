@@ -10,15 +10,20 @@ export default async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const userAgent = request.headers.get('user-agent') || '';
 
-  // ✅ 1. GOOGLEBOT
+  // ✅ 1. ŠAKNINIS URL - LEIDŽIAME next-intl NUSPRĘSTI KALBĄ
+  if (pathname === '/') {
+    return intlMiddleware(request);
+  }
+
+  // ✅ 2. GOOGLEBOT
   const isGooglebot = userAgent.includes('Googlebot');
   if (isGooglebot) {
-    if (pathname === '/' || pathname === '/lt' || pathname === '/en') {
+    if (pathname === '/lt' || pathname === '/en') {
       return intlMiddleware(request);
     }
   }
 
-  // ✅ 2. VIEŠI MARŠRUTAI
+  // ✅ 3. VIEŠI MARŠRUTAI
   const isPublicRoute =
     pathname.includes('/login') ||
     pathname.includes('/demo') ||
@@ -30,7 +35,7 @@ export default async function proxy(request: NextRequest) {
     pathname.includes('/api/system-stats') ||
     pathname.includes('/api/ping') ||
     pathname.includes('/manifest.json') ||
-    pathname.includes('/icon.svg') || // <-- JAU YRA
+    pathname.includes('/icon.svg') ||
     pathname.includes('/sw.js') ||
     pathname.includes('/_next') ||
     pathname.includes('/api') ||
@@ -43,7 +48,7 @@ export default async function proxy(request: NextRequest) {
       pathname.includes('/manifest.json') ||
       pathname.includes('/api/system-stats') ||
       pathname.includes('/api/ping') ||
-      pathname.includes('/icon.svg') || // <-- PRIDĖKITE ŠIĄ EILUTĘ
+      pathname.includes('/icon.svg') ||
       pathname.includes('/sw.js')
     ) {
       return NextResponse.next();
@@ -51,7 +56,7 @@ export default async function proxy(request: NextRequest) {
     return intlMiddleware(request);
   }
 
-  // ✅ 3. PRIVATŪS MARŠRUTAI
+  // ✅ 4. PRIVATŪS MARŠRUTAI
   const token = await getToken({
     req: request,
     secret: process.env.AUTH_SECRET,
@@ -59,6 +64,7 @@ export default async function proxy(request: NextRequest) {
   });
 
   if (!token) {
+    // ✅ NUKREIPIAME Į /lt/login (arba galite naudoti /login, jei norite, kad next-intl parinktų kalbą)
     const loginUrl = new URL('/lt/login', request.nextUrl);
     return NextResponse.redirect(loginUrl);
   }
