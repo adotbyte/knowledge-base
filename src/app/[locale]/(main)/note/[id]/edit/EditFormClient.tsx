@@ -2,10 +2,11 @@
 
 import { useState } from 'react';
 import { Link } from '@/i18n/routing';
-import { useTranslations } from 'next-intl';
+import { toast } from 'sonner';
 import MarkdownEditor from '@/components/MarkdownEditor';
 import FileDropzone from '@/components/FileDropzone';
 import { updateNote } from '../../../../../actions';
+import { useAutosave } from '@/hooks/useAutosave';
 
 interface EditFormClientProps {
   note: {
@@ -28,8 +29,22 @@ interface EditFormClientProps {
 }
 
 export default function EditFormClient({ note, translations }: EditFormClientProps) {
+  const [title, setTitle] = useState(note.title);
   const [content, setContent] = useState(note.content);
+  const [tags, setTags] = useState(note.tags);
   const [files, setFiles] = useState<File[]>([]);
+
+  // ✅ Autosave hook'as (unikalus raktas pagal note.id)
+  const { clearAutosave } = useAutosave(
+    `autosave-edit-${note.id}`,
+    { title, content, tags },
+    (data) => {
+      if (data.title) setTitle(data.title);
+      if (data.content) setContent(data.content);
+      if (data.tags) setTags(data.tags);
+      toast.info('Atkurtas neišsaugotas juodraštis!');
+    }
+  );
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -37,12 +52,19 @@ export default function EditFormClient({ note, translations }: EditFormClientPro
 
     // ✅ Įdedame nutemptus failus į FormData
     files.forEach((file) => formData.append('files', file));
-
-    // ✅ Išvalome failus
     setFiles([]);
 
-    // ✅ Iškviečiame Server Action
-    await updateNote(note.id, formData);
+    try {
+      // ✅ Iškviečiame Server Action
+      await updateNote(note.id, formData);
+
+      // ✅ Išvalome juodraštį
+      clearAutosave();
+      toast.success('Užrašas sėkmingai atnaujintas!');
+    } catch (error) {
+      console.error(error);
+      toast.error('Nepavyko atnaujinti užrašo.');
+    }
   };
 
   return (
@@ -79,7 +101,8 @@ export default function EditFormClient({ note, translations }: EditFormClientPro
             type="text"
             id="title"
             name="title"
-            defaultValue={note.title}
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
             required
             className="w-full rounded-xl border border-gray-200 bg-gray-50 p-3 text-sm text-gray-900 transition-all outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-950 dark:text-white"
           />
@@ -112,7 +135,8 @@ export default function EditFormClient({ note, translations }: EditFormClientPro
             type="text"
             id="tags"
             name="tags"
-            defaultValue={note.tags}
+            value={tags}
+            onChange={(e) => setTags(e.target.value)}
             placeholder={translations.tagsPlaceholder}
             className="w-full rounded-xl border border-gray-200 bg-gray-50 p-3 text-sm text-gray-900 transition-all outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-950 dark:text-white"
           />
@@ -127,7 +151,6 @@ export default function EditFormClient({ note, translations }: EditFormClientPro
             onFilesSelected={(newFiles) => setFiles((prev) => [...prev, ...newFiles])}
           />
 
-          {/* ✅ Parodykime, kokie failai bus įkelti */}
           {files.length > 0 && (
             <div className="mt-2 flex flex-wrap gap-2">
               {files.map((file, index) => (

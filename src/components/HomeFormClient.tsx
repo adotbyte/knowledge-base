@@ -2,15 +2,27 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { toast } from 'sonner';
 import MarkdownEditor from '@/components/MarkdownEditor';
 import GenerateNoteButton from '@/components/GenerateNoteButton';
 import { createNote } from '@/app/actions';
 import FileDropzone from '@/components/FileDropzone';
+import { useAutosave } from '@/hooks/useAutosave';
 
 export default function HomeFormClient() {
   const t = useTranslations('Home');
+  const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const [files, setFiles] = useState<File[]>([]); // ✅ Būsena failams
+  const [tags, setTags] = useState('');
+  const [files, setFiles] = useState<File[]>([]);
+
+  // ✅ Autosave hook'as
+  const { clearAutosave } = useAutosave('autosave-new-note', { title, content, tags }, (data) => {
+    if (data.title) setTitle(data.title);
+    if (data.content) setContent(data.content);
+    if (data.tags) setTags(data.tags);
+    toast.info('Atkurtas neišsaugotas juodraštis!');
+  });
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -19,11 +31,22 @@ export default function HomeFormClient() {
     // ✅ Įdedame nutemptus failus į FormData
     files.forEach((file) => formData.append('files', file));
 
-    // ✅ Išvalome failus
-    setFiles([]);
+    try {
+      // ✅ Iškviečiame Server Action
+      await createNote(formData);
 
-    // ✅ Iškviečiame Server Action
-    await createNote(formData);
+      // ✅ Išvalome juodraštį ir formas
+      clearAutosave();
+      setTitle('');
+      setContent('');
+      setTags('');
+      setFiles([]);
+
+      toast.success('Užrašas sėkmingai išsaugotas!');
+    } catch (error) {
+      console.error(error);
+      toast.error('Nepavyko išsaugoti užrašo.');
+    }
   };
 
   return (
@@ -33,7 +56,6 @@ export default function HomeFormClient() {
         <GenerateNoteButton />
       </div>
 
-      {/* ✅ Pakeistas action į onSubmit */}
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div>
           <label
@@ -46,6 +68,8 @@ export default function HomeFormClient() {
             type="text"
             id="title"
             name="title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
             placeholder={t('titlePlaceholder')}
             required
             className="w-full rounded-xl border border-gray-200 bg-gray-50 p-3 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-950 dark:text-white"
@@ -59,6 +83,7 @@ export default function HomeFormClient() {
           >
             {t('content')}
           </label>
+          {/* ✅ Paslėptas input, kad Server Action gautų turinį */}
           <input type="hidden" name="content" value={content} />
           <MarkdownEditor
             value={content}
@@ -79,12 +104,13 @@ export default function HomeFormClient() {
             type="text"
             id="tags"
             name="tags"
+            value={tags}
+            onChange={(e) => setTags(e.target.value)}
             placeholder={t('tagsPlaceholder')}
             className="w-full rounded-xl border border-gray-200 bg-gray-50 p-3 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-950 dark:text-white"
           />
         </div>
 
-        {/* ✅ Drag & Drop komponentas vietoj seno input */}
         <div>
           <label className="mb-1 block text-xs font-bold tracking-wider text-gray-700 uppercase dark:text-gray-300">
             {t('attachments')}
@@ -94,7 +120,6 @@ export default function HomeFormClient() {
             onFilesSelected={(newFiles) => setFiles((prev) => [...prev, ...newFiles])}
           />
 
-          {/* ✅ Parodykime, kokie failai bus įkelti */}
           {files.length > 0 && (
             <div className="mt-2 flex flex-wrap gap-2">
               {files.map((file, index) => (
