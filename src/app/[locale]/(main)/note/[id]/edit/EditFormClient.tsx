@@ -1,12 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Link } from '@/i18n/routing';
 import { toast } from 'sonner';
 import MarkdownEditor from '@/components/MarkdownEditor';
 import FileDropzone from '@/components/FileDropzone';
 import { updateNote } from '../../../../../actions';
 import { useAutosave } from '@/hooks/useAutosave';
+import { useKeyboardShortcut } from '@/hooks/useKeyboardShortcut';
 
 interface EditFormClientProps {
   note: {
@@ -33,8 +34,9 @@ export default function EditFormClient({ note, translations }: EditFormClientPro
   const [content, setContent] = useState(note.content);
   const [tags, setTags] = useState(note.tags);
   const [files, setFiles] = useState<File[]>([]);
+  const formRef = useRef<HTMLFormElement>(null);
 
-  // ✅ Autosave hook'as (unikalus raktas pagal note.id)
+  // ✅ Autosave hook'as
   const { clearAutosave } = useAutosave(
     `autosave-edit-${note.id}`,
     { title, content, tags },
@@ -46,19 +48,22 @@ export default function EditFormClient({ note, translations }: EditFormClientPro
     }
   );
 
+  // ✅ Ctrl + S išsaugo užrašą
+  useKeyboardShortcut({ ctrlKey: true, key: 's' }, () => {
+    if (formRef.current) {
+      formRef.current.requestSubmit();
+    }
+  });
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
 
-    // ✅ Įdedame nutemptus failus į FormData
     files.forEach((file) => formData.append('files', file));
     setFiles([]);
 
     try {
-      // ✅ Iškviečiame Server Action
       await updateNote(note.id, formData);
-
-      // ✅ Išvalome juodraštį
       clearAutosave();
       toast.success('Užrašas sėkmingai atnaujintas!');
     } catch (error) {
@@ -87,9 +92,13 @@ export default function EditFormClient({ note, translations }: EditFormClientPro
       </div>
 
       <form
+        ref={formRef}
         onSubmit={handleSubmit}
         className="flex flex-col gap-6 rounded-2xl border border-gray-100 bg-white p-8 shadow-sm dark:border-gray-800 dark:bg-gray-900"
       >
+        {/* ... (visi laukai: title, content, tags, files) ... */}
+
+        {/* Laukai lieka tokie patys, kaip jūsų pateiktame kode */}
         <div>
           <label
             htmlFor="title"
@@ -107,7 +116,6 @@ export default function EditFormClient({ note, translations }: EditFormClientPro
             className="w-full rounded-xl border border-gray-200 bg-gray-50 p-3 text-sm text-gray-900 transition-all outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-950 dark:text-white"
           />
         </div>
-
         <div>
           <label
             htmlFor="content"
@@ -123,7 +131,6 @@ export default function EditFormClient({ note, translations }: EditFormClientPro
             minHeight="400px"
           />
         </div>
-
         <div>
           <label
             htmlFor="tags"
@@ -141,16 +148,13 @@ export default function EditFormClient({ note, translations }: EditFormClientPro
             className="w-full rounded-xl border border-gray-200 bg-gray-50 p-3 text-sm text-gray-900 transition-all outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-950 dark:text-white"
           />
         </div>
-
         <div>
           <label className="mb-1 block text-xs font-bold tracking-wider text-gray-700 uppercase dark:text-gray-300">
             {translations.addAttachments}
           </label>
-
           <FileDropzone
             onFilesSelected={(newFiles) => setFiles((prev) => [...prev, ...newFiles])}
           />
-
           {files.length > 0 && (
             <div className="mt-2 flex flex-wrap gap-2">
               {files.map((file, index) => (
@@ -171,7 +175,6 @@ export default function EditFormClient({ note, translations }: EditFormClientPro
             </div>
           )}
         </div>
-
         {note.attachments && note.attachments.length > 0 && (
           <div className="mt-4">
             <label className="mb-2 block text-xs font-bold tracking-wider text-gray-700 uppercase dark:text-gray-300">
@@ -196,7 +199,6 @@ export default function EditFormClient({ note, translations }: EditFormClientPro
             </div>
           </div>
         )}
-
         <button
           type="submit"
           className="mt-2 rounded-xl bg-blue-600 py-3 font-bold text-white shadow-lg shadow-blue-200 transition-colors hover:bg-blue-700 dark:shadow-none"
