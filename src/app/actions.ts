@@ -208,7 +208,7 @@ export async function toggleShare(formData: FormData) {
 export async function updateNote(id: string, formData: FormData) {
   const userId = await getUserId();
   const title = formData.get('title') as string;
-  const content = formData.get('content') as string;
+  let content = formData.get('content') as string; // <-- Pakeista į let
   const tagsString = formData.get('tags') as string;
   const files = formData.getAll('files') as File[];
 
@@ -237,6 +237,7 @@ export async function updateNote(id: string, formData: FormData) {
         .filter(Boolean)
     : [];
 
+  // ✅ Pirmiausia atnaujiname tekstą ir žymes
   await prisma.note.update({
     where: { id: id, userId: userId },
     data: {
@@ -252,6 +253,7 @@ export async function updateNote(id: string, formData: FormData) {
     },
   });
 
+  // ✅ Tada tvarkome failus ir pridedame juos į turinį
   if (files && files.length > 0 && files[0].size > 0) {
     const uploadDir = join(process.cwd(), 'uploads');
     await mkdir(uploadDir, { recursive: true });
@@ -264,16 +266,31 @@ export async function updateNote(id: string, formData: FormData) {
       const filePath = join(uploadDir, uniqueName);
       await writeFile(filePath, buffer);
 
+      const fileUrl = `/api/uploads/${uniqueName}`;
+
       await prisma.attachment.create({
         data: {
           name: file.name,
-          url: `/api/uploads/${uniqueName}`,
+          url: fileUrl,
           type: file.type,
           size: file.size,
           noteId: id,
         },
       });
+
+      // ✅ PRIDEDAME PAVEIKSLĖLĮ ARBA NUORODĄ Į TURINĮ
+      if (file.type.startsWith('image/')) {
+        content += `\n\n![${file.name}](${fileUrl})`;
+      } else {
+        content += `\n\n[📎 ${file.name}](${fileUrl})`;
+      }
     }
+
+    // ✅ Išsaugome atnaujintą turinį su paveikslėliais
+    await prisma.note.update({
+      where: { id: id, userId: userId },
+      data: { content },
+    });
   }
 
   revalidatePath('/', 'page');
