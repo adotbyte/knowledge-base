@@ -5,10 +5,11 @@ import remarkGfm from 'remark-gfm';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { useState } from 'react';
-import { useTranslations } from 'next-intl'; // <-- Vertimams
+import { useTranslations } from 'next-intl';
+import Image from 'next/image'; // <-- PRIDĖKITE
 
 function CodeBlockCopyButton({ text }: { text: string }) {
-  const t = useTranslations('Components'); // <-- Vertimų hook'as
+  const t = useTranslations('Components');
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -25,7 +26,7 @@ function CodeBlockCopyButton({ text }: { text: string }) {
     <button
       onClick={handleCopy}
       className="absolute top-3 right-3 z-10 rounded-md bg-gray-800/80 p-1.5 text-gray-400 opacity-0 transition-colors group-hover:opacity-100 hover:bg-gray-700 hover:text-white"
-      title={copied ? t('copied') : t('copy')} // <-- VERTIMAS
+      title={copied ? t('copied') : t('copy')}
     >
       {copied ? (
         <svg
@@ -95,6 +96,26 @@ export default function MarkdownRenderer({ content }: { content: string }) {
               );
             }
             return null;
+          },
+          // ✅ PAVEIKSLĖLIŲ APDOROJIMAS
+          img({ src, alt, ...props }: any) {
+            if (!src) return null;
+            return (
+              <span className="my-4 block">
+                <img
+                  src={src}
+                  alt={alt || 'Paveikslėlis'}
+                  className="max-w-full rounded-xl border border-gray-200 dark:border-gray-700"
+                  referrerPolicy="no-referrer"
+                  {...props}
+                />
+                {alt && (
+                  <span className="mt-1 block text-center text-xs text-gray-500 dark:text-gray-400">
+                    {alt}
+                  </span>
+                )}
+              </span>
+            );
           },
         }}
       >

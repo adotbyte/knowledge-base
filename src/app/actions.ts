@@ -33,7 +33,7 @@ async function checkAiRateLimit(userId: string, limit: number = 5) {
 export async function createNote(formData: FormData) {
   const userId = await getUserId();
   const title = formData.get('title') as string;
-  const content = formData.get('content') as string;
+  let content = formData.get('content') as string;
   const tagsString = formData.get('tags') as string;
   const files = formData.getAll('files') as File[];
 
@@ -84,15 +84,25 @@ export async function createNote(formData: FormData) {
         continue;
       }
 
+      const fileUrl = `/api/uploads/${uniqueName}`;
+
       const attachment = await prisma.attachment.create({
         data: {
           name: file.name,
-          url: `/api/uploads/${uniqueName}`,
+          url: fileUrl,
           type: file.type,
           size: file.size,
           noteId: note.id,
         },
       });
+
+      // ✅ PRIDEDAME PAVEIKSLĖLĮ Į MARKDOWN TURINĮ
+      if (file.type.startsWith('image/')) {
+        content += `\n\n![${file.name}](${fileUrl})`;
+      } else {
+        // Jei tai ne paveikslėlis (pvz., PDF), tiesiog įrašome nuorodą
+        content += `\n\n[📎 ${file.name}](${fileUrl})`;
+      }
 
       // ✅ RATE LIMIT: AI analizė failams
       await checkAiRateLimit(userId, 5);
@@ -152,12 +162,15 @@ export async function createNote(formData: FormData) {
       }
 
       if (aiDescription) {
-        await prisma.note.update({
-          where: { id: note.id },
-          data: { content: note.content + aiDescription },
-        });
+        content += aiDescription;
       }
     }
+
+    // ✅ ATNAUJINAME UŽRAŠO TURINĮ SU PAVEIKSLĖLIAIS IR AI ANALIZE
+    await prisma.note.update({
+      where: { id: note.id },
+      data: { content },
+    });
   }
 
   revalidatePath('/', 'page');
