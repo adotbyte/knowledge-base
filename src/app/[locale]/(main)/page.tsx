@@ -20,7 +20,7 @@ import CopyButton from '@/components/CopyButton';
 import DeleteConfirmButton from '@/components/DeleteConfirmButton';
 import ActionButton from '@/components/ActionButton';
 import HomeClient from '@/components/HomeClient';
-import HomeFormClient from '@/components/HomeFormClient'; // <-- PRIDĖTAS IMPORTAS
+import HomeFormClient from '@/components/HomeFormClient';
 import { FormSkeleton, NoteListSkeleton } from '@/components/Skeleton';
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
@@ -61,7 +61,7 @@ async function ProtectedContent({
     <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
       {/* LEFT COLUMN: Create Form */}
       <div className="lg:col-span-1">
-        <HomeFormClient /> {/* <-- Pakeista */}
+        <HomeFormClient />
       </div>
 
       {/* RIGHT COLUMN: Notes List */}
@@ -211,9 +211,97 @@ async function ProtectedContent({
                     </form>
                   </div>
                 </div>
+
                 <div className="rounded-xl border border-gray-100 bg-white p-4 dark:border-gray-800 dark:bg-gray-950">
                   <MarkdownRenderer content={note.content} />
                 </div>
+
+                {/* ✅ PRIEDAI */}
+                {note.attachments && note.attachments.length > 0 && (
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {note.attachments.map((file: any) => (
+                      <div
+                        key={file.id}
+                        className="flex items-center gap-2 rounded-lg bg-gray-100 px-3 py-1.5 text-xs font-semibold text-gray-700 dark:bg-gray-800 dark:text-gray-300"
+                      >
+                        <a
+                          href={file.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-1 hover:underline"
+                        >
+                          📎 {file.name}
+                        </a>
+
+                        {/* SHARE FILE BUTTON */}
+                        <form action={toggleFileShare}>
+                          <input type="hidden" name="id" value={file.id} />
+                          <input type="hidden" name="isPublic" value={String(file.isPublic)} />
+                          <button
+                            type="submit"
+                            className={`p-0.5 transition-colors ${file.isPublic ? 'text-green-500' : 'text-gray-400 hover:text-green-500'}`}
+                            title={file.isPublic ? t('stopSharing') : t('share')}
+                          >
+                            <svg
+                              className="h-3.5 w-3.5"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
+                              />
+                            </svg>
+                          </button>
+                        </form>
+
+                        {file.isPublic && (
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono text-[10px] text-green-600 dark:text-green-400">
+                              /share-file/{file.shareId}
+                            </span>
+                            <CopyButton
+                              text={`https://knowledge.morkunas.info/share-file/${file.shareId}`}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* ✅ BENDRINIMO NUORODA */}
+                {note.isPublic && (
+                  <div className="mt-3 flex items-center justify-between rounded-lg border border-green-200 bg-green-50 p-2 dark:border-green-800 dark:bg-green-900/20">
+                    <div className="flex items-center gap-2 overflow-hidden">
+                      <span className="truncate font-mono text-xs text-green-700 dark:text-green-400">
+                        /share/{note.shareId}
+                      </span>
+                      <CopyButton text={`https://knowledge.morkunas.info/share/${note.shareId}`} />
+                    </div>
+                    <span className="text-[10px] font-bold tracking-wider text-green-600 uppercase dark:text-green-500">
+                      {t('public')}
+                    </span>
+                  </div>
+                )}
+
+                {/* TAGS */}
+                {note.tags.length > 0 && (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {note.tags.map((tag) => (
+                      <Link
+                        key={tag.id}
+                        href={`/?tag=${tag.name}`}
+                        className="cursor-pointer rounded-md bg-blue-50 px-2 py-1 text-xs font-bold text-blue-600 transition-colors hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
+                      >
+                        #{tag.name}
+                      </Link>
+                    ))}
+                  </div>
+                )}
               </div>
             ))
           )}
