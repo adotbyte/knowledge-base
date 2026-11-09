@@ -84,9 +84,9 @@ export default function GenerateNoteButton() {
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="flex items-center gap-2 rounded-lg bg-purple-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-purple-700"
+        className="flex max-w-[200px] items-center justify-center gap-2 rounded-lg bg-purple-600 px-4 py-2 text-center text-sm font-semibold text-white shadow-sm transition-colors hover:bg-purple-700"
       >
-        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -94,7 +94,7 @@ export default function GenerateNoteButton() {
             d="M13 10V3L4 14h7v7l9-11h-7z"
           />
         </svg>
-        {t('generateWithAi')} {/* <-- VERTIMAS */}
+        <span>{t('generateWithAi')}</span>
       </button>
 
       {mounted && isOpen ? createPortal(modalContent, document.body) : null}
