@@ -1,4 +1,4 @@
-const CACHE_NAME = 'knowledge-base-v4';
+const CACHE_NAME = 'knowledge-base-v5';
 const urlsToCache = [
   '/manifest.json',
   '/icon.svg',
@@ -34,7 +34,8 @@ self.addEventListener('fetch', (event) => {
   if (
     event.request.url.includes('/api/') ||
     event.request.url.includes('/_next/') ||
-    event.request.method !== 'GET'
+    event.request.method !== 'GET' ||
+    event.request.destination === 'image'
   ) {
     return;
   }

@@ -34,6 +34,7 @@ async function ProfileData() {
         <img
           src={session.user.image}
           alt={t('profileImage')}
+          referrerPolicy="no-referrer"
           className="h-20 w-20 rounded-full border-2 border-blue-500"
         />
       )}
