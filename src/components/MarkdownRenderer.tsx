@@ -6,7 +6,6 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import Image from 'next/image'; // <-- PRIDĖKITE
 
 function CodeBlockCopyButton({ text }: { text: string }) {
   const t = useTranslations('Components');
@@ -25,27 +24,33 @@ function CodeBlockCopyButton({ text }: { text: string }) {
   return (
     <button
       onClick={handleCopy}
-      className="absolute top-3 right-3 z-10 rounded-md bg-gray-800/80 p-1.5 text-gray-400 opacity-0 transition-colors group-hover:opacity-100 hover:bg-gray-700 hover:text-white"
+      className="absolute top-3 right-3 z-10 flex items-center gap-1 rounded-md bg-gray-800/80 px-2 py-1 text-xs text-gray-300 opacity-70 transition-all hover:bg-gray-700 hover:text-white hover:opacity-100"
       title={copied ? t('copied') : t('copy')}
     >
       {copied ? (
-        <svg
-          className="h-4 w-4 text-green-400"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-        </svg>
+        <>
+          <svg
+            className="h-3.5 w-3.5 text-green-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+          </svg>
+          <span>{t('copied')}</span>
+        </>
       ) : (
-        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-          />
-        </svg>
+        <>
+          <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+            />
+          </svg>
+          <span>{t('copy')}</span>
+        </>
       )}
     </button>
   );
@@ -97,7 +102,6 @@ export default function MarkdownRenderer({ content }: { content: string }) {
             }
             return null;
           },
-          // ✅ PAVEIKSLĖLIŲ APDOROJIMAS
           img({ src, alt, ...props }: any) {
             if (!src) return null;
             return (
