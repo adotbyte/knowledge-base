@@ -31,6 +31,7 @@ export default async function proxy(request: NextRequest) {
     pathname.includes('/api/ping') ||
     pathname.includes('/manifest.json') ||
     pathname.includes('/icon.svg') || // <-- JAU YRA
+    pathname.includes('/sw.js') ||
     pathname.includes('/_next') ||
     pathname.includes('/api') ||
     pathname.includes('/llms.txt') ||
@@ -42,7 +43,8 @@ export default async function proxy(request: NextRequest) {
       pathname.includes('/manifest.json') ||
       pathname.includes('/api/system-stats') ||
       pathname.includes('/api/ping') ||
-      pathname.includes('/icon.svg') // <-- PRIDĖKITE ŠIĄ EILUTĘ
+      pathname.includes('/icon.svg') || // <-- PRIDĖKITE ŠIĄ EILUTĘ
+      pathname.includes('/sw.js')
     ) {
       return NextResponse.next();
     }
