@@ -10,11 +10,14 @@ export default async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const userAgent = request.headers.get('user-agent') || '';
 
-  // ✅ 1. ŠAKNINIS URL - PRIVERSTINIS NUKREIPIMAS (VEIKĖ)
+  // ✅ 1. ŠAKNINIS URL - IŠTRINAME SLAPUKĄ IR NUKREIPIAME
   if (pathname === '/') {
     const url = request.nextUrl.clone();
     url.pathname = '/lt';
-    return NextResponse.redirect(url);
+    const response = NextResponse.redirect(url);
+    // ✅ Išvalome NEXT_LOCALE slapuką, kad next-intl nustatytų kalbą iš naujo
+    response.cookies.delete('NEXT_LOCALE');
+    return response;
   }
 
   // ✅ 2. GOOGLEBOT
