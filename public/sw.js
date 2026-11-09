@@ -1,6 +1,5 @@
-const CACHE_NAME = 'knowledge-base-v3';
+const CACHE_NAME = 'knowledge-base-v4';
 const urlsToCache = [
-  '/',
   '/manifest.json',
   '/icon.svg',
 ];
@@ -32,7 +31,6 @@ self.addEventListener('activate', (event) => {
 
 // 3. Užklausų perėmimas (Fetch)
 self.addEventListener('fetch', (event) => {
-  // Apeiname API ir Next.js serverio užklausas (jos turi būti dinaminės)
   if (
     event.request.url.includes('/api/') ||
     event.request.url.includes('/_next/') ||
@@ -42,13 +40,22 @@ self.addEventListener('fetch', (event) => {
   }
 
   event.respondWith(
-    caches.match(event.request).then((response) => {
-      // Jei radome podėlyje, grąžiname
-      if (response) {
+    fetch(event.request).then((response) => {
+      // ✅ NEIŠSAUGOME peradresuotų atsakymų
+      if (response.redirected || response.status !== 200) {
         return response;
       }
-      // Kitu atveju einame į tinklą
-      return fetch(event.request);
+
+      // Talpiname tik sėkmingus (200) atsakymus
+      const responseToCache = response.clone();
+      caches.open(CACHE_NAME).then((cache) => {
+        cache.put(event.request, responseToCache);
+      });
+
+      return response;
+    }).catch(() => {
+      // Jei tinklas neveikia, bandome iš podėlio
+      return caches.match(event.request);
     })
   );
 });
