@@ -103,7 +103,9 @@ export default function Navbar() {
                   />
                 </svg>
               )}
-              <span className="hidden lg:block">{session.user?.name || 'Profilis'}</span>
+              <span className="hidden max-w-[100px] truncate whitespace-nowrap lg:block">
+                {session.user?.name || 'Profilis'}
+              </span>
             </Link>
           )}
           {session && <LogoutButton />}
