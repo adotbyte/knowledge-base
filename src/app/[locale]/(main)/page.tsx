@@ -21,6 +21,7 @@ import DeleteConfirmButton from '@/components/DeleteConfirmButton';
 import ActionButton from '@/components/ActionButton';
 import HomeClient from '@/components/HomeClient';
 import HomeFormClient from '@/components/HomeFormClient'; // <-- PRIDĖTAS IMPORTAS
+import { FormSkeleton, NoteListSkeleton } from '@/components/Skeleton';
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
@@ -235,8 +236,13 @@ export default function Home({
       <main className="mx-auto max-w-6xl px-6 py-10">
         <Suspense
           fallback={
-            <div className="flex min-h-screen items-center justify-center">
-              <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-500 border-t-transparent"></div>
+            <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+              <div className="lg:col-span-1">
+                <FormSkeleton />
+              </div>
+              <div className="lg:col-span-2">
+                <NoteListSkeleton />
+              </div>
             </div>
           }
         >
@@ -263,13 +269,7 @@ async function HomeWrapper({
     <>
       <HomeClient translations={{ yourNotes: t('yourNotes') }} />
 
-      <Suspense
-        fallback={
-          <div className="flex animate-pulse items-center justify-center p-20 font-medium text-gray-500">
-            {t('loading')}
-          </div>
-        }
-      >
+      <Suspense fallback={<NoteListSkeleton />}>
         <ProtectedContent searchParams={searchParams} />
       </Suspense>
     </>

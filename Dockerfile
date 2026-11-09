@@ -11,7 +11,8 @@ COPY prisma ./prisma/
 COPY prisma.config.ts ./prisma.config.ts
 
 # Įdiegiame priklausomybes (su legacy-peer-deps, kad išvengtume konfliktų)
-RUN npm ci --legacy-peer-deps
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci --legacy-peer-deps --prefer-offline --no-audit
 
 # Nukopijuojame visą kodą
 COPY . .
@@ -29,7 +30,8 @@ ARG NEXT_PUBLIC_TURNSTILE_SITE_KEY
 ENV NEXT_PUBLIC_TURNSTILE_SITE_KEY=$NEXT_PUBLIC_TURNSTILE_SITE_KEY
 
 # Pastatome Next.js aplikaciją
-RUN npm run build
+RUN --mount=type=cache,target=/app/.next/cache \
+    npm run build
 
 # --- 2 etapas: Production ---
 FROM node:22-alpine AS runner

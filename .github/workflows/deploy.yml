@@ -13,6 +13,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
 
       - name: Create .env file
         run: |
@@ -39,7 +41,7 @@ jobs:
 
       - name: Build and Deploy
         run: |
-          docker compose up -d --build
+          DOCKER_BUILDKIT=1 docker compose up -d --build
 
       # --- DB INICIALIZAVIMO IR PRISMA MIGRACIJŲ ŽINGSNIS ---
       - name: Wait for DB and apply Prisma migrations

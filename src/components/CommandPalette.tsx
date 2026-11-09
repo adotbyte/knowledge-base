@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { useSession, signOut } from 'next-auth/react';
 import { useTheme } from 'next-themes';
 import { searchNotes } from '../app/actions';
+import HighlightText from '@/components/HighlightText'; // ✅ IMPORTAS
 
 interface CommandItem {
   id: string;
@@ -222,7 +223,8 @@ export default function CommandPalette() {
                     >
                       <div className="flex items-center justify-between">
                         <span className="font-bold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-white">
-                          {note.title}
+                          {/* ✅ PARYŠKINAME PAVADINIMĄ */}
+                          <HighlightText text={note.title} query={query} />
                         </span>
                         {note.attachments && note.attachments.length > 0 && (
                           <span className="text-xs text-gray-400">
@@ -231,7 +233,8 @@ export default function CommandPalette() {
                         )}
                       </div>
                       <span className="line-clamp-1 text-xs text-gray-500 dark:text-gray-400">
-                        {note.content.replace(/[#*`]/g, '')}
+                        {/* ✅ PARYŠKINAME TURINĮ */}
+                        <HighlightText text={note.content.replace(/[#*`]/g, '')} query={query} />
                       </span>
                     </button>
                   ))}
