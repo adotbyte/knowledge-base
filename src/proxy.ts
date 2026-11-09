@@ -53,7 +53,8 @@ export default async function proxy(request: NextRequest) {
       pathname.includes('/api/system-stats') ||
       pathname.includes('/api/ping') ||
       pathname.includes('/icon.svg') ||
-      pathname.includes('/sw.js')
+      pathname.includes('/sw.js') ||
+      pathname.includes('/api')
     ) {
       return NextResponse.next();
     }
