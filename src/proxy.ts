@@ -10,9 +10,11 @@ export default async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const userAgent = request.headers.get('user-agent') || '';
 
-  // ✅ 1. ŠAKNINIS URL - LEIDŽIAME next-intl NUSPRĘSTI KALBĄ
+  // ✅ 1. ŠAKNINIS URL - PRIVERSTINIS NUKREIPIMAS (VEIKĖ)
   if (pathname === '/') {
-    return intlMiddleware(request);
+    const url = request.nextUrl.clone();
+    url.pathname = '/lt';
+    return NextResponse.redirect(url);
   }
 
   // ✅ 2. GOOGLEBOT
@@ -43,7 +45,6 @@ export default async function proxy(request: NextRequest) {
     pathname.includes('/.well-known');
 
   if (isPublicRoute) {
-    // ✅ APEINAME intlMiddleware manifest.json, api/system-stats IR icon.svg
     if (
       pathname.includes('/manifest.json') ||
       pathname.includes('/api/system-stats') ||
@@ -64,7 +65,6 @@ export default async function proxy(request: NextRequest) {
   });
 
   if (!token) {
-    // ✅ NUKREIPIAME Į /lt/login (arba galite naudoti /login, jei norite, kad next-intl parinktų kalbą)
     const loginUrl = new URL('/lt/login', request.nextUrl);
     return NextResponse.redirect(loginUrl);
   }

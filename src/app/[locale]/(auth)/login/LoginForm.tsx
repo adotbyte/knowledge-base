@@ -4,6 +4,7 @@ import { signIn } from 'next-auth/react';
 import { useState } from 'react';
 import { Link } from '@/i18n/routing';
 import { Turnstile } from '@marsidev/react-turnstile';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 interface LoginFormProps {
   translations: {
@@ -52,6 +53,10 @@ export default function LoginForm({ translations, language }: LoginFormProps) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-900">
       <div className="w-full max-w-md space-y-8 rounded-2xl bg-white p-10 shadow-xl dark:bg-gray-800">
+        {/* ✅ KALBOS PERJUNGIKLIS */}
+        <div className="absolute top-4 right-4">
+          <LanguageSwitcher />
+        </div>
         <div className="text-center">
           <h2 className="text-3xl font-bold text-gray-900 dark:text-white">{translations.title}</h2>
           <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">{translations.subtitle}</p>
