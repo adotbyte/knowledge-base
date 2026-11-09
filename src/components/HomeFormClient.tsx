@@ -5,10 +5,26 @@ import { useTranslations } from 'next-intl';
 import MarkdownEditor from '@/components/MarkdownEditor';
 import GenerateNoteButton from '@/components/GenerateNoteButton';
 import { createNote } from '@/app/actions';
+import FileDropzone from '@/components/FileDropzone';
 
 export default function HomeFormClient() {
   const t = useTranslations('Home');
   const [content, setContent] = useState('');
+  const [files, setFiles] = useState<File[]>([]); // ✅ Būsena failams
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+
+    // ✅ Įdedame nutemptus failus į FormData
+    files.forEach((file) => formData.append('files', file));
+
+    // ✅ Išvalome failus
+    setFiles([]);
+
+    // ✅ Iškviečiame Server Action
+    await createNote(formData);
+  };
 
   return (
     <div className="sticky top-6 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
@@ -17,7 +33,8 @@ export default function HomeFormClient() {
         <GenerateNoteButton />
       </div>
 
-      <form action={createNote} className="flex flex-col gap-4">
+      {/* ✅ Pakeistas action į onSubmit */}
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div>
           <label
             htmlFor="title"
@@ -42,7 +59,6 @@ export default function HomeFormClient() {
           >
             {t('content')}
           </label>
-          {/* ✅ Paslėptas input, kad Server Action gautų turinį */}
           <input type="hidden" name="content" value={content} />
           <MarkdownEditor
             value={content}
@@ -68,20 +84,36 @@ export default function HomeFormClient() {
           />
         </div>
 
-        <div className="pointer-events-none relative z-10 mt-2">
-          <label
-            htmlFor="files"
-            className="mb-1 block text-xs font-bold tracking-wider text-gray-700 uppercase dark:text-gray-300"
-          >
+        {/* ✅ Drag & Drop komponentas vietoj seno input */}
+        <div>
+          <label className="mb-1 block text-xs font-bold tracking-wider text-gray-700 uppercase dark:text-gray-300">
             {t('attachments')}
           </label>
-          <input
-            type="file"
-            id="files"
-            name="files"
-            multiple
-            className="pointer-events-auto w-full rounded-xl border border-gray-200 bg-gray-50 p-2 text-sm text-gray-900 transition-none file:mr-4 file:rounded-lg file:border-0 file:bg-blue-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-blue-700 hover:file:bg-blue-100 dark:border-gray-700 dark:bg-gray-950 dark:text-white dark:file:bg-gray-800 dark:file:text-gray-300 dark:hover:file:bg-gray-700"
+
+          <FileDropzone
+            onFilesSelected={(newFiles) => setFiles((prev) => [...prev, ...newFiles])}
           />
+
+          {/* ✅ Parodykime, kokie failai bus įkelti */}
+          {files.length > 0 && (
+            <div className="mt-2 flex flex-wrap gap-2">
+              {files.map((file, index) => (
+                <span
+                  key={index}
+                  className="flex items-center gap-1 rounded-md bg-blue-50 px-2 py-1 text-xs font-bold text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
+                >
+                  📎 {file.name}
+                  <button
+                    type="button"
+                    onClick={() => setFiles(files.filter((_, i) => i !== index))}
+                    className="ml-1 text-red-500 hover:text-red-700"
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
         </div>
 
         <button

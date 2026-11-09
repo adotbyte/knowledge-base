@@ -2,8 +2,10 @@
 
 import { useState } from 'react';
 import { Link } from '@/i18n/routing';
+import { useTranslations } from 'next-intl';
 import MarkdownEditor from '@/components/MarkdownEditor';
-import { updateNote } from '@/app/actions';
+import FileDropzone from '@/components/FileDropzone';
+import { updateNote } from '../../../../../actions';
 
 interface EditFormClientProps {
   note: {
@@ -27,9 +29,21 @@ interface EditFormClientProps {
 
 export default function EditFormClient({ note, translations }: EditFormClientProps) {
   const [content, setContent] = useState(note.content);
+  const [files, setFiles] = useState<File[]>([]);
 
-  // ✅ updateNote.bind – serverinė funkcija, kuri priima note.id
-  const updateNoteWithId = updateNote.bind(null, note.id);
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+
+    // ✅ Įdedame nutemptus failus į FormData
+    files.forEach((file) => formData.append('files', file));
+
+    // ✅ Išvalome failus
+    setFiles([]);
+
+    // ✅ Iškviečiame Server Action
+    await updateNote(note.id, formData);
+  };
 
   return (
     <div className="space-y-6">
@@ -51,7 +65,7 @@ export default function EditFormClient({ note, translations }: EditFormClientPro
       </div>
 
       <form
-        action={updateNoteWithId}
+        onSubmit={handleSubmit}
         className="flex flex-col gap-6 rounded-2xl border border-gray-100 bg-white p-8 shadow-sm dark:border-gray-800 dark:bg-gray-900"
       >
         <div>
@@ -67,7 +81,7 @@ export default function EditFormClient({ note, translations }: EditFormClientPro
             name="title"
             defaultValue={note.title}
             required
-            className="w-full rounded-xl border border-gray-200 bg-gray-50 p-3 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-950 dark:text-white"
+            className="w-full rounded-xl border border-gray-200 bg-gray-50 p-3 text-sm text-gray-900 transition-all outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-950 dark:text-white"
           />
         </div>
 
@@ -78,7 +92,6 @@ export default function EditFormClient({ note, translations }: EditFormClientPro
           >
             {translations.content}
           </label>
-          {/* ✅ Paslėptas input, kad Server Action gautų turinį */}
           <input type="hidden" name="content" value={content} />
           <MarkdownEditor
             value={content}
@@ -101,24 +114,39 @@ export default function EditFormClient({ note, translations }: EditFormClientPro
             name="tags"
             defaultValue={note.tags}
             placeholder={translations.tagsPlaceholder}
-            className="w-full rounded-xl border border-gray-200 bg-gray-50 p-3 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-950 dark:text-white"
+            className="w-full rounded-xl border border-gray-200 bg-gray-50 p-3 text-sm text-gray-900 transition-all outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-950 dark:text-white"
           />
         </div>
 
-        <div className="pointer-events-none relative z-10 mt-2">
-          <label
-            htmlFor="files"
-            className="mb-1 block text-xs font-bold tracking-wider text-gray-700 uppercase dark:text-gray-300"
-          >
+        <div>
+          <label className="mb-1 block text-xs font-bold tracking-wider text-gray-700 uppercase dark:text-gray-300">
             {translations.addAttachments}
           </label>
-          <input
-            type="file"
-            id="files"
-            name="files"
-            multiple
-            className="pointer-events-auto w-full rounded-xl border border-gray-200 bg-gray-50 p-2 text-sm text-gray-900 transition-none file:mr-4 file:rounded-lg file:border-0 file:bg-blue-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-blue-700 hover:file:bg-blue-100 dark:border-gray-700 dark:bg-gray-950 dark:text-white dark:file:bg-gray-800 dark:file:text-gray-300 dark:hover:file:bg-gray-700"
+
+          <FileDropzone
+            onFilesSelected={(newFiles) => setFiles((prev) => [...prev, ...newFiles])}
           />
+
+          {/* ✅ Parodykime, kokie failai bus įkelti */}
+          {files.length > 0 && (
+            <div className="mt-2 flex flex-wrap gap-2">
+              {files.map((file, index) => (
+                <span
+                  key={index}
+                  className="flex items-center gap-1 rounded-md bg-blue-50 px-2 py-1 text-xs font-bold text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
+                >
+                  📎 {file.name}
+                  <button
+                    type="button"
+                    onClick={() => setFiles(files.filter((_, i) => i !== index))}
+                    className="ml-1 text-red-500 hover:text-red-700"
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
         </div>
 
         {note.attachments && note.attachments.length > 0 && (
