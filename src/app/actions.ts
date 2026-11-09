@@ -8,6 +8,7 @@ import { constants } from 'fs';
 import { join } from 'path';
 import { redirect } from 'next/navigation';
 import { auth } from '@/app/auth';
+import { checkRateLimit } from '@/lib/rate-limit'; // <-- JAU YRA
 
 // Pagalbinė funkcija vartotojo ID gauti
 async function getUserId() {
@@ -18,6 +19,14 @@ async function getUserId() {
   }
 
   return session.user.id;
+}
+
+// ✅ Nauja pagalbinė funkcija rate limit patikrinimui
+async function checkAiRateLimit(userId: string, limit: number = 5) {
+  const rateLimit = checkRateLimit(userId, limit, 60000);
+  if (!rateLimit.allowed) {
+    throw new Error(`Per daug užklausų. Bandykite po ${rateLimit.retryAfter} sek.`);
+  }
 }
 
 // 1. CREATE NOTE
@@ -43,7 +52,7 @@ export async function createNote(formData: FormData) {
     data: {
       title,
       content,
-      userId: userId, // <-- Dinaminis ID
+      userId: userId,
       tags: {
         connectOrCreate: tagNames.map((tagName) => ({
           where: { name: tagName },
@@ -66,7 +75,6 @@ export async function createNote(formData: FormData) {
       const uniqueName = `${Date.now()}-${file.name.replace(/\s+/g, '-')}`;
       const filePath = join(uploadDir, uniqueName);
 
-      // 1. PIRMA įrašome failą į diską
       await writeFile(filePath, buffer);
 
       try {
@@ -76,7 +84,6 @@ export async function createNote(formData: FormData) {
         continue;
       }
 
-      // 2. Įrašome į duomenų bazę (tai turi įvykti prieš AI)
       const attachment = await prisma.attachment.create({
         data: {
           name: file.name,
@@ -87,7 +94,9 @@ export async function createNote(formData: FormData) {
         },
       });
 
-      // 3. TIK DABAR bandome AI analizę (jei ji lūžta, failas jau yra saugus)
+      // ✅ RATE LIMIT: AI analizė failams
+      await checkAiRateLimit(userId, 5);
+
       let aiDescription = '';
       const apiKey = process.env.GEMINI_API_KEY;
       const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
@@ -114,12 +123,9 @@ export async function createNote(formData: FormData) {
         }
       }
 
-      // PDF analizė (įjungta)
       if (ai && file.type === 'application/pdf') {
         try {
           const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
-
-          // Nurodome worker failo kelią
           pdfjs.GlobalWorkerOptions.workerSrc = `file://${process.cwd()}/public/pdf.worker.mjs`;
 
           const uint8Array = new Uint8Array(buffer);
@@ -145,7 +151,6 @@ export async function createNote(formData: FormData) {
         }
       }
 
-      // 4. Jei AI ką nors aprašė, pridedame prie užrašo turinio
       if (aiDescription) {
         await prisma.note.update({
           where: { id: note.id },
@@ -268,6 +273,9 @@ export async function summarizeNote(formData: FormData) {
   const id = formData.get('id') as string;
   if (!id) return;
 
+  // ✅ RATE LIMIT
+  await checkAiRateLimit(userId, 5);
+
   const note = await prisma.note.findUnique({
     where: { id, userId: userId },
   });
@@ -299,6 +307,9 @@ export async function improveNote(formData: FormData) {
   const id = formData.get('id') as string;
   if (!id) return;
 
+  // ✅ RATE LIMIT
+  await checkAiRateLimit(userId, 5);
+
   const note = await prisma.note.findUnique({
     where: { id, userId: userId },
   });
@@ -329,6 +340,9 @@ export async function generateNote(formData: FormData) {
   const userId = await getUserId();
   const topic = formData.get('topic') as string;
   if (!topic) throw new Error('Topic is required');
+
+  // ✅ RATE LIMIT: generavimas yra brangesnis, todėl limitas mažesnis
+  await checkAiRateLimit(userId, 3);
 
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) throw new Error('GEMINI_API_KEY is missing');
@@ -364,6 +378,10 @@ export async function generateNote(formData: FormData) {
 // 8. ASK AI (RAG)
 export async function askKnowledgeBase(query: string) {
   const userId = await getUserId();
+
+  // ✅ RATE LIMIT: paieška yra pigi, todėl limitas didesnis
+  await checkAiRateLimit(userId, 10);
+
   const notes = await prisma.note.findMany({
     where: { userId: userId },
     include: { tags: true },
@@ -418,7 +436,11 @@ export async function exportNotes() {
 
 // Review Code
 export async function reviewCode(formData: FormData) {
-  await getUserId(); // Patikriname, ar prisijungęs
+  const userId = await getUserId();
+
+  // ✅ RATE LIMIT
+  await checkAiRateLimit(userId, 5);
+
   const code = formData.get('code') as string;
   const language = (formData.get('language') as string) || 'unknown';
 
@@ -458,7 +480,11 @@ Respond in the same language as the code comments (if any). Be concise but thoro
 
 // AI Config Generator
 export async function generateConfig(formData: FormData) {
-  await getUserId();
+  const userId = await getUserId();
+
+  // ✅ RATE LIMIT
+  await checkAiRateLimit(userId, 5);
+
   const serviceName = formData.get('serviceName') as string;
   const requirements = (formData.get('requirements') as string) || '';
 
@@ -489,7 +515,11 @@ Return the response in Markdown format with code blocks.`;
 
 // AI Code Explainer
 export async function explainCode(formData: FormData) {
-  await getUserId();
+  const userId = await getUserId();
+
+  // ✅ RATE LIMIT
+  await checkAiRateLimit(userId, 5);
+
   const code = formData.get('code') as string;
   if (!code) throw new Error('Code is required');
 
@@ -532,12 +562,12 @@ export async function toggleFileShare(formData: FormData) {
 
 // Globali paieška
 export async function searchNotes(query: string) {
-  await getUserId();
+  const userId = await getUserId();
   if (!query || query.trim().length === 0) return [];
 
   const notes = await prisma.note.findMany({
     where: {
-      userId: await getUserId(), // <-- Dinaminis ID
+      userId: userId,
       OR: [
         { title: { contains: query, mode: 'insensitive' } },
         { content: { contains: query, mode: 'insensitive' } },

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ReactNode } from 'react';
+import { toast } from 'sonner'; // <-- PRIDĖKITE
 
 export default function ActionButton({
   action,
@@ -27,8 +28,13 @@ export default function ActionButton({
     try {
       await action(formData);
       router.refresh();
-    } catch (error) {
-      console.error(error);
+    } catch (error: any) {
+      // ✅ RODOME GRAŽŲ PRANEŠIMĄ
+      if (error.message?.includes('Per daug užklausų')) {
+        toast.error(error.message);
+      } else {
+        toast.error('Įvyko klaida. Bandykite dar kartą.');
+      }
     } finally {
       setIsPending(false);
     }
