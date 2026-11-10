@@ -20,15 +20,59 @@ interface LoginFormProps {
 }
 
 export default function LoginForm({ translations, language }: LoginFormProps) {
-  // ✅ Atskiri būsenos kintamieji kiekvienam mygtukui
   const [isGitHubLoading, setIsGitHubLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [isVerified, setIsVerified] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  
+  // Būsena, kad neleistume spausti mygtukų, kol vyksta patikrinimas
+  const [isVerifying, setIsVerifying] = useState(false);
+
+  const isLoading = isGitHubLoading || isGoogleLoading || isVerifying;
+
+  // Pagalbinė funkcija, kuri patikrina žetoną mūsų serveryje
+  const verifyTurnstile = async (): Promise<boolean> => {
+    if (!turnstileToken) {
+      alert('Prašome pirmiausia užbaigti saugumo patikrinimą.');
+      return false;
+    }
+
+    setIsVerifying(true);
+    try {
+      const res = await fetch('/api/turnstile/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: turnstileToken }),
+      });
+      
+      const data = await res.json();
+      
+      if (!data.success) {
+        alert('Saugumo patikrinimas nepavyko. Bandykite dar kartą.');
+        return false;
+      }
+      return true;
+    } catch (error) {
+      console.error('Klaida tikrinant Turnstile:', error);
+      alert('Įvyko serverio klaida. Bandykite vėliau.');
+      return false;
+    } finally {
+      setIsVerifying(false);
+    }
+  };
 
   const handleGitHubLogin = async () => {
-    if (!isVerified) return;
+    if (!isVerified || isLoading) return;
+    
     setIsGitHubLoading(true);
     try {
+      const isValid = await verifyTurnstile();
+      if (!isValid) {
+        setIsGitHubLoading(false);
+        return;
+      }
+      
+      // Jei patikrinimas sėkmingas, leidžiame prisijungti
       await signIn('github', { callbackUrl: '/' });
     } catch (error) {
       console.error('Login failed:', error);
@@ -37,18 +81,23 @@ export default function LoginForm({ translations, language }: LoginFormProps) {
   };
 
   const handleGoogleLogin = async () => {
-    if (!isVerified) return;
+    if (!isVerified || isLoading) return;
+    
     setIsGoogleLoading(true);
     try {
+      const isValid = await verifyTurnstile();
+      if (!isValid) {
+        setIsGoogleLoading(false);
+        return;
+      }
+      
+      // Jei patikrinimas sėkmingas, leidžiame prisijungti
       await signIn('google', { callbackUrl: '/' });
     } catch (error) {
       console.error('Login failed:', error);
       setIsGoogleLoading(false);
     }
   };
-
-  // ✅ Bendras "loading" rodymui (jei bent vienas kraunasi)
-  const isLoading = isGitHubLoading || isGoogleLoading;
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-900">
@@ -57,6 +106,7 @@ export default function LoginForm({ translations, language }: LoginFormProps) {
         <div className="absolute top-4 right-4">
           <LanguageSwitcher />
         </div>
+        
         <div className="text-center">
           <h2 className="text-3xl font-bold text-gray-900 dark:text-white">{translations.title}</h2>
           <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">{translations.subtitle}</p>
@@ -67,9 +117,18 @@ export default function LoginForm({ translations, language }: LoginFormProps) {
           <Turnstile
             siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || '1x00000000000000000000AA'}
             options={{ language: language }}
-            onSuccess={() => setIsVerified(true)}
-            onError={() => setIsVerified(false)}
-            onExpire={() => setIsVerified(false)}
+            onSuccess={(token) => {
+              setTurnstileToken(token);
+              setIsVerified(true);
+            }}
+            onError={() => {
+              setTurnstileToken(null);
+              setIsVerified(false);
+            }}
+            onExpire={() => {
+              setTurnstileToken(null);
+              setIsVerified(false);
+            }}
           />
         </div>
 
@@ -81,7 +140,7 @@ export default function LoginForm({ translations, language }: LoginFormProps) {
             className="flex w-full items-center justify-center gap-3 rounded-lg bg-gray-900 px-4 py-3 font-semibold text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-gray-700 dark:hover:bg-gray-600"
           >
             {isGitHubLoading ? (
-              <span>{translations.loading}</span> // ✅ Tik GitHub rodo savo loading
+              <span>{translations.loading}</span>
             ) : (
               <>
                 <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
@@ -98,7 +157,7 @@ export default function LoginForm({ translations, language }: LoginFormProps) {
             disabled={isLoading || !isVerified}
             className="flex w-full items-center justify-center gap-3 rounded-lg bg-red-600 px-4 py-3 font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {isGoogleLoading ? ( // ✅ Tik Google rodo savo loading
+            {isGoogleLoading ? (
               <span>{translations.loading}</span>
             ) : (
               <>{translations.google}</>
